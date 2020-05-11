@@ -1,0 +1,12 @@
+G:\Well Trajectory Visualization\Well Trajectory Visualization\bin\Debug\Well Trajectory Visualization.exe.config
+G:\Well Trajectory Visualization\Well Trajectory Visualization\bin\Debug\Well Trajectory Visualization.exe
+G:\Well Trajectory Visualization\Well Trajectory Visualization\bin\Debug\Well Trajectory Visualization.pdb
+G:\Well Trajectory Visualization\Well Trajectory Visualization\bin\Debug\System.Numerics.Vectors.dll
+G:\Well Trajectory Visualization\Well Trajectory Visualization\bin\Debug\System.Numerics.Vectors.xml
+G:\Well Trajectory Visualization\Well Trajectory Visualization\obj\Debug\Well Trajectory Visualization.csprojAssemblyReference.cache
+G:\Well Trajectory Visualization\Well Trajectory Visualization\obj\Debug\Well_Trajectory_Visualization.Properties.Resources.resources
+G:\Well Trajectory Visualization\Well Trajectory Visualization\obj\Debug\Well Trajectory Visualization.csproj.GenerateResource.cache
+G:\Well Trajectory Visualization\Well Trajectory Visualization\obj\Debug\Well Trajectory Visualization.csproj.CoreCompileInputs.cache
+G:\Well Trajectory Visualization\Well Trajectory Visualization\obj\Debug\Well Trajectory Visualization.csproj.CopyComplete
+G:\Well Trajectory Visualization\Well Trajectory Visualization\obj\Debug\Well Trajectory Visualization.exe
+G:\Well Trajectory Visualization\Well Trajectory Visualization\obj\Debug\Well Trajectory Visualization.pdb
