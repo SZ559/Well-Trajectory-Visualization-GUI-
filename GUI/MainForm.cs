@@ -10,9 +10,9 @@ using System.Windows.Forms;
 
 namespace Well_Trajectory_Visualization
 {
-    public partial class Form1 : Form
+    public partial class MainForm : Form
     {
-        public Form1()
+        public MainForm()
         {
             InitializeComponent();
         }

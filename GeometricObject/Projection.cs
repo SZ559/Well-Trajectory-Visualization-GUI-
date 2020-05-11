@@ -8,39 +8,39 @@ namespace GeometricObject
     {
         public List<PointIn2D> GetProjectionInPlane(List<Vector3> wellTrajectory, Vector3 normalVector)
         {
-            List<PointIn2D> pojectionInPlane = new List<PointIn2D>();
+            List<PointIn2D> projectionInPlane = new List<PointIn2D>();
             switch (GetProjectionView(normalVector))
             {
                 case "Main":
                     foreach (var point in wellTrajectory)
                     {
-                        pojectionInPlane.Add(new PointIn2D(point.X, point.Y));
+                        projectionInPlane.Add(new PointIn2D(point.X, point.Z));
                     }
                     break;
                 case "Left":
                     foreach (var point in wellTrajectory)
                     {
-                        pojectionInPlane.Add(new PointIn2D(point.Y, point.Z));
+                        projectionInPlane.Add(new PointIn2D(point.Y, point.Z));
                     }
                     break;
                 case "Top":
                     foreach (var point in wellTrajectory)
                     {
-                        pojectionInPlane.Add(new PointIn2D(point.X, point.Z));
+                        projectionInPlane.Add(new PointIn2D(point.X, point.Y));
                     }
                     break;
                 case "Projection":
                     foreach (var point in wellTrajectory)
                     {
-                        Vector3 porjectionPointIn3D = GetPorjectionPointIn3D_UsingNormalVector(normalVector, point, Vector3.Zero);
+                        Vector3 projectionPointIn3D = GetCoordinatesOfPointIn3D_AfterProjection_UsingNormalVector(normalVector, point, Vector3.Zero);
 
-                        Vector3 unitXProjectionIn3D = GetPorjectionPointIn3D_UsingNormalVector(normalVector, Vector3.UnitX, Vector3.Zero);
+                        Vector3 unitXOfProjectionPlane = GetCoordinatesOfPointIn3D_AfterProjection_UsingNormalVector(normalVector, Vector3.UnitX, Vector3.Zero);
                         //Vector3 unitVectorOfUnitXProjectionIn3D = Vector3.Normalize(unitXProjectionIn3D);
-                        pojectionInPlane.Add(GetProjectionPointIn2D_PlaneThroughOrigin(porjectionPointIn3D, unitXProjectionIn3D));
+                        projectionInPlane.Add(GetCoordinatesOfProjection_InPlaneThroughOrigin(projectionPointIn3D, unitXOfProjectionPlane));
                     }
                     break;
             }
-            return pojectionInPlane;
+            return projectionInPlane;
         }
 
         public string GetProjectionView(Vector3 normalVector)
@@ -50,11 +50,11 @@ namespace GeometricObject
             {
                 return "Left";
             }
-            if (unitNormalVector == Vector3.UnitY)
+            if (unitNormalVector == Vector3.UnitZ)
             {
                 return "Top";
             }
-            if (unitNormalVector == Vector3.UnitZ)
+            if (unitNormalVector == Vector3.UnitY)
             {
                 return "Main";
             }
@@ -62,23 +62,23 @@ namespace GeometricObject
         }
        
         //vector 3 contains x, y, z in Single type
-        public Vector3 GetPorjectionPointIn3D_UsingNormalVector(Vector3 normalVector, Vector3 point, Vector3 onePointOnPlane)
+        public Vector3 GetCoordinatesOfPointIn3D_AfterProjection_UsingNormalVector(Vector3 normalVector, Vector3 pointToProject, Vector3 onePointInProjectionPlane)
         {
-            Single numerator = (normalVector.X * onePointOnPlane.X + normalVector.Y * onePointOnPlane.Y + normalVector.Z * onePointOnPlane.Z) - (normalVector.X * point.X + normalVector.Y * point.Y + normalVector.Z * point.Z);
+            Single numerator = (normalVector.X * onePointInProjectionPlane.X + normalVector.Y * onePointInProjectionPlane.Y + normalVector.Z * onePointInProjectionPlane.Z) - (normalVector.X * pointToProject.X + normalVector.Y * pointToProject.Y + normalVector.Z * pointToProject.Z);
             Single denominator = normalVector.X * normalVector.X + normalVector.Y * normalVector.Y + normalVector.Z * normalVector.Z;
             Single t = numerator / denominator;
 
-            Single x = point.X + normalVector.X * t;
-            Single y = point.Y + normalVector.Y * t;
-            Single z = point.Z + normalVector.Z * t;
+            Single x = pointToProject.X + normalVector.X * t;
+            Single y = pointToProject.Y + normalVector.Y * t;
+            Single z = pointToProject.Z + normalVector.Z * t;
 
             return new Vector3(x, y, z);
         }
 
-        public PointIn2D GetProjectionPointIn2D_PlaneThroughOrigin(Vector3 projectionPoint, Vector3 unitX)
+        public PointIn2D GetCoordinatesOfProjection_InPlaneThroughOrigin(Vector3 projectionPoint, Vector3 unitXOfProjectionPlane)
         {
-            Single abscissa = Vector3.Dot(projectionPoint, unitX) / unitX.Length();
-            Vector3 projectionVector = Vector3.Multiply (unitX, abscissa / unitX.Length());
+            Single abscissa = Vector3.Dot(projectionPoint, unitXOfProjectionPlane) / unitXOfProjectionPlane.Length();
+            Vector3 projectionVector = Vector3.Multiply (unitXOfProjectionPlane, abscissa / unitXOfProjectionPlane.Length());
             Vector3 rejection = Vector3.Subtract(projectionPoint, projectionVector);
             Single ordinate = rejection.Length();
             if (rejection.Z < 0)
