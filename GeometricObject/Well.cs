@@ -14,6 +14,12 @@ namespace GeometricObject
             get; set;
         }
 
+        public Well(string wellName = "")
+        {
+            Trajectories = new List<Trajectory>();
+            WellName = wellName;
+        }
+
         public void AddTrajectory(Trajectory trajectory)
         {
             Trajectories.Add(trajectory);
