@@ -10,15 +10,21 @@ namespace GeometricObject
             get; set;
         }
 
-        public string SourceWell
+        public string SourceFile
         {
             get; set;
         }
 
-        public Trajectory(string sourceWell = "")
+        public string TrajectoryName { get; set; }
+
+        public string WellName { get; set; }
+
+        public Trajectory(string source = "", string wellName = "", string trajectoryName = "")
         {
             PolyLineNodes = new List<Vector3>();
-            SourceWell = sourceWell;
+            SourceFile = source;
+            WellName = wellName;
+            TrajectoryName = trajectoryName;
         }
 
         public void AddNode(Vector3 point)
