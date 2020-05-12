@@ -38,6 +38,7 @@
             this.viewToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
             this.toolStripButton1 = new System.Windows.Forms.ToolStripButton();
+            this.closeTheCurrentTabPageToolStripButton = new System.Windows.Forms.ToolStripButton();
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
             this.wellsTreeView = new System.Windows.Forms.TreeView();
@@ -108,7 +109,8 @@
             // 
             this.toolStrip1.ImageScalingSize = new System.Drawing.Size(40, 40);
             this.toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.toolStripButton1});
+            this.toolStripButton1,
+            this.closeTheCurrentTabPageToolStripButton});
             this.toolStrip1.Location = new System.Drawing.Point(0, 49);
             this.toolStrip1.Name = "toolStrip1";
             this.toolStrip1.Padding = new System.Windows.Forms.Padding(0, 0, 5, 0);
@@ -126,6 +128,17 @@
             this.toolStripButton1.Size = new System.Drawing.Size(58, 20);
             this.toolStripButton1.Text = "Open";
             this.toolStripButton1.Click += new System.EventHandler(this.OpenFileToolStripMenuItem_Click);
+            // 
+            // closeTheCurrentTabPageToolStripButton
+            // 
+            this.closeTheCurrentTabPageToolStripButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.closeTheCurrentTabPageToolStripButton.Image = ((System.Drawing.Image)(resources.GetObject("closeTheCurrentTabPageToolStripButton.Image")));
+            this.closeTheCurrentTabPageToolStripButton.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
+            this.closeTheCurrentTabPageToolStripButton.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.closeTheCurrentTabPageToolStripButton.Name = "closeTheCurrentTabPageToolStripButton";
+            this.closeTheCurrentTabPageToolStripButton.Size = new System.Drawing.Size(58, 20);
+            this.closeTheCurrentTabPageToolStripButton.Text = "Close Tab Page";
+            this.closeTheCurrentTabPageToolStripButton.Click += new System.EventHandler(this.CloseTheCurrentTabPageToolStripButton_Click);
             // 
             // statusStrip1
             // 
@@ -176,6 +189,7 @@
             this.tabControl.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tabControl.Location = new System.Drawing.Point(0, 0);
             this.tabControl.Margin = new System.Windows.Forms.Padding(8);
+            this.tabControl.Multiline = true;
             this.tabControl.Name = "tabControl";
             this.tabControl.SelectedIndex = 0;
             this.tabControl.Size = new System.Drawing.Size(2373, 1430);
@@ -227,6 +241,7 @@
         private System.Windows.Forms.ToolStripMenuItem exitToolStripMenuItem;
         private System.Windows.Forms.OpenFileDialog openFileDialog;
         private System.Windows.Forms.TabControl tabControl;
+        private System.Windows.Forms.ToolStripButton closeTheCurrentTabPageToolStripButton;
     }
 }
 
