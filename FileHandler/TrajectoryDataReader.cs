@@ -1,8 +1,7 @@
 ﻿using System;
 using System.IO;
-using System.Collections.Generic;
-using GeometricObject;
 using System.Numerics;
+using GeometricObject;
 using System.Linq;
 
 namespace FileHandler
