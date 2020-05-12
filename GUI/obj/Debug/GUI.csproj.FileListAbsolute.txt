@@ -27,3 +27,20 @@ C:\Users\Kristol\Desktop\Well-Trajectory-Visualization-GUI-\GUI\bin\Debug\FileHa
 C:\Users\Kristol\Desktop\Well-Trajectory-Visualization-GUI-\GUI\bin\Debug\GeometricObject.dll
 C:\Users\Kristol\Desktop\Well-Trajectory-Visualization-GUI-\GUI\bin\Debug\FileHandler.pdb
 C:\Users\Kristol\Desktop\Well-Trajectory-Visualization-GUI-\GUI\bin\Debug\GeometricObject.pdb
+C:\Users\Kristol\Desktop\Well-Trajectory-Visualization-GUI\GUI\bin\Debug\Well Trajectory Visualization.exe.config
+C:\Users\Kristol\Desktop\Well-Trajectory-Visualization-GUI\GUI\bin\Debug\Well Trajectory Visualization.exe
+C:\Users\Kristol\Desktop\Well-Trajectory-Visualization-GUI\GUI\bin\Debug\Well Trajectory Visualization.pdb
+C:\Users\Kristol\Desktop\Well-Trajectory-Visualization-GUI\GUI\bin\Debug\FileHandler.dll
+C:\Users\Kristol\Desktop\Well-Trajectory-Visualization-GUI\GUI\bin\Debug\GeometricObject.dll
+C:\Users\Kristol\Desktop\Well-Trajectory-Visualization-GUI\GUI\bin\Debug\System.Numerics.Vectors.dll
+C:\Users\Kristol\Desktop\Well-Trajectory-Visualization-GUI\GUI\bin\Debug\FileHandler.pdb
+C:\Users\Kristol\Desktop\Well-Trajectory-Visualization-GUI\GUI\bin\Debug\GeometricObject.pdb
+C:\Users\Kristol\Desktop\Well-Trajectory-Visualization-GUI\GUI\bin\Debug\System.Numerics.Vectors.xml
+C:\Users\Kristol\Desktop\Well-Trajectory-Visualization-GUI\GUI\obj\Debug\GUI.csprojAssemblyReference.cache
+C:\Users\Kristol\Desktop\Well-Trajectory-Visualization-GUI\GUI\obj\Debug\Well_Trajectory_Visualization.MainForm.resources
+C:\Users\Kristol\Desktop\Well-Trajectory-Visualization-GUI\GUI\obj\Debug\Well_Trajectory_Visualization.Properties.Resources.resources
+C:\Users\Kristol\Desktop\Well-Trajectory-Visualization-GUI\GUI\obj\Debug\GUI.csproj.GenerateResource.cache
+C:\Users\Kristol\Desktop\Well-Trajectory-Visualization-GUI\GUI\obj\Debug\GUI.csproj.CoreCompileInputs.cache
+C:\Users\Kristol\Desktop\Well-Trajectory-Visualization-GUI\GUI\obj\Debug\GUI.csproj.CopyComplete
+C:\Users\Kristol\Desktop\Well-Trajectory-Visualization-GUI\GUI\obj\Debug\Well Trajectory Visualization.exe
+C:\Users\Kristol\Desktop\Well-Trajectory-Visualization-GUI\GUI\obj\Debug\Well Trajectory Visualization.pdb

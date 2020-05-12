@@ -3,6 +3,7 @@ using System.IO;
 using System.Collections.Generic;
 using GeometricObject;
 using System.Numerics;
+using System.Linq;
 
 namespace FileHandler
 {
@@ -17,7 +18,11 @@ namespace FileHandler
                 using (StreamReader sr = new StreamReader(path))
                 {
                     string line;
-                    Trajectory newTrajectory = new Trajectory();
+
+                    string fileName = path.Split('.')[0].Split('\\').Last();
+                    string wellName = fileName.Split('-')[0];
+                    string trajectoryName = fileName.Split('-')[1];
+                    Trajectory newTrajectory = new Trajectory(path, wellName, trajectoryName);
 
                     int lineNumber = 0;
                     while (!string.IsNullOrEmpty(line = sr.ReadLine()))
