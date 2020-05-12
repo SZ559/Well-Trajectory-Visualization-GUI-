@@ -30,6 +30,7 @@ namespace Well_Trajectory_Visualization
             wells = new List<Well>();
         }
 
+        //what is "loading well"?
         private void LoadTrajectoryDataFromFile()
         {
             if (openFileDialog.ShowDialog() == DialogResult.OK)
@@ -84,24 +85,88 @@ namespace Well_Trajectory_Visualization
                 {
                     wellsTreeView.Nodes[0].Nodes[i].Nodes.Add(trajectory.TrajectoryName);
                     wellsTreeView.Nodes[0].Nodes[i].Nodes[j].Name = trajectory.WellName + "-" + trajectory.TrajectoryName;
-                    j++;
+                    j = j + 1;
                 }
-                i++;
+                i = i + 1;
             }
 
             wellsTreeView.EndUpdate();
             wellsTreeView.ExpandAll();
         }
 
+        private void WellsTreeView_NodeMouseDoubleClick(object sender, TreeNodeMouseClickEventArgs e)
+        {
+            if (e.Node.Parent == null || e.Node.Parent.Text == "Wells")
+            {
+                return;
+            }
+            else
+            {
+                string wellName = e.Node.Parent.Text;
+                string trajectoryName = e.Node.Text;
+                VisualizeWellTrajectryInThreeViews(wellName, trajectoryName);
+            }
+        }
+
+
+        private void VisualizeWellTrajectryInThreeViews(string wellName, string trajectoryName)
+        {
+            string tabPageText = $"{wellName} - {trajectoryName}";
+            foreach (TabPage tabpage in tabControl.TabPages)
+            {
+                if (tabpage.Text == tabPageText)
+                {
+                    tabControl.SelectedTab = tabpage;
+                    return;
+                }
+            }
+
+            if (tabControl.TabCount >= 3)
+            {
+                MessageBox.Show("Only 10 pages can be opened. Please close a page before opening a new one.");
+                return;
+            }
+
+            TabPage tabPage = new TabPage
+            {
+                Text = tabPageText
+            };
+            
+            TableLayoutPanel panel = SetTableLayoutPanelForTabPage();
+            tabPage.Controls.Add(panel);
+            tabControl.Controls.Add(tabPage);
+        }
+
+
+        private TableLayoutPanel SetTableLayoutPanelForTabPage()
+        {
+            TableLayoutPanel tableLayoutPanel = new TableLayoutPanel
+            {
+                BorderStyle = BorderStyle.FixedSingle,
+                CellBorderStyle = TableLayoutPanelCellBorderStyle.Inset,
+                RowCount = 1,
+                ColumnCount = 3,
+                Dock = DockStyle.Fill,
+                Visible = true
+            };
+            foreach (ColumnStyle columnStyle in tableLayoutPanel.ColumnStyles)
+            {
+                columnStyle.SizeType = SizeType.Percent;
+                columnStyle.Width = 33;
+            }
+            return tableLayoutPanel;
+            //scroll?
+        }
         // Tab Page
 
 
         // Menu Bar
 
-        private void openFileToolStripMenuItem_Click(object sender, EventArgs e)
+        private void OpenFileToolStripMenuItem_Click(object sender, EventArgs e)
         {
             LoadTrajectoryDataFromFile();
         }
+
 
     }
 }

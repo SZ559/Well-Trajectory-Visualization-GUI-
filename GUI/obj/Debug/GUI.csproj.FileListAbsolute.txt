@@ -44,3 +44,20 @@ C:\Users\Kristol\Desktop\Well-Trajectory-Visualization-GUI\GUI\obj\Debug\GUI.csp
 C:\Users\Kristol\Desktop\Well-Trajectory-Visualization-GUI\GUI\obj\Debug\GUI.csproj.CopyComplete
 C:\Users\Kristol\Desktop\Well-Trajectory-Visualization-GUI\GUI\obj\Debug\Well Trajectory Visualization.exe
 C:\Users\Kristol\Desktop\Well-Trajectory-Visualization-GUI\GUI\obj\Debug\Well Trajectory Visualization.pdb
+G:\Well Trajectory Visualization - Copy\GUI\bin\Debug\Well Trajectory Visualization.exe.config
+G:\Well Trajectory Visualization - Copy\GUI\bin\Debug\Well Trajectory Visualization.exe
+G:\Well Trajectory Visualization - Copy\GUI\bin\Debug\Well Trajectory Visualization.pdb
+G:\Well Trajectory Visualization - Copy\GUI\bin\Debug\FileHandler.dll
+G:\Well Trajectory Visualization - Copy\GUI\bin\Debug\GeometricObject.dll
+G:\Well Trajectory Visualization - Copy\GUI\bin\Debug\System.Numerics.Vectors.dll
+G:\Well Trajectory Visualization - Copy\GUI\bin\Debug\FileHandler.pdb
+G:\Well Trajectory Visualization - Copy\GUI\bin\Debug\GeometricObject.pdb
+G:\Well Trajectory Visualization - Copy\GUI\bin\Debug\System.Numerics.Vectors.xml
+G:\Well Trajectory Visualization - Copy\GUI\obj\Debug\GUI.csprojAssemblyReference.cache
+G:\Well Trajectory Visualization - Copy\GUI\obj\Debug\Well_Trajectory_Visualization.MainForm.resources
+G:\Well Trajectory Visualization - Copy\GUI\obj\Debug\Well_Trajectory_Visualization.Properties.Resources.resources
+G:\Well Trajectory Visualization - Copy\GUI\obj\Debug\GUI.csproj.GenerateResource.cache
+G:\Well Trajectory Visualization - Copy\GUI\obj\Debug\GUI.csproj.CoreCompileInputs.cache
+G:\Well Trajectory Visualization - Copy\GUI\obj\Debug\GUI.csproj.CopyComplete
+G:\Well Trajectory Visualization - Copy\GUI\obj\Debug\Well Trajectory Visualization.exe
+G:\Well Trajectory Visualization - Copy\GUI\obj\Debug\Well Trajectory Visualization.pdb
