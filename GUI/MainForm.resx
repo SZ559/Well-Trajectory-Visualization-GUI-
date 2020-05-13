@@ -127,8 +127,10 @@
   <data name="toolStripButton1.Image" type="System.Drawing.Bitmap, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
     <value>
         iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8
-        YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAABJSURBVDhPY8AFvn379h8ZQ4WJByBNTk5OYDxqAAEDQJK4
-        MLIBuDCKTaRi6hmACyMrxIWhIYEJQJIoNpEKRg2AGICMocJogIEBAJPtRNDUz1LZAAAAAElFTkSuQmCC
+        YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAACxSURBVDhPzZOxDcMgEEWZjZ4tPAttxBRs4Z6eAWgDRWwM
+        tCR3EsgOjkPiFDnpC90X9/g6CXK6Ukr5jBBAKf1KfwaYbvNH+j3A+wWNtebJ7w6DdhMsS8jDMGDPOT+E
+        bAAxxhxCwNM5t4GA9xZgjMmMMTSfJaXM4ZHsEADD8BqAoBdC4AVIYq+2GW4A0Cil0ABQHba2bwclgdYa
+        zSJIBBdfqQLGcaw7WAN6VH7kpTG7ipA7IQq9yji/P90AAAAASUVORK5CYII=
 </value>
   </data>
   <metadata name="statusStrip1.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">

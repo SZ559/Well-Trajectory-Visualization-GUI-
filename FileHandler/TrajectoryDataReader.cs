@@ -40,15 +40,15 @@ namespace FileHandler
             }
             catch (FileNotFoundException)
             {
-                errorMessage = "File not found.";
+                errorMessage = "Error: File not found.";
             }
             catch (UnauthorizedAccessException)
             {
-                errorMessage = "File not accessible.";
+                errorMessage = "Error: File not accessible.";
             }
             catch (Exception ex)
             {
-                errorMessage = "Failed to read trajectory data from file. " + ex.Message;
+                errorMessage = "Failed to read trajectory data from file. Error: " + ex.Message;
             }
 
             return null;
@@ -66,7 +66,7 @@ namespace FileHandler
                     string[] coordinates = line.Split(splitter);
                     if (coordinates.Count() > 3)
                     {
-                        errorMessage = $"Line {lineNumber}: Data overflow.";
+                        errorMessage = $"Error in Line {lineNumber}: Data overflow.";
                     }
                     float x = float.Parse(coordinates[0]);
                     float y = float.Parse(coordinates[1]);
@@ -77,15 +77,15 @@ namespace FileHandler
             }
             catch(IndexOutOfRangeException)
             {
-                errorMessage = $"Line {lineNumber}: Data lost.";
+                errorMessage = $"Error in Line {lineNumber}: Data lost.";
             }
             catch (FormatException)  // Parse: coordinates are not float numbers
             {
-                errorMessage = $"Line {lineNumber}: Non-float numbers in data.";
+                errorMessage = $"Error in Line {lineNumber}: Non-float numbers in data.";
             }
             catch (Exception ex)
             {
-                errorMessage = $"Line {lineNumber}: {ex.Message}";
+                errorMessage = $"Error in Line {lineNumber}: {ex.Message}";
             }
 
             return new Vector3();

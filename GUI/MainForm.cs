@@ -62,7 +62,7 @@ namespace Well_Trajectory_Visualization
                     }
                     else
                     {
-                        MessageBox.Show($"Loading {filePath} failed.\nError: {errorMessage}", "Loading Well Trajectory", MessageBoxButtons.OK);
+                        MessageBox.Show($"Loading {filePath} failed.\n{errorMessage}", "Loading Well Trajectory", MessageBoxButtons.OK);
                     }
                 }
             }
@@ -112,12 +112,6 @@ namespace Well_Trajectory_Visualization
 
         private void VisualizeWellTrajectryInThreeViews(string wellName, string trajectoryName)
         {
-            if (tabControl.TabCount >= 10)
-            {
-                MessageBox.Show("Only 10 pages can be opened. Please close a page before opening a new one.");
-                return;
-            }
-
             string tabPageText = $"{wellName} - {trajectoryName}";
             foreach (TabPage tabpage in tabControl.TabPages)
             {
@@ -126,6 +120,12 @@ namespace Well_Trajectory_Visualization
                     tabControl.SelectedTab = tabpage;
                     return;
                 }
+            }
+
+            if (tabControl.TabCount >= 10)
+            {
+                MessageBox.Show("Only 10 pages can be opened. Please close a page before opening a new one.");
+                return;
             }
 
             TabPage tabPage = new TabPage
