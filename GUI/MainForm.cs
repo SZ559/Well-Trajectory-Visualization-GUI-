@@ -23,6 +23,8 @@ namespace Well_Trajectory_Visualization
         Trajectory trajectory;
         Single zoom;
 
+        bool hasPreviewTab;
+
         List<Well> wells;
 
         public MainForm()
@@ -34,6 +36,8 @@ namespace Well_Trajectory_Visualization
             projection = new Projection();
 
             wells = new List<Well>();
+
+            hasPreviewTab = false;
         }
 
         private void LoadTrajectoryDataFromFile()
@@ -118,23 +122,54 @@ namespace Well_Trajectory_Visualization
             {
                 string wellName = e.Node.Parent.Text;
                 string trajectoryName = e.Node.Text;
-                VisualizeWellTrajectryInThreeViews(wellName, trajectoryName);
+                VisualizeWellTrajectoryInThreeViews(wellName, trajectoryName, 2);
             }
         }
 
-        private void VisualizeWellTrajectryInThreeViews(string wellName, string trajectoryName)
+        private void wellsTreeView_NodeMouseClick(object sender, TreeNodeMouseClickEventArgs e)
         {
-            string tabPageText = $"{wellName}-{trajectoryName}";
-            foreach (TabPage page in tabControl.TabPages)
+            if (e.Node.Parent == null || e.Node.Parent.Text == "Wells")
+            {
+                return;
+            }
+            else
+            {
+                string wellName = e.Node.Parent.Text;
+                string trajectoryName = e.Node.Text;
+                VisualizeWellTrajectoryInThreeViews(wellName, trajectoryName, 1);
+            }
+        }
+
+        private void ChangeTabPageHeaderFontStyle(TabPage tabpage, FontStyle fontStyle)
+        {
+            Graphics g = tabControl.CreateGraphics();
+            Rectangle rect = new Rectangle(tabControl.TabPages.IndexOf(tabpage) * tabControl.ItemSize.Width + 2, 2, tabControl.ItemSize.Width - 2, tabControl.ItemSize.Height - 2);
+            g.FillRectangle(Brushes.LightBlue, rect);
+            g.DrawString(tabpage.Text, new Font(tabControl.Font, fontStyle), Brushes.Black, rect);
+        }
+
+
+        private void VisualizeWellTrajectoryInThreeViews(string wellName, string trajectoryName, int clickMode)
+        {
+            defaultPagePanel.Visible = false;
+
+            string tabPageText = $"{wellName} - {trajectoryName}";
+
+            foreach (TabPage tabpage in tabControl.TabPages)
             {
                 if (page.Text == tabPageText)
                 {
-                    tabControl.SelectedTab = page;
+                    tabControl.SelectedTab = tabpage;
+                    if (clickMode == 2 && tabControl.TabPages.IndexOf(tabpage) == tabControl.TabCount - 1)
+                    {
+                        ChangeTabPageHeaderFontStyle(tabpage, FontStyle.Regular);
+                        hasPreviewTab = false;
+                    }
                     return;
                 }
             }
 
-            if (tabControl.TabCount >= 10)
+            if (hasPreviewTab == false && tabControl.TabCount >= 10)
             {
                 MessageBox.Show("Only 10 pages can be opened. Please close a page before opening a new one.");
                 return;
@@ -142,15 +177,46 @@ namespace Well_Trajectory_Visualization
 
             TabPage tabPage = new TabPage
             {
-                Text = tabPageText
+                Text = tabPageText,
             };
 
             trajectory = wells.Find(x => x.WellName == wellName).Trajectories.Find(x => x.TrajectoryName == trajectoryName);
             SetZoom();
-            TableLayoutPanel tableLayoutPanel = SetTableLayoutPanelForTabPage();            
+            TableLayoutPanel tableLayoutPanel = SetTableLayoutPanelForTabPage();
+            tableLayoutPanel.SuspendLayout();
+            tableLayoutPanel.Controls.Add(DrawTopViewOfTrajectory(wellName, trajectoryName), 0, 0);
+            Graphics g = tableLayoutPanel.CreateGraphics();
+            Pen pen = new Pen(Color.Green);
+            g.DrawLine(pen, 0, 0, 15, 15);
+            tableLayoutPanel.ResumeLayout();
+
             tabPage.Controls.Add(tableLayoutPanel);
+
+            if (hasPreviewTab)
+            {
+                tabControl.TabPages.RemoveAt(tabControl.TabCount - 1);
+            }
+
             tabControl.TabPages.Add(tabPage);
+            if(clickMode == 1)
+            {
+                ChangeTabPageHeaderFontStyle(tabPage, FontStyle.Italic);
+            }else if (clickMode == 2)
+            {
+                ChangeTabPageHeaderFontStyle(tabPage, FontStyle.Regular);
+            }
+            
             tabControl.SelectedTab = tabPage;
+
+
+            if(clickMode == 1)
+            {
+                hasPreviewTab = true;
+            }
+            else if (clickMode == 2)
+            {
+                hasPreviewTab = false;
+            }
         }
 
         private void UpdateSelectedTrajectory(Object sender, EventArgs e)
@@ -177,7 +243,16 @@ namespace Well_Trajectory_Visualization
         {
             if (tabControl.SelectedTab != null)
             {
+                if(tabControl.SelectedIndex == tabControl.TabCount-1  && hasPreviewTab == true)
+                {
+                    hasPreviewTab = false;
+                }
                 tabControl.TabPages.Remove(tabControl.SelectedTab);
+                tabControl.SelectedIndex = tabControl.TabCount - 1;
+                if(tabControl.SelectedIndex == -1)
+                {
+                    defaultPagePanel.Visible = true;
+                }
             }
         }
 
@@ -302,6 +377,26 @@ namespace Well_Trajectory_Visualization
             LoadTrajectoryDataFromFile();
         }
 
+        private void viewSourceToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            // HACK
+            System.Diagnostics.Process.Start("https://github.com/SZ559/Well-Trajectory-Visualization-GUI-");
+        }
 
+        private void referenceToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            System.Diagnostics.Process.Start("https://commons.wikimedia.org/wiki/File:Third_angle_projecting.svg");
+
+        }
+
+
+        //// TODO: ????
+        //private void tabControl_SelectedIndexChanged(object sender, EventArgs e)
+        //{
+        //    Graphics g = tabControl.CreateGraphics();
+        //    Rectangle rect = new Rectangle(tabControl.SelectedIndex * tabControl.ItemSize.Width + 2, 2, tabControl.ItemSize.Width - 2, tabControl.ItemSize.Height - 2);
+        //    g.FillRectangle(Brushes.LightBlue, rect);
+        //    g.DrawString(tabControl.SelectedTab.Text, new Font(tabControl.SelectedTab.Font, FontStyle.Italic), Brushes.Black, rect);
+        //}
     }
 }
