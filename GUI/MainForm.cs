@@ -30,40 +30,40 @@ namespace Well_Trajectory_Visualization
             wells = new List<Well>();
         }
 
-        //what is "loading well"?
         private void LoadTrajectoryDataFromFile()
         {
             if (openFileDialog.ShowDialog() == DialogResult.OK)
             {
-                string filePath = openFileDialog.FileName;
-
-                if (wells.SelectMany(x => x.Sources).Contains(filePath))
+                foreach (var filePath in openFileDialog.FileNames)
                 {
-                    MessageBox.Show("Trajectory has been already loaded!", "Loading Well", MessageBoxButtons.OK);
-                    return;
-                }
-
-                string errorMessage;
-                Trajectory newTrajectory = trajectoryDataReader.ReadFile(filePath, out errorMessage);
-                if (string.IsNullOrEmpty(errorMessage))
-                {
-                    if (!wells.Select(x => x.WellName).Contains(newTrajectory.WellName))
+                    if (wells.SelectMany(x => x.Sources).Contains(filePath))
                     {
-                        Well newWell = new Well(newTrajectory.WellName);
-                        newWell.AddTrajectory(newTrajectory);
-                        wells.Add(newWell);
+                        MessageBox.Show($"Trajectory has been already loaded for {filePath}!", "Loading Well Trajectory", MessageBoxButtons.OK);
+                        continue;
+                    }
+
+                    string errorMessage;
+                    Trajectory newTrajectory = trajectoryDataReader.ReadFile(filePath, out errorMessage);
+                    if (string.IsNullOrEmpty(errorMessage))
+                    {
+                        if (!wells.Select(x => x.WellName).Contains(newTrajectory.WellName))
+                        {
+                            Well newWell = new Well(newTrajectory.WellName);
+                            newWell.AddTrajectory(newTrajectory);
+                            wells.Add(newWell);
+                        }
+                        else
+                        {
+                            wells.Find(x => x.WellName == newTrajectory.WellName).AddTrajectory(newTrajectory);
+                        }
+
+                        UpdateTreeView();
+                        MessageBox.Show($"New Well loading from {filePath} succeed.", "Loading Well Trajectory", MessageBoxButtons.OK);
                     }
                     else
                     {
-                        wells.Find(x => x.WellName == newTrajectory.WellName).AddTrajectory(newTrajectory);
+                        MessageBox.Show($"Loading {filePath} failed.\n{errorMessage}", "Loading Well Trajectory", MessageBoxButtons.OK);
                     }
-
-                    UpdateTreeView();
-                    MessageBox.Show($"New Well loading from {filePath} succeed.", "Loading Well", MessageBoxButtons.OK);
-                }
-                else
-                {
-                    MessageBox.Show(errorMessage, "Loading Well", MessageBoxButtons.OK);
                 }
             }
         }
@@ -80,11 +80,13 @@ namespace Well_Trajectory_Visualization
             {
                 wellsTreeView.Nodes[0].Nodes.Add(well.WellName);
                 wellsTreeView.Nodes[0].Nodes[i].Name = well.WellName;
+                wellsTreeView.Nodes[0].Nodes[i].Tag = well;
                 int j = 0;
                 foreach (var trajectory in well.Trajectories)
                 {
                     wellsTreeView.Nodes[0].Nodes[i].Nodes.Add(trajectory.TrajectoryName);
-                    wellsTreeView.Nodes[0].Nodes[i].Nodes[j].Name = trajectory.WellName + "-" + trajectory.TrajectoryName;
+                    wellsTreeView.Nodes[0].Nodes[i].Nodes[j].Name = trajectory.WellName + " - " + trajectory.TrajectoryName;
+                    wellsTreeView.Nodes[0].Nodes[i].Nodes[j].Tag = trajectory;
                     j = j + 1;
                 }
                 i = i + 1;
@@ -108,7 +110,6 @@ namespace Well_Trajectory_Visualization
             }
         }
 
-
         private void VisualizeWellTrajectryInThreeViews(string wellName, string trajectoryName)
         {
             string tabPageText = $"{wellName} - {trajectoryName}";
@@ -121,7 +122,7 @@ namespace Well_Trajectory_Visualization
                 }
             }
 
-            if (tabControl.TabCount >= 3)
+            if (tabControl.TabCount >= 10)
             {
                 MessageBox.Show("Only 10 pages can be opened. Please close a page before opening a new one.");
                 return;
@@ -131,10 +132,11 @@ namespace Well_Trajectory_Visualization
             {
                 Text = tabPageText
             };
-            
+
             TableLayoutPanel panel = SetTableLayoutPanelForTabPage();
             tabPage.Controls.Add(panel);
-            tabControl.Controls.Add(tabPage);
+            tabControl.TabPages.Add(tabPage);
+            tabControl.SelectedTab = tabPage;
         }
 
 
@@ -157,6 +159,7 @@ namespace Well_Trajectory_Visualization
             return tableLayoutPanel;
             //scroll?
         }
+
         // Tab Page
 
 

@@ -23,10 +23,14 @@ namespace FileHandler
                     string trajectoryName = fileName.Split('-')[1];
                     Trajectory newTrajectory = new Trajectory(path, wellName, trajectoryName);
 
-                    int lineNumber = 0;
+                    int lineNumber = 1;
                     while (!string.IsNullOrEmpty(line = sr.ReadLine()))
                     {
                         Vector3 point = ParseLine(lineNumber, line, out errorMessage);
+                        if(!string.IsNullOrEmpty(errorMessage))
+                        {
+                            return null;
+                        }
                         newTrajectory.AddNode(point);
                         lineNumber++;
                     }
@@ -36,15 +40,15 @@ namespace FileHandler
             }
             catch (FileNotFoundException)
             {
-                errorMessage = "File not found.";
+                errorMessage = "Error: File not found.";
             }
             catch (UnauthorizedAccessException)
             {
-                errorMessage = "File not accessible.";
+                errorMessage = "Error: File not accessible.";
             }
             catch (Exception ex)
             {
-                errorMessage = "Failed to read trajectory data from file. " + ex.Message;
+                errorMessage = "Failed to read trajectory data from file. Error: " + ex.Message;
             }
 
             return null;
@@ -60,6 +64,10 @@ namespace FileHandler
                 {
                     char splitter = ',';
                     string[] coordinates = line.Split(splitter);
+                    if (coordinates.Count() > 3)
+                    {
+                        errorMessage = $"Error in Line {lineNumber}: Data overflow.";
+                    }
                     float x = float.Parse(coordinates[0]);
                     float y = float.Parse(coordinates[1]);
                     float z = float.Parse(coordinates[2]);
@@ -67,17 +75,17 @@ namespace FileHandler
                     return vector;
                 }
             }
+            catch(IndexOutOfRangeException)
+            {
+                errorMessage = $"Error in Line {lineNumber}: Data lost.";
+            }
             catch (FormatException)  // Parse: coordinates are not float numbers
             {
-                errorMessage = $"Line: {lineNumber}: Non-float numbers in data.";
-            }
-            catch (IndexOutOfRangeException)
-            {
-                errorMessage = $"Line: {lineNumber}: Data lost.";
+                errorMessage = $"Error in Line {lineNumber}: Non-float numbers in data.";
             }
             catch (Exception ex)
             {
-                errorMessage = $"Line: {lineNumber}: {ex.Message}";
+                errorMessage = $"Error in Line {lineNumber}: {ex.Message}";
             }
 
             return new Vector3();
