@@ -54,14 +54,15 @@
             // 
             // menuStrip1
             // 
+            this.menuStrip1.GripMargin = new System.Windows.Forms.Padding(2, 2, 0, 2);
             this.menuStrip1.ImageScalingSize = new System.Drawing.Size(40, 40);
             this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.fileToolStripMenuItem,
             this.viewToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
-            this.menuStrip1.Padding = new System.Windows.Forms.Padding(2, 1, 0, 1);
-            this.menuStrip1.Size = new System.Drawing.Size(976, 24);
+            this.menuStrip1.Padding = new System.Windows.Forms.Padding(5, 2, 0, 2);
+            this.menuStrip1.Size = new System.Drawing.Size(2440, 49);
             this.menuStrip1.TabIndex = 0;
             this.menuStrip1.Text = "menuStrip1";
             // 
@@ -72,7 +73,7 @@
             this.saveAsToolStripMenuItem,
             this.exitToolStripMenuItem});
             this.fileToolStripMenuItem.Name = "fileToolStripMenuItem";
-            this.fileToolStripMenuItem.Size = new System.Drawing.Size(39, 22);
+            this.fileToolStripMenuItem.Size = new System.Drawing.Size(87, 45);
             this.fileToolStripMenuItem.Text = "&File";
             // 
             // openFileToolStripMenuItem
@@ -80,7 +81,7 @@
             this.openFileToolStripMenuItem.Name = "openFileToolStripMenuItem";
             this.openFileToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)(((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.Shift) 
             | System.Windows.Forms.Keys.O)));
-            this.openFileToolStripMenuItem.Size = new System.Drawing.Size(221, 22);
+            this.openFileToolStripMenuItem.Size = new System.Drawing.Size(520, 54);
             this.openFileToolStripMenuItem.Text = "&Open File...";
             this.openFileToolStripMenuItem.Click += new System.EventHandler(this.OpenFileToolStripMenuItem_Click);
             // 
@@ -89,34 +90,32 @@
             this.saveAsToolStripMenuItem.Name = "saveAsToolStripMenuItem";
             this.saveAsToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)(((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.Shift) 
             | System.Windows.Forms.Keys.S)));
-            this.saveAsToolStripMenuItem.Size = new System.Drawing.Size(221, 22);
+            this.saveAsToolStripMenuItem.Size = new System.Drawing.Size(520, 54);
             this.saveAsToolStripMenuItem.Text = "&Save as...";
             // 
             // exitToolStripMenuItem
             // 
             this.exitToolStripMenuItem.Name = "exitToolStripMenuItem";
             this.exitToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.Q)));
-            this.exitToolStripMenuItem.Size = new System.Drawing.Size(221, 22);
+            this.exitToolStripMenuItem.Size = new System.Drawing.Size(520, 54);
             this.exitToolStripMenuItem.Text = "E&xit";
             // 
             // viewToolStripMenuItem
             // 
             this.viewToolStripMenuItem.Name = "viewToolStripMenuItem";
-            this.viewToolStripMenuItem.Size = new System.Drawing.Size(47, 22);
+            this.viewToolStripMenuItem.Size = new System.Drawing.Size(106, 45);
             this.viewToolStripMenuItem.Text = "&View";
             // 
             // toolStrip1
             // 
             this.toolStrip1.ImageScalingSize = new System.Drawing.Size(40, 40);
             this.toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-
             this.toolStripButton1,
             this.closeTheCurrentTabPageToolStripButton});
             this.toolStrip1.Location = new System.Drawing.Point(0, 49);
-
             this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Padding = new System.Windows.Forms.Padding(0, 0, 2, 0);
-            this.toolStrip1.Size = new System.Drawing.Size(976, 25);
+            this.toolStrip1.Padding = new System.Windows.Forms.Padding(0, 0, 5, 0);
+            this.toolStrip1.Size = new System.Drawing.Size(2440, 27);
             this.toolStrip1.TabIndex = 1;
             this.toolStrip1.Text = "toolStrip1";
             // 
@@ -127,7 +126,7 @@
             this.toolStripButton1.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
             this.toolStripButton1.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton1.Name = "toolStripButton1";
-            this.toolStripButton1.Size = new System.Drawing.Size(23, 22);
+            this.toolStripButton1.Size = new System.Drawing.Size(58, 20);
             this.toolStripButton1.Text = "Open";
             this.toolStripButton1.Click += new System.EventHandler(this.OpenFileToolStripMenuItem_Click);
             // 
@@ -145,16 +144,18 @@
             // statusStrip1
             // 
             this.statusStrip1.ImageScalingSize = new System.Drawing.Size(40, 40);
-            this.statusStrip1.Location = new System.Drawing.Point(0, 552);
+            this.statusStrip1.Location = new System.Drawing.Point(0, 1413);
             this.statusStrip1.Name = "statusStrip1";
-            this.statusStrip1.Size = new System.Drawing.Size(976, 22);
+            this.statusStrip1.Padding = new System.Windows.Forms.Padding(2, 0, 35, 0);
+            this.statusStrip1.Size = new System.Drawing.Size(2440, 22);
             this.statusStrip1.TabIndex = 2;
             this.statusStrip1.Text = "statusStrip1";
             // 
             // splitContainer1
             // 
             this.splitContainer1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.splitContainer1.Location = new System.Drawing.Point(0, 49);
+            this.splitContainer1.Location = new System.Drawing.Point(0, 76);
+            this.splitContainer1.Margin = new System.Windows.Forms.Padding(8, 8, 8, 8);
             this.splitContainer1.Name = "splitContainer1";
             // 
             // splitContainer1.Panel1
@@ -164,8 +165,9 @@
             // splitContainer1.Panel2
             // 
             this.splitContainer1.Panel2.Controls.Add(this.tabControl);
-            this.splitContainer1.Size = new System.Drawing.Size(976, 503);
-            this.splitContainer1.SplitterDistance = 138;
+            this.splitContainer1.Size = new System.Drawing.Size(2440, 1337);
+            this.splitContainer1.SplitterDistance = 345;
+            this.splitContainer1.SplitterWidth = 10;
             this.splitContainer1.TabIndex = 3;
             // 
             // wellsTreeView
@@ -173,12 +175,13 @@
             this.wellsTreeView.Dock = System.Windows.Forms.DockStyle.Fill;
             this.wellsTreeView.ItemHeight = 16;
             this.wellsTreeView.Location = new System.Drawing.Point(0, 0);
+            this.wellsTreeView.Margin = new System.Windows.Forms.Padding(8, 8, 8, 8);
             this.wellsTreeView.Name = "wellsTreeView";
             treeNode1.Name = "Root";
             treeNode1.Text = "Wells";
             this.wellsTreeView.Nodes.AddRange(new System.Windows.Forms.TreeNode[] {
             treeNode1});
-            this.wellsTreeView.Size = new System.Drawing.Size(138, 503);
+            this.wellsTreeView.Size = new System.Drawing.Size(345, 1337);
             this.wellsTreeView.TabIndex = 0;
             this.wellsTreeView.NodeMouseDoubleClick += new System.Windows.Forms.TreeNodeMouseClickEventHandler(this.WellsTreeView_NodeMouseDoubleClick);
             // 
@@ -186,14 +189,13 @@
             // 
             this.tabControl.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tabControl.Location = new System.Drawing.Point(0, 0);
-
-            this.tabControl.Margin = new System.Windows.Forms.Padding(8);
+            this.tabControl.Margin = new System.Windows.Forms.Padding(20, 20, 20, 20);
             this.tabControl.Multiline = true;
-
             this.tabControl.Name = "tabControl";
             this.tabControl.SelectedIndex = 0;
-            this.tabControl.Size = new System.Drawing.Size(834, 503);
+            this.tabControl.Size = new System.Drawing.Size(2085, 1337);
             this.tabControl.TabIndex = 0;
+            this.tabControl.SelectedIndexChanged += new System.EventHandler(this.UpdateSelectedTrajectory);
             // 
             // openFileDialog
             // 
@@ -203,15 +205,16 @@
             // 
             // MainForm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(15F, 30F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(976, 574);
+            this.ClientSize = new System.Drawing.Size(2440, 1435);
             this.Controls.Add(this.splitContainer1);
             this.Controls.Add(this.statusStrip1);
             this.Controls.Add(this.toolStrip1);
             this.Controls.Add(this.menuStrip1);
             this.MainMenuStrip = this.menuStrip1;
-            this.MinimumSize = new System.Drawing.Size(752, 455);
+            this.Margin = new System.Windows.Forms.Padding(8, 8, 8, 8);
+            this.MinimumSize = new System.Drawing.Size(1832, 1006);
             this.Name = "MainForm";
             this.Text = "Well Trajectory Visualizer";
             this.menuStrip1.ResumeLayout(false);
