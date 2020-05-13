@@ -199,7 +199,7 @@
             treeNode1});
             this.wellsTreeView.Size = new System.Drawing.Size(151, 518);
             this.wellsTreeView.TabIndex = 0;
-            this.wellsTreeView.NodeMouseClick += new System.Windows.Forms.TreeNodeMouseClickEventHandler(this.wellsTreeView_NodeMouseClick);
+            this.wellsTreeView.NodeMouseClick += new System.Windows.Forms.TreeNodeMouseClickEventHandler(this.WellsTreeView_NodeMouseClick);
             this.wellsTreeView.NodeMouseDoubleClick += new System.Windows.Forms.TreeNodeMouseClickEventHandler(this.WellsTreeView_NodeMouseDoubleClick);
             // 
             // defaultPagePanel

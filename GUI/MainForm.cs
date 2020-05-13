@@ -114,29 +114,37 @@ namespace Well_Trajectory_Visualization
 
         private void WellsTreeView_NodeMouseDoubleClick(object sender, TreeNodeMouseClickEventArgs e)
         {
-            if (e.Node.Parent == null || e.Node.Parent.Text == "Wells")
+            if (hasPreviewTab)
             {
-                return;
+                tabControl.TabPages.RemoveAt(tabControl.TabCount - 1);
             }
-            else
-            {
-                string wellName = e.Node.Parent.Text;
-                string trajectoryName = e.Node.Text;
-                VisualizeWellTrajectoryInThreeViews(wellName, trajectoryName, 2);
-            }
+            hasPreviewTab = false;
+            OpenTabPage(e.Node);
+            ChangeTabPageHeaderFontStyle(tabControl.SelectedTab, FontStyle.Regular);
         }
 
-        private void wellsTreeView_NodeMouseClick(object sender, TreeNodeMouseClickEventArgs e)
+        private void WellsTreeView_NodeMouseClick(object sender, TreeNodeMouseClickEventArgs e)
         {
-            if (e.Node.Parent == null || e.Node.Parent.Text == "Wells")
+            if (hasPreviewTab)
+            {
+                tabControl.TabPages.RemoveAt(tabControl.TabCount - 1);
+            }
+            hasPreviewTab = true;
+            OpenTabPage(e.Node);
+            ChangeTabPageHeaderFontStyle(tabControl.SelectedTab, FontStyle.Italic);
+        }
+
+        private void OpenTabPage(TreeNode node)
+        {
+            if (node.Parent == null || node.Parent.Text == "Wells")
             {
                 return;
             }
             else
             {
-                string wellName = e.Node.Parent.Text;
-                string trajectoryName = e.Node.Text;
-                VisualizeWellTrajectoryInThreeViews(wellName, trajectoryName, 1);
+                string wellName = node.Parent.Text;
+                string trajectoryName = node.Text;
+                VisualizeWellTrajectoryInThreeViews(wellName, trajectoryName);
             }
         }
 
@@ -149,7 +157,7 @@ namespace Well_Trajectory_Visualization
         }
 
 
-        private void VisualizeWellTrajectoryInThreeViews(string wellName, string trajectoryName, int clickMode)
+        private void VisualizeWellTrajectoryInThreeViews(string wellName, string trajectoryName)
         {
             defaultPagePanel.Visible = false;
 
@@ -157,10 +165,10 @@ namespace Well_Trajectory_Visualization
 
             foreach (TabPage tabpage in tabControl.TabPages)
             {
-                if (page.Text == tabPageText)
+                if (tabpage.Text == tabPageText)
                 {
                     tabControl.SelectedTab = tabpage;
-                    if (clickMode == 2 && tabControl.TabPages.IndexOf(tabpage) == tabControl.TabCount - 1)
+                    if (tabControl.TabPages.IndexOf(tabpage) == tabControl.TabCount - 1)
                     {
                         ChangeTabPageHeaderFontStyle(tabpage, FontStyle.Regular);
                         hasPreviewTab = false;
@@ -169,7 +177,7 @@ namespace Well_Trajectory_Visualization
                 }
             }
 
-            if (hasPreviewTab == false && tabControl.TabCount >= 10)
+            if (tabControl.TabCount >= 10)
             {
                 MessageBox.Show("Only 10 pages can be opened. Please close a page before opening a new one.");
                 return;
@@ -180,43 +188,9 @@ namespace Well_Trajectory_Visualization
                 Text = tabPageText,
             };
 
-            trajectory = wells.Find(x => x.WellName == wellName).Trajectories.Find(x => x.TrajectoryName == trajectoryName);
-            SetZoom();
-            TableLayoutPanel tableLayoutPanel = SetTableLayoutPanelForTabPage();
-            tableLayoutPanel.SuspendLayout();
-            tableLayoutPanel.Controls.Add(DrawTopViewOfTrajectory(wellName, trajectoryName), 0, 0);
-            Graphics g = tableLayoutPanel.CreateGraphics();
-            Pen pen = new Pen(Color.Green);
-            g.DrawLine(pen, 0, 0, 15, 15);
-            tableLayoutPanel.ResumeLayout();
-
             tabPage.Controls.Add(tableLayoutPanel);
-
-            if (hasPreviewTab)
-            {
-                tabControl.TabPages.RemoveAt(tabControl.TabCount - 1);
-            }
-
             tabControl.TabPages.Add(tabPage);
-            if(clickMode == 1)
-            {
-                ChangeTabPageHeaderFontStyle(tabPage, FontStyle.Italic);
-            }else if (clickMode == 2)
-            {
-                ChangeTabPageHeaderFontStyle(tabPage, FontStyle.Regular);
-            }
-            
             tabControl.SelectedTab = tabPage;
-
-
-            if(clickMode == 1)
-            {
-                hasPreviewTab = true;
-            }
-            else if (clickMode == 2)
-            {
-                hasPreviewTab = false;
-            }
         }
 
         private void UpdateSelectedTrajectory(Object sender, EventArgs e)
