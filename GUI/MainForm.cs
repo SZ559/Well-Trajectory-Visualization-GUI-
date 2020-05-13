@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using GeometricObject;
 using FileHandler;
+using System.Numerics;
 
 namespace Well_Trajectory_Visualization
 {
@@ -16,6 +17,7 @@ namespace Well_Trajectory_Visualization
     {
 
         TrajectoryDataReader trajectoryDataReader;
+        Projection projection;
         WellViewSaver wellViewSaver;
 
         List<Well> wells;
@@ -26,6 +28,7 @@ namespace Well_Trajectory_Visualization
 
             trajectoryDataReader = new TrajectoryDataReader();
             wellViewSaver = new WellViewSaver();
+            projection = new Projection();
 
             wells = new List<Well>();
         }
@@ -132,13 +135,28 @@ namespace Well_Trajectory_Visualization
             {
                 Text = tabPageText
             };
-
-            TableLayoutPanel panel = SetTableLayoutPanelForTabPage();
-            tabPage.Controls.Add(panel);
+ 
+            TableLayoutPanel tableLayoutPanel = SetTableLayoutPanelForTabPage();
+            tableLayoutPanel.SuspendLayout();
+            tableLayoutPanel.Controls.Add(DrawTopViewOfTrajectory(wellName, trajectoryName), 0, 0);
+            Graphics g = tableLayoutPanel.CreateGraphics();
+            Pen pen = new Pen(Color.Green);
+            g.DrawLine(pen, 0, 0, 15, 15);
+            tableLayoutPanel.ResumeLayout();
+            
+            tabPage.Controls.Add(tableLayoutPanel);
             tabControl.TabPages.Add(tabPage);
             tabControl.SelectedTab = tabPage;
         }
 
+        // Tab Page
+        private void CloseTheCurrentTabPageToolStripButton_Click(object sender, EventArgs e)
+        {
+            if (tabControl.SelectedTab != null)
+            {
+                tabControl.TabPages.Remove(tabControl.SelectedTab);
+            }
+        }
 
         private TableLayoutPanel SetTableLayoutPanelForTabPage()
         {
@@ -148,23 +166,40 @@ namespace Well_Trajectory_Visualization
                 CellBorderStyle = TableLayoutPanelCellBorderStyle.Inset,
                 RowCount = 1,
                 ColumnCount = 3,
+                AutoScroll = true,
                 Dock = DockStyle.Fill,
-                Visible = true
             };
-            foreach (ColumnStyle columnStyle in tableLayoutPanel.ColumnStyles)
-            {
-                columnStyle.SizeType = SizeType.Percent;
-                columnStyle.Width = 33;
-            }
+            tableLayoutPanel.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 33));
+            tableLayoutPanel.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 33));
+            tableLayoutPanel.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 33));
             return tableLayoutPanel;
             //scroll?
         }
 
         // Tab Page
 
+        private Panel DrawTopViewOfTrajectory(string wellName, string trajectoryName)
+        {
+            Trajectory trajectory = wells.Find(x => x.WellName == wellName).Trajectories.Find(x => x.TrajectoryName == trajectoryName);
+            Vector3 normalVector = Vector3.UnitZ;
+            List<PointIn2D> projectionInTopView = projection.GetProjectionInPlane(trajectory.PolyLineNodes, normalVector);
+            Panel panelTopView = new Panel
+            {
+                Dock = DockStyle.Fill,
+            };
+            Graphics g = panelTopView.CreateGraphics();
+            Pen skyBluePen = new Pen(Brushes.DeepSkyBlue);
+            skyBluePen.Width = 2.0F;
+            g.DrawLine(skyBluePen, 20, 10, 300, 100);
+            return panelTopView;
+        }
+
+        protected override void OnPaint(PaintEventArgs e)
+        {
+            base.OnPaint(e);
+        }
 
         // Menu Bar
-
         private void OpenFileToolStripMenuItem_Click(object sender, EventArgs e)
         {
             LoadTrajectoryDataFromFile();
