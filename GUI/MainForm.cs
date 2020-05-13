@@ -295,7 +295,6 @@ namespace Well_Trajectory_Visualization
             graphic.Dispose();
         }
 
-
         // Menu Bar
         private void OpenFileToolStripMenuItem_Click(object sender, EventArgs e)
         {
