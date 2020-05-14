@@ -284,7 +284,6 @@
             this.tabControl.SelectedIndex = 0;
             this.tabControl.Size = new System.Drawing.Size(914, 518);
             this.tabControl.TabIndex = 0;
-            this.tabControl.SelectedIndexChanged += new System.EventHandler(this.UpdateSelectedTrajectory);
             // 
             // openFileDialog
             // 

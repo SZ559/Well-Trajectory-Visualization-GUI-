@@ -17,7 +17,9 @@ namespace Well_Trajectory_Visualization
         Projection projection;
         WellViewSaver wellViewSaver;
         Trajectory trajectory;
-        Single zoom;
+        Single zoomX;
+        Single zoomY;
+
         List<Well> wells;
 
         bool hasPreviewTab;
@@ -184,12 +186,12 @@ namespace Well_Trajectory_Visualization
             };
 
             trajectory = wells.Find(x => x.WellName == wellName).Trajectories.Find(x => x.TrajectoryName == trajectoryName);
-            SetZoom();
+            SetZoomForThreeViews();
 
-            TableLayoutPanel tableLayoutPanel = SetTableLayoutPanelForTabPage();
-
+            TableLayoutPanel tableLayoutPanel = InitializeTableLayoutPanelForTabPage();
             tabPage.Controls.Add(tableLayoutPanel);
             tabControl.TabPages.Add(tabPage);
+            SetTableLayoutPanel(tableLayoutPanel);
             tabControl.SelectedTab = tabPage;
 
             hasPreviewTab = !isDoubleClick;
@@ -202,6 +204,7 @@ namespace Well_Trajectory_Visualization
                 ChangeTabPageHeaderFontStyle(tabControl.SelectedTab, FontStyle.Italic);
             }
         }
+
         private void ChangeTabPageHeaderFontStyle(TabPage tabpage, FontStyle fontStyle)
         {
             Graphics g = tabControl.CreateGraphics();
@@ -210,24 +213,23 @@ namespace Well_Trajectory_Visualization
             g.DrawString(tabpage.Text, new Font(tabControl.Font, fontStyle), Brushes.Black, rect);
         }
 
-        private void UpdateSelectedTrajectory(Object sender, EventArgs e)
-        {
-            if (tabControl.SelectedTab != null)
-            {
-                string wellName = tabControl.SelectedTab.Text.Split('-')[0];
-                string trajectoryName = tabControl.SelectedTab.Text.Split('-')[1];
-                trajectory = wells.Find(x => x.WellName == wellName).Trajectories.Find(x => x.TrajectoryName == trajectoryName);
-                SetZoom();
-            }
-        }
-
-        private void SetZoom()
+        private void SetZoomForThreeViews()
         {
             Single maxX = trajectory.PolyLineNodes.Select(x => x.X).Max();
             Single maxY = trajectory.PolyLineNodes.Select(x => x.Y).Max();
             Single maxZ = trajectory.PolyLineNodes.Select(x => x.Z).Max();
-            zoom = Math.Max(maxX, maxY);
-            zoom = Math.Max(zoom, maxZ);
+
+            Single minX = trajectory.PolyLineNodes.Select(x => x.X).Min();
+            Single minY = trajectory.PolyLineNodes.Select(x => x.Y).Min();
+            Single minZ = trajectory.PolyLineNodes.Select(x => x.Z).Min();
+
+            Single max_XAxis = Math.Max(maxX, maxY);
+            Single min_XAxis = Math.Min(minX, minY);
+
+            Single max_YAxis = Math.Max(maxZ, maxY);
+            Single min_YAxis = Math.Min(minZ, minY);
+            zoomX = max_XAxis - min_XAxis;
+            zoomY = max_YAxis - min_YAxis;
         }
 
         // Tab Page
@@ -240,7 +242,7 @@ namespace Well_Trajectory_Visualization
                     hasPreviewTab = false;
                 }
                 tabControl.TabPages.Remove(tabControl.SelectedTab);
-                //tabControl.SelectedIndex = tabControl.TabCount - 1;
+                tabControl.SelectedIndex = tabControl.TabCount - 1;
                 if (tabControl.SelectedIndex == -1)
                 {
                     defaultPagePanel.Visible = true;
@@ -248,7 +250,7 @@ namespace Well_Trajectory_Visualization
             }
         }
 
-        private TableLayoutPanel SetTableLayoutPanelForTabPage()
+        private TableLayoutPanel InitializeTableLayoutPanelForTabPage()
         {
             TableLayoutPanel tableLayoutPanel = new TableLayoutPanel
             {
@@ -260,108 +262,125 @@ namespace Well_Trajectory_Visualization
                 Dock = DockStyle.Fill,
             };
             tableLayoutPanel.SuspendLayout();
-
             tableLayoutPanel.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 33));
             tableLayoutPanel.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 33));
             tableLayoutPanel.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 33));
-
-            Panel mainViewPanel = InitializePanelForProjection();
-            Panel topViewPanel = InitializePanelForProjection();
-            Panel leftViewPanel = InitializePanelForProjection();
-            tableLayoutPanel.Controls.Add(mainViewPanel, 0, 0);
-            tableLayoutPanel.Controls.Add(topViewPanel, 1, 0);
-            tableLayoutPanel.Controls.Add(leftViewPanel, 2, 0);
-
-            PaintPanel(topViewPanel, "Top View");
-            PaintPanel(mainViewPanel, "Main View");
-            PaintPanel(leftViewPanel, "Left View");
             tableLayoutPanel.ResumeLayout();
             return tableLayoutPanel;
         }
 
-        private Panel InitializePanelForProjection()
+        private void SetTableLayoutPanel(TableLayoutPanel tableLayoutPanel)
         {
-            Panel panelTopView = new Panel
-            {
-                Dock = DockStyle.Fill,
-            };
-            return panelTopView;
+            PictureBox mainViewPanel = InitializePictureBoxForProjection();
+            PictureBox topViewPanel = InitializePictureBoxForProjection();
+            PictureBox leftViewPictureBox = InitializePictureBoxForProjection();
+
+            tableLayoutPanel.SuspendLayout();
+            tableLayoutPanel.Controls.Add(mainViewPanel, 0, 0);
+            tableLayoutPanel.Controls.Add(topViewPanel, 1, 0);
+            tableLayoutPanel.Controls.Add(leftViewPictureBox, 2, 0);
+            tableLayoutPanel.ResumeLayout();
+
+            PaintPictureBox(topViewPanel, "Top View");
+            PaintPictureBox(mainViewPanel, "Main View");
+            PaintPictureBox(leftViewPictureBox, "Left View");
         }
 
-        private Panel PaintPanel(Panel panel, string option)
+
+        private PictureBox InitializePictureBoxForProjection()
+        {
+            PictureBox pictureBox = new PictureBox
+            {
+                Dock = DockStyle.Fill,
+                BorderStyle = BorderStyle.Fixed3D,
+            };
+            return pictureBox;
+        }
+
+        private PictureBox PaintPictureBox(PictureBox pictureBox, string option)
         {
             switch (option)
             {
                 case "Top View":
-                    panel.Paint += new PaintEventHandler(TopView_Paint);
+                    TopView_LoadPicture(pictureBox);
                     break;
                 case "Left View":
-                    panel.Paint += new PaintEventHandler(LeftView_Paint);
+                    LeftView_LoadPicture(pictureBox);
                     break;
                 case "Main View":
-                    panel.Paint += new PaintEventHandler(MainView_Paint);
+                    MainView_LoadPicture(pictureBox);
                     break;
             }
-            Point locationOfPanelLabel = new Point(panel.Width - 10, 5);
-            panel.Controls.Add(new Label { Text = option, Location = locationOfPanelLabel });
-            return panel;
+            return pictureBox;
         }
 
-
-        private void TopView_Paint(object sender, PaintEventArgs pe)
+        private void LeftView_LoadPicture(PictureBox pictureBox)
         {
-            Graphics graphic = pe.Graphics;
-            Pen skyBluePen = new Pen(Brushes.DeepSkyBlue);
-            skyBluePen.Width = 1.0F;
-
-            Panel panel = (Panel)sender;
-            List<PointIn2D> projectionPointIn2D = projection.GetProjectionInPlane(trajectory.PolyLineNodes, Vector3.UnitZ);
-            Single zoomInXAxisParameter = panel.Width / zoom;
-            Single zoomInYAxisParameter = panel.Height / zoom;
-
-            for (int i = 0; i < projectionPointIn2D.Count - 1; i = i + 1)
-            {
-                graphic.DrawLine(skyBluePen, projectionPointIn2D[i].X * zoomInXAxisParameter, projectionPointIn2D[i].Y * zoomInYAxisParameter, projectionPointIn2D[i + 1].X * zoomInXAxisParameter, projectionPointIn2D[i + 1].Y * zoomInYAxisParameter);
-            }
-            graphic.Dispose();
-        }
-
-        private void MainView_Paint(object sender, PaintEventArgs pe)
-        {
-            Graphics graphic = pe.Graphics;
-            Pen skyBluePen = new Pen(Brushes.DeepSkyBlue);
-            skyBluePen.Width = 1.0F;
-
-            Panel panel = (Panel)sender;
-            List<PointIn2D> projectionPointIn2D = projection.GetProjectionInPlane(trajectory.PolyLineNodes, Vector3.UnitY);
-            Single zoomInXAxisParameter = panel.Width / zoom;
-            Single zoomInYAxisParameter = panel.Height / zoom;
-
-            for (int i = 0; i < projectionPointIn2D.Count - 1; i = i + 1)
-            {
-                graphic.DrawLine(skyBluePen, projectionPointIn2D[i].X * zoomInXAxisParameter, projectionPointIn2D[i].Y * zoomInYAxisParameter, projectionPointIn2D[i + 1].X * zoomInXAxisParameter, projectionPointIn2D[i + 1].Y * zoomInYAxisParameter);
-            }
-            graphic.Dispose();
-        }
-
-        private void LeftView_Paint(object sender, PaintEventArgs pe)
-        {
-            Graphics graphic = pe.Graphics;
-            Pen skyBluePen = new Pen(Brushes.DeepSkyBlue);
-            skyBluePen.Width = 1.0F;
-
-            Panel panel = (Panel)sender;
             List<PointIn2D> projectionPointIn2D = projection.GetProjectionInPlane(trajectory.PolyLineNodes, Vector3.UnitX);
-            Single zoomInXAxisParameter = panel.Width / zoom;
-            Single zoomInYAxisParameter = panel.Height / zoom;
+            Bitmap bitMap = LoadPicture("Left View", pictureBox.Width, pictureBox.Height, projectionPointIn2D);
+            pictureBox.Image = bitMap;
+        }
+
+        private void MainView_LoadPicture(PictureBox pictureBox)
+        {
+            List<PointIn2D> projectionPointIn2D = projection.GetProjectionInPlane(trajectory.PolyLineNodes, Vector3.UnitY);
+            Bitmap bitMap = LoadPicture("Main View", pictureBox.Width, pictureBox.Height, projectionPointIn2D);
+            pictureBox.Image = bitMap;
+        }
+
+        private void TopView_LoadPicture(PictureBox pictureBox)
+        {
+            List<PointIn2D> projectionPointIn2D = projection.GetProjectionInPlane(trajectory.PolyLineNodes, Vector3.UnitZ);
+            Bitmap bitMap = LoadPicture("Top View", pictureBox.Width, pictureBox.Height, projectionPointIn2D);
+            pictureBox.Image = bitMap;
+        }
+
+        private Bitmap LoadPicture(string text, int pictureBoxWidth, int pictureBoxHeight, List<PointIn2D> projectionPointIn2D)
+        {
+            int spaceX = 20;
+            int spaceY = 25;
+            int textPositionY = 5;
+            Single zoomInXAxisParameter = (pictureBoxWidth - spaceX * 2) / zoomX;
+            Single zoomInYAxisParameter = (pictureBoxHeight - spaceY * 2) / zoomY;
+            Single minX = projectionPointIn2D.Select(x => x.X).Min();
+            Single minY = projectionPointIn2D.Select(x => x.Y).Min();
+            spaceX = SetInitialPointToPaint(minX * zoomInXAxisParameter, spaceX);
+            spaceY = SetInitialPointToPaint(minY * zoomInYAxisParameter, spaceY);
+
+            Pen skyBluePen = new Pen(Color.DeepSkyBlue);
+            skyBluePen.Width = 2.0F;
+            Pen darkBluePen = new Pen(Color.DarkBlue);
+            SolidBrush darkBlueBrush = new SolidBrush(Color.DarkBlue);
+            Bitmap bitMap = new Bitmap(pictureBoxWidth, pictureBoxHeight);
+            Graphics graphic = Graphics.FromImage(bitMap);
+            int radius = 3;
 
             for (int i = 0; i < projectionPointIn2D.Count - 1; i = i + 1)
             {
-                graphic.DrawLine(skyBluePen, projectionPointIn2D[i].X * zoomInXAxisParameter, projectionPointIn2D[i].Y * zoomInYAxisParameter, projectionPointIn2D[i + 1].X * zoomInXAxisParameter, projectionPointIn2D[i + 1].Y * zoomInYAxisParameter);
+                float xForPaint = projectionPointIn2D[i].X * zoomInXAxisParameter + spaceX;
+                float yForPaint = projectionPointIn2D[i].Y * zoomInYAxisParameter + spaceY;
+                float x2ForPaint = projectionPointIn2D[i + 1].X * zoomInXAxisParameter + spaceX;
+                float y2ForPaint = projectionPointIn2D[i + 1].Y * zoomInYAxisParameter + spaceY;
+                graphic.DrawLine(skyBluePen, xForPaint, yForPaint, x2ForPaint, y2ForPaint);
+                graphic.FillEllipse(darkBlueBrush, xForPaint, yForPaint, radius, radius);
             }
+
+            graphic.FillEllipse(darkBlueBrush, projectionPointIn2D[projectionPointIn2D.Count - 1].X * zoomInXAxisParameter + spaceX, projectionPointIn2D[projectionPointIn2D.Count - 1].Y * zoomInYAxisParameter + spaceY, radius, radius);
+            graphic.DrawString(text, new Font(Label.DefaultFont, FontStyle.Regular), Brushes.Black, new PointF(pictureBoxWidth - 80, textPositionY));
+            skyBluePen.Dispose();
+            darkBlueBrush.Dispose();
             graphic.Dispose();
+            return bitMap;
         }
 
+        private int SetInitialPointToPaint(Single minValue, int space)
+        {
+            if (minValue < 0)
+            {
+                space = (int)(space - minValue);
+            }
+            return space;
+        }
 
         // Menu Bar
         private void OpenFileToolStripMenuItem_Click(object sender, EventArgs e)
@@ -380,7 +399,6 @@ namespace Well_Trajectory_Visualization
             System.Diagnostics.Process.Start("https://commons.wikimedia.org/wiki/File:Third_angle_projecting.svg");
 
         }
-
 
         //// TODO: ????
         //private void tabControl_SelectedIndexChanged(object sender, EventArgs e)
