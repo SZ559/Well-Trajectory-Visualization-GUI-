@@ -17,9 +17,9 @@ namespace Well_Trajectory_Visualization
         Projection projection;
         WellViewSaver wellViewSaver;
         Trajectory trajectory;
+
         Single zoomX;
         Single zoomY;
-
         List<Well> wells;
 
         bool hasPreviewTab;
@@ -172,7 +172,6 @@ namespace Well_Trajectory_Visualization
         private void OpenNewTabPage(string wellName, string trajectoryName)
         {
             defaultPagePanel.Visible = false;
-
             if (tabControl.TabCount >= 10)
             {
                 MessageBox.Show("Only 10 pages can be opened. Please close a page before opening a new one.");
@@ -186,8 +185,8 @@ namespace Well_Trajectory_Visualization
             };
 
             trajectory = wells.Find(x => x.WellName == wellName).Trajectories.Find(x => x.TrajectoryName == trajectoryName);
-            SetZoomForThreeViews();
 
+            SetZoomForThreeViews();
             TableLayoutPanel tableLayoutPanel = InitializeTableLayoutPanelForTabPage();
             tabPage.Controls.Add(tableLayoutPanel);
             tabControl.TabPages.Add(tabPage);
@@ -203,6 +202,13 @@ namespace Well_Trajectory_Visualization
             {
                 ChangeTabPageHeaderFontStyle(tabControl.SelectedTab, FontStyle.Italic);
             }
+        }
+        private void ChangeTabPageHeaderFontStyle(TabPage tabpage, FontStyle fontStyle)
+        {
+            Graphics g = tabControl.CreateGraphics();
+            Rectangle rect = new Rectangle(tabControl.TabPages.IndexOf(tabpage) * tabControl.ItemSize.Width + 2, 2, tabControl.ItemSize.Width - 2, tabControl.ItemSize.Height - 2);
+            g.FillRectangle(Brushes.LightBlue, rect);
+            g.DrawString(tabpage.Text, new Font(tabControl.Font, fontStyle), Brushes.Black, rect);
         }
 
         private void ChangeTabPageHeaderFontStyle(TabPage tabpage, FontStyle fontStyle)
