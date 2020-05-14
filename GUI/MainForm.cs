@@ -23,8 +23,7 @@ namespace Well_Trajectory_Visualization
         List<Well> wells;
 
         bool hasPreviewTab;
-        private bool isDoubleClick = false;
-
+        private bool isDoubleClick;
 
         public MainForm()
         {
@@ -36,6 +35,7 @@ namespace Well_Trajectory_Visualization
 
             wells = new List<Well>();
             hasPreviewTab = false;
+            isDoubleClick = false;
         }
 
         private void LoadTrajectoryDataFromFile()
@@ -112,17 +112,16 @@ namespace Well_Trajectory_Visualization
         private void WellsTreeView_NodeMouseClick(object sender, TreeNodeMouseClickEventArgs e)
         {
             isDoubleClick = false;
-            TreeViewSelection(e.Node, isDoubleClick);
+            TreeViewSelection(e.Node);
         }
 
         private void WellsTreeView_NodeMouseDoubleClick(object sender, TreeNodeMouseClickEventArgs e)
         {
             isDoubleClick = true;
-            TreeViewSelection(e.Node, isDoubleClick);
-            ChangeTabPageHeaderFontStyle(tabControl.SelectedTab, FontStyle.Regular);
+            TreeViewSelection(e.Node);
         }
 
-        private void TreeViewSelection(TreeNode node, bool isDoubleClick)
+        private void TreeViewSelection(TreeNode node)
         {
             if (node.Parent == null || node.Parent.Text == "Wells")
             {
@@ -138,10 +137,18 @@ namespace Well_Trajectory_Visualization
                     return;
                 }
                 RemovePreviewTab();
+
+                if (tabControl.TabCount >= 10)
+                {
+                    MessageBox.Show("Only 10 pages can be opened. Please close a page before opening a new one.");
+                    return;
+                }
+
                 OpenNewTabPage(wellName, trajectoryName);
             }
         }
 
+        // tab page
         public bool IfTabPageOpened(string tabPageText)
         {
             defaultPagePanel.Visible = false;
@@ -149,12 +156,13 @@ namespace Well_Trajectory_Visualization
             {
                 if (page.Text == tabPageText)
                 {
-                    tabControl.SelectedTab = page;
                     if (isDoubleClick && tabControl.TabPages.IndexOf(page) == tabControl.TabCount - 1)
                     {
-                        ChangeTabPageHeaderFontStyle(page, FontStyle.Regular);
+                        page.Tag = true;
                         hasPreviewTab = false;
                     }
+                    tabControl.SelectedTab = page;
+
                     return true;
                 }
             }
@@ -166,22 +174,17 @@ namespace Well_Trajectory_Visualization
             if (hasPreviewTab == true)
             {
                 tabControl.TabPages.RemoveAt(tabControl.TabCount - 1);
+                hasPreviewTab = false;
             }
         }
 
         private void OpenNewTabPage(string wellName, string trajectoryName)
         {
             defaultPagePanel.Visible = false;
-            if (tabControl.TabCount >= 10)
-            {
-                MessageBox.Show("Only 10 pages can be opened. Please close a page before opening a new one.");
-                return;
-            }
 
             TabPage tabPage = new TabPage
             {
-                Text = $"{wellName}-{trajectoryName}",
-
+                Text = $"{wellName}-{trajectoryName}"
             };
 
             trajectory = wells.Find(x => x.WellName == wellName).Trajectories.Find(x => x.TrajectoryName == trajectoryName);
@@ -189,26 +192,12 @@ namespace Well_Trajectory_Visualization
             SetZoomForThreeViews();
             TableLayoutPanel tableLayoutPanel = InitializeTableLayoutPanelForTabPage();
             tabPage.Controls.Add(tableLayoutPanel);
+            tabPage.Tag = isDoubleClick; // opened or preview : true means opened
             tabControl.TabPages.Add(tabPage);
             SetTableLayoutPanel(tableLayoutPanel);
             tabControl.SelectedTab = tabPage;
 
             hasPreviewTab = !isDoubleClick;
-            if (isDoubleClick)
-            {
-                ChangeTabPageHeaderFontStyle(tabControl.SelectedTab, FontStyle.Regular);
-            }
-            else
-            {
-                ChangeTabPageHeaderFontStyle(tabControl.SelectedTab, FontStyle.Italic);
-            }
-        }
-        private void ChangeTabPageHeaderFontStyle(TabPage tabpage, FontStyle fontStyle)
-        {
-            Graphics g = tabControl.CreateGraphics();
-            Rectangle rect = new Rectangle(tabControl.TabPages.IndexOf(tabpage) * tabControl.ItemSize.Width + 2, 2, tabControl.ItemSize.Width - 2, tabControl.ItemSize.Height - 2);
-            g.FillRectangle(Brushes.LightBlue, rect);
-            g.DrawString(tabpage.Text, new Font(tabControl.Font, fontStyle), Brushes.Black, rect);
         }
 
         private void SetZoomForThreeViews()
@@ -235,7 +224,7 @@ namespace Well_Trajectory_Visualization
         {
             if (tabControl.SelectedTab != null)
             {
-                if (tabControl.SelectedIndex == tabControl.TabCount - 1 && hasPreviewTab == true)
+                if ((bool)tabControl.SelectedTab.Tag == false)
                 {
                     hasPreviewTab = false;
                 }
@@ -269,77 +258,69 @@ namespace Well_Trajectory_Visualization
 
         private void SetTableLayoutPanel(TableLayoutPanel tableLayoutPanel)
         {
-            PictureBox mainViewPictureBox = InitializePictureBoxForProjection();
-            PictureBox topViewPictureBox = InitializePictureBoxForProjection();
-            PictureBox leftViewPictureBox = InitializePictureBoxForProjection();
+            PictureBox mainViewPictureBox = InitializePictureBoxForProjection("Top View");
+            PictureBox topViewPictureBox = InitializePictureBoxForProjection("Main View");
+            PictureBox leftViewPictureBox = InitializePictureBoxForProjection("Left View");
 
             tableLayoutPanel.SuspendLayout();
             tableLayoutPanel.Controls.Add(mainViewPictureBox, 0, 0);
             tableLayoutPanel.Controls.Add(topViewPictureBox, 1, 0);
             tableLayoutPanel.Controls.Add(leftViewPictureBox, 2, 0);
+
             tableLayoutPanel.ResumeLayout();
 
-            PaintPictureBox(topViewPictureBox, "Top View");
-            PaintPictureBox(mainViewPictureBox, "Main View");
-            PaintPictureBox(leftViewPictureBox, "Left View");
+            PaintPictureBox(topViewPictureBox);
+            PaintPictureBox(mainViewPictureBox);
+            PaintPictureBox(leftViewPictureBox);
         }
 
 
-        private PictureBox InitializePictureBoxForProjection()
+        private PictureBox InitializePictureBoxForProjection(string viewName)
         {
             PictureBox pictureBox = new PictureBox
             {
                 Dock = DockStyle.Fill,
                 BorderStyle = BorderStyle.Fixed3D,
+                Name = viewName
             };
             return pictureBox;
         }
 
-        private PictureBox PaintPictureBox(PictureBox pictureBox, string option)
+        private PictureBox PaintPictureBox(PictureBox pictureBox)
         {
-            switch (option)
+            Vector3 normalVector;
+            switch (pictureBox.Name)
             {
                 case "Top View":
-                    TopView_LoadPicture(pictureBox);
+                    normalVector = Vector3.UnitZ;
                     break;
                 case "Left View":
-                    LeftView_LoadPicture(pictureBox);
+                    normalVector = Vector3.UnitX;
                     break;
                 case "Main View":
-                    MainView_LoadPicture(pictureBox);
+                default:
+                    normalVector = Vector3.UnitY;
                     break;
             }
+
+            LoadView(pictureBox, normalVector);
             return pictureBox;
         }
 
-        private void LeftView_LoadPicture(PictureBox pictureBox)
+        private void LoadView(PictureBox pictureBox, Vector3 normalVector)
         {
-            List<PointIn2D> projectionPointIn2D = projection.GetProjectionInPlane(trajectory.PolyLineNodes, Vector3.UnitX);
-            Bitmap bitMap = LoadPicture("Left View", pictureBox.Width, pictureBox.Height, projectionPointIn2D);
+            List<PointIn2D> projectionPointIn2D = projection.GetProjectionInPlane(trajectory.PolyLineNodes, normalVector);
+            Bitmap bitMap = LoadPicture(pictureBox, projectionPointIn2D);
             pictureBox.Image = bitMap;
         }
 
-        private void MainView_LoadPicture(PictureBox pictureBox)
-        {
-            List<PointIn2D> projectionPointIn2D = projection.GetProjectionInPlane(trajectory.PolyLineNodes, Vector3.UnitY);
-            Bitmap bitMap = LoadPicture("Main View", pictureBox.Width, pictureBox.Height, projectionPointIn2D);
-            pictureBox.Image = bitMap;
-        }
-
-        private void TopView_LoadPicture(PictureBox pictureBox)
-        {
-            List<PointIn2D> projectionPointIn2D = projection.GetProjectionInPlane(trajectory.PolyLineNodes, Vector3.UnitZ);
-            Bitmap bitMap = LoadPicture("Top View", pictureBox.Width, pictureBox.Height, projectionPointIn2D);
-            pictureBox.Image = bitMap;
-        }
-
-        private Bitmap LoadPicture(string text, int pictureBoxWidth, int pictureBoxHeight, List<PointIn2D> projectionPointIn2D)
+        private Bitmap LoadPicture(PictureBox pictureBox, List<PointIn2D> projectionPointIn2D)
         {
             int spaceX = 20;
             int spaceY = 25;
             int textPositionY = 5;
-            Single zoomInXAxisParameter = (pictureBoxWidth - spaceX * 2) / zoomX;
-            Single zoomInYAxisParameter = (pictureBoxHeight - spaceY * 2) / zoomY;
+            Single zoomInXAxisParameter = (pictureBox.Width - spaceX * 2) / zoomX;
+            Single zoomInYAxisParameter = (pictureBox.Height - spaceY * 2) / zoomY;
             Single minX = projectionPointIn2D.Select(x => x.X).Min();
             Single minY = projectionPointIn2D.Select(x => x.Y).Min();
             spaceX = SetInitialPointToPaint(minX * zoomInXAxisParameter, spaceX);
@@ -349,7 +330,7 @@ namespace Well_Trajectory_Visualization
             skyBluePen.Width = 2.0F;
             Pen darkBluePen = new Pen(Color.DarkBlue);
             SolidBrush darkBlueBrush = new SolidBrush(Color.DarkBlue);
-            Bitmap bitMap = new Bitmap(pictureBoxWidth, pictureBoxHeight);
+            Bitmap bitMap = new Bitmap(pictureBox.Width, pictureBox.Height);
             Graphics graphic = Graphics.FromImage(bitMap);
             int radius = 3;
 
@@ -364,7 +345,7 @@ namespace Well_Trajectory_Visualization
             }
 
             graphic.FillEllipse(darkBlueBrush, projectionPointIn2D[projectionPointIn2D.Count - 1].X * zoomInXAxisParameter + spaceX, projectionPointIn2D[projectionPointIn2D.Count - 1].Y * zoomInYAxisParameter + spaceY, radius, radius);
-            graphic.DrawString(text, new Font(Label.DefaultFont, FontStyle.Regular), Brushes.Black, new PointF(pictureBoxWidth - 80, textPositionY));
+            graphic.DrawString(pictureBox.Name, new Font(Label.DefaultFont, FontStyle.Bold), Brushes.OrangeRed, new PointF(pictureBox.Width/2, textPositionY));
             skyBluePen.Dispose();
             darkBlueBrush.Dispose();
             graphic.Dispose();
@@ -395,16 +376,25 @@ namespace Well_Trajectory_Visualization
         private void referenceToolStripMenuItem_Click(object sender, EventArgs e)
         {
             System.Diagnostics.Process.Start("https://commons.wikimedia.org/wiki/File:Third_angle_projecting.svg");
-
         }
 
         //// TODO: ????
         //private void tabControl_SelectedIndexChanged(object sender, EventArgs e)
         //{
-        //    Graphics g = tabControl.CreateGraphics();
-        //    Rectangle rect = new Rectangle(tabControl.SelectedIndex * tabControl.ItemSize.Width + 2, 2, tabControl.ItemSize.Width - 2, tabControl.ItemSize.Height - 2);
-        //    g.FillRectangle(Brushes.LightBlue, rect);
-        //    g.DrawString(tabControl.SelectedTab.Text, new Font(tabControl.SelectedTab.Font, FontStyle.Italic), Brushes.Black, rect);
+        //    if (tabControl.SelectedTab != null)
+        //    {
+        //        string wellName = tabControl.SelectedTab.Text.Split('-')[0];
+        //        string trajectoryName = tabControl.SelectedTab.Text.Split('-')[1];
+        //        trajectory = wells.Find(x => x.WellName == wellName).Trajectories.Find(x => x.TrajectoryName == trajectoryName);
+        //        SetZoom();
+
+        //        //FontStyle fontStyle = (bool)tabControl.SelectedTab.Tag ? FontStyle.Regular : FontStyle.Italic;
+
+        //        Graphics g = tabControl.CreateGraphics();
+        //        Rectangle rect = new Rectangle(tabControl.SelectedIndex * tabControl.ItemSize.Width + 2, 2, tabControl.ItemSize.Width - 2, tabControl.ItemSize.Height - 2);
+        //        g.FillRectangle(Brushes.LightBlue, rect);
+        //        g.DrawString(tabControl.SelectedTab.Text, new Font(tabControl.SelectedTab.Font, FontStyle.Bold), Brushes.Black, rect);
+        //    }
         //}
     }
 }
