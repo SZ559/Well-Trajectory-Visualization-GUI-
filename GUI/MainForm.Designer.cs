@@ -76,8 +76,10 @@
             this.helpToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
+
             this.menuStrip1.Padding = new System.Windows.Forms.Padding(2, 1, 0, 1);
             this.menuStrip1.Size = new System.Drawing.Size(1070, 24);
+
             this.menuStrip1.TabIndex = 0;
             this.menuStrip1.Text = "menuStrip1";
             // 
@@ -199,7 +201,7 @@
             treeNode1});
             this.wellsTreeView.Size = new System.Drawing.Size(151, 518);
             this.wellsTreeView.TabIndex = 0;
-            this.wellsTreeView.NodeMouseClick += new System.Windows.Forms.TreeNodeMouseClickEventHandler(this.wellsTreeView_NodeMouseClick);
+            this.wellsTreeView.NodeMouseClick += new System.Windows.Forms.TreeNodeMouseClickEventHandler(this.WellsTreeView_NodeMouseClick);
             this.wellsTreeView.NodeMouseDoubleClick += new System.Windows.Forms.TreeNodeMouseClickEventHandler(this.WellsTreeView_NodeMouseDoubleClick);
             // 
             // defaultPagePanel
@@ -335,6 +337,7 @@
             // 
             // MainForm
             // 
+
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 17F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1070, 589);
@@ -346,6 +349,7 @@
             this.MainMenuStrip = this.menuStrip1;
             this.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.MinimumSize = new System.Drawing.Size(875, 628);
+
             this.Name = "MainForm";
             this.Text = "Well Trajectory Visualizer";
             this.menuStrip1.ResumeLayout(false);
