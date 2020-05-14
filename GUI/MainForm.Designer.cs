@@ -30,7 +30,7 @@
         {
             this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
-            System.Windows.Forms.TreeNode treeNode4 = new System.Windows.Forms.TreeNode("Wells");
+            System.Windows.Forms.TreeNode treeNode1 = new System.Windows.Forms.TreeNode("Wells");
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.openFileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -46,6 +46,7 @@
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
             this.wellsTreeView = new System.Windows.Forms.TreeView();
             this.defaultPagePanel = new System.Windows.Forms.TableLayoutPanel();
+            this.label8 = new System.Windows.Forms.Label();
             this.label4 = new System.Windows.Forms.Label();
             this.label1 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
@@ -53,12 +54,11 @@
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.imageSourceReference = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.referenceToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.tabControl = new System.Windows.Forms.TabControl();
-            this.openFileDialog = new System.Windows.Forms.OpenFileDialog();
             this.label5 = new System.Windows.Forms.Label();
             this.label6 = new System.Windows.Forms.Label();
             this.label7 = new System.Windows.Forms.Label();
-            this.label8 = new System.Windows.Forms.Label();
+            this.tabControl = new System.Windows.Forms.TabControl();
+            this.openFileDialog = new System.Windows.Forms.OpenFileDialog();
             this.menuStrip1.SuspendLayout();
             this.toolStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
@@ -217,10 +217,10 @@
             this.wellsTreeView.Location = new System.Drawing.Point(0, 0);
             this.wellsTreeView.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.wellsTreeView.Name = "wellsTreeView";
-            treeNode4.Name = "Root";
-            treeNode4.Text = "Wells";
+            treeNode1.Name = "Root";
+            treeNode1.Text = "Wells";
             this.wellsTreeView.Nodes.AddRange(new System.Windows.Forms.TreeNode[] {
-            treeNode4});
+            treeNode1});
             this.wellsTreeView.Size = new System.Drawing.Size(151, 518);
             this.wellsTreeView.TabIndex = 0;
             this.wellsTreeView.NodeMouseClick += new System.Windows.Forms.TreeNodeMouseClickEventHandler(this.WellsTreeView_NodeMouseClick);
@@ -252,6 +252,18 @@
             this.defaultPagePanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 12.22494F));
             this.defaultPagePanel.Size = new System.Drawing.Size(914, 518);
             this.defaultPagePanel.TabIndex = 0;
+            // 
+            // label8
+            // 
+            this.label8.Anchor = System.Windows.Forms.AnchorStyles.Right;
+            this.label8.AutoSize = true;
+            this.label8.Font = new System.Drawing.Font("Microsoft YaHei UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.label8.Location = new System.Drawing.Point(312, 475);
+            this.label8.Name = "label8";
+            this.label8.Size = new System.Drawing.Size(142, 21);
+            this.label8.TabIndex = 8;
+            this.label8.Text = "View Source Files";
+            this.label8.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // label4
             // 
@@ -330,24 +342,6 @@
             this.referenceToolStripMenuItem.Text = "Reference";
             this.referenceToolStripMenuItem.Click += new System.EventHandler(this.referenceToolStripMenuItem_Click);
             // 
-            // tabControl
-            // 
-            this.tabControl.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tabControl.Location = new System.Drawing.Point(0, 0);
-            this.tabControl.Margin = new System.Windows.Forms.Padding(9, 11, 9, 11);
-            this.tabControl.Multiline = true;
-            this.tabControl.Name = "tabControl";
-            this.tabControl.SelectedIndex = 0;
-            this.tabControl.Size = new System.Drawing.Size(914, 518);
-            this.tabControl.TabIndex = 0;
-            this.tabControl.SelectedIndexChanged += new System.EventHandler(this.tabControl_SelectedIndexChanged);
-            // 
-            // openFileDialog
-            // 
-            this.openFileDialog.FileName = "openFileDialog";
-            this.openFileDialog.Filter = "\"CSV Files|*.csv|TXT Files|*.txt\"";
-            this.openFileDialog.Multiselect = true;
-            // 
             // label5
             // 
             this.label5.Anchor = System.Windows.Forms.AnchorStyles.Left;
@@ -388,17 +382,23 @@
             this.label7.Text = "Ctrl + Shift + E";
             this.label7.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
-            // label8
+            // tabControl
             // 
-            this.label8.Anchor = System.Windows.Forms.AnchorStyles.Right;
-            this.label8.AutoSize = true;
-            this.label8.Font = new System.Drawing.Font("Microsoft YaHei UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.label8.Location = new System.Drawing.Point(312, 475);
-            this.label8.Name = "label8";
-            this.label8.Size = new System.Drawing.Size(142, 21);
-            this.label8.TabIndex = 8;
-            this.label8.Text = "View Source Files";
-            this.label8.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.tabControl.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tabControl.Location = new System.Drawing.Point(0, 0);
+            this.tabControl.Margin = new System.Windows.Forms.Padding(9, 11, 9, 11);
+            this.tabControl.Multiline = true;
+            this.tabControl.Name = "tabControl";
+            this.tabControl.SelectedIndex = 0;
+            this.tabControl.Size = new System.Drawing.Size(914, 518);
+            this.tabControl.TabIndex = 0;
+            this.tabControl.SelectedIndexChanged += new System.EventHandler(this.tabControl_SelectedIndexChanged);
+            // 
+            // openFileDialog
+            // 
+            this.openFileDialog.FileName = "openFileDialog";
+            this.openFileDialog.Filter = "\"CSV Files|*.csv|TXT Files|*.txt\"";
+            this.openFileDialog.Multiselect = true;
             // 
             // MainForm
             // 

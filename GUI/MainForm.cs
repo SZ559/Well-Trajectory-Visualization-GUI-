@@ -135,6 +135,13 @@ namespace Well_Trajectory_Visualization
                     return;
                 }
                 RemovePreviewTab();
+
+                if (tabControl.TabCount >= 10)
+                {
+                    MessageBox.Show("Only 10 pages can be opened. Please close a page before opening a new one.");
+                    return;
+                }
+
                 OpenNewTabPage(wellName, trajectoryName);
             }
         }
@@ -165,18 +172,13 @@ namespace Well_Trajectory_Visualization
             if (hasPreviewTab == true)
             {
                 tabControl.TabPages.RemoveAt(tabControl.TabCount - 1);
+                hasPreviewTab = false;
             }
         }
 
         private void OpenNewTabPage(string wellName, string trajectoryName)
         {
             defaultPagePanel.Visible = false;
-
-            if (tabControl.TabCount >= 10)
-            {
-                MessageBox.Show("Only 10 pages can be opened. Please close a page before opening a new one.");
-                return;
-            }
 
             TabPage tabPage = new TabPage
             {
@@ -196,6 +198,24 @@ namespace Well_Trajectory_Visualization
             hasPreviewTab = !isDoubleClick;
         }
 
+        // Tab Page
+        private void CloseTheCurrentTabPageToolStripButton_Click(object sender, EventArgs e)
+        {
+            if (tabControl.SelectedTab != null)
+            {
+                if ((bool)tabControl.SelectedTab.Tag == false)
+                {
+                    hasPreviewTab = false;
+                }
+                tabControl.TabPages.Remove(tabControl.SelectedTab);
+                //tabControl.SelectedIndex = tabControl.TabCount - 1;
+                if (tabControl.SelectedIndex == -1)
+                {
+                    defaultPagePanel.Visible = true;
+                }
+            }
+        }
+
         //private void UpdateSelectedTrajectory(Object sender, EventArgs e)
         //{
         //    if (tabControl.SelectedTab != null)
@@ -213,24 +233,6 @@ namespace Well_Trajectory_Visualization
             Single maxY = trajectory.PolyLineNodes.Select(x => x.Y).Max();
             Single maxZ = trajectory.PolyLineNodes.Select(x => x.Z).Max();
             zoom = Math.Max(Math.Max(maxX, maxY), maxZ);
-        }
-
-        // Tab Page
-        private void CloseTheCurrentTabPageToolStripButton_Click(object sender, EventArgs e)
-        {
-            if (tabControl.SelectedTab != null)
-            {
-                if ((bool)tabControl.SelectedTab.Tag == false)
-                {
-                    hasPreviewTab = false;
-                }
-                tabControl.TabPages.Remove(tabControl.SelectedTab);
-                //tabControl.SelectedIndex = tabControl.TabCount - 1;
-                if (tabControl.SelectedIndex == -1)
-                {
-                    defaultPagePanel.Visible = true;
-                }
-            }
         }
 
         private TableLayoutPanel SetTableLayoutPanelForTabPage()
@@ -341,12 +343,12 @@ namespace Well_Trajectory_Visualization
                 trajectory = wells.Find(x => x.WellName == wellName).Trajectories.Find(x => x.TrajectoryName == trajectoryName);
                 SetZoom();
 
-                FontStyle fontStyle = (bool)tabControl.SelectedTab.Tag ? FontStyle.Regular : FontStyle.Italic;
+                //FontStyle fontStyle = (bool)tabControl.SelectedTab.Tag ? FontStyle.Regular : FontStyle.Italic;
 
                 Graphics g = tabControl.CreateGraphics();
                 Rectangle rect = new Rectangle(tabControl.SelectedIndex * tabControl.ItemSize.Width + 2, 2, tabControl.ItemSize.Width - 2, tabControl.ItemSize.Height - 2);
                 g.FillRectangle(Brushes.LightBlue, rect);
-                g.DrawString(tabControl.SelectedTab.Text, new Font(tabControl.SelectedTab.Font, fontStyle), Brushes.Black, rect);
+                g.DrawString(tabControl.SelectedTab.Text, new Font(tabControl.SelectedTab.Font, FontStyle.Bold), Brushes.Black, rect);
             }
         }
     }
