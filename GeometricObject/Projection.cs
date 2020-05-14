@@ -87,17 +87,5 @@ namespace GeometricObject
             }
             return new PointIn2D(abscissa, ordinate);
         }
-
-        //useless for now
-        public PointIn2D GetProjectionPointIn2D_PlaneParallelToZAxis(PointIn3D projectionPoint, PointIn3D projectionOrigin)
-        {
-            double[] vectorOriginToPoint = new double[] { projectionPoint.X - projectionOrigin.X, projectionPoint.Y - projectionOrigin.Y };
-            double vectorLength = Math.Sqrt(vectorOriginToPoint[0] * vectorOriginToPoint[0] + vectorOriginToPoint[1] * vectorOriginToPoint[1]);
-            if (vectorOriginToPoint[0] < 0)
-            {
-                vectorLength = -vectorLength;
-            }
-            return new PointIn2D(vectorLength, projectionPoint.Z);
-        }
     }
 }

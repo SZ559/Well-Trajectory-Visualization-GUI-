@@ -4,12 +4,12 @@ namespace GeometricObject
 {
     public struct PointIn2D
     {
-        public double X
+        public Single X
         {
             get; set;
         }
 
-        public double Y
+        public Single Y
         {
             get; set;
         }
@@ -18,7 +18,7 @@ namespace GeometricObject
             get; set;
         }
 
-        public PointIn2D(double x, double y, string annotation = "")
+        public PointIn2D(Single x, Single y, string annotation = "")
         {
             X = x;
             Y = y;
