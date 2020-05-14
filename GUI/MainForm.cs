@@ -22,10 +22,14 @@ namespace Well_Trajectory_Visualization
         WellViewSaver wellViewSaver;
         Trajectory trajectory;
         Single zoom;
+        List<Well> wells;
 
         bool hasPreviewTab;
 
-        List<Well> wells;
+        Timer doubleClickTimer = new Timer();
+        bool isFirstClick = true;
+        private bool isDoubleClick = false;
+        private int milliseconds = 0;
 
         public MainForm()
         {
@@ -36,7 +40,6 @@ namespace Well_Trajectory_Visualization
             projection = new Projection();
 
             wells = new List<Well>();
-
             hasPreviewTab = false;
         }
 
@@ -85,7 +88,6 @@ namespace Well_Trajectory_Visualization
         }
 
         // TreeView
-
         private void UpdateTreeView()
         {
             wellsTreeView.BeginUpdate();
@@ -112,29 +114,20 @@ namespace Well_Trajectory_Visualization
             wellsTreeView.ExpandAll();
         }
 
+        private void WellsTreeView_NodeMouseClick(object sender, TreeNodeMouseClickEventArgs e)
+        {
+            isDoubleClick = false;
+            TreeViewSelection(e.Node, isDoubleClick);
+        }
+
         private void WellsTreeView_NodeMouseDoubleClick(object sender, TreeNodeMouseClickEventArgs e)
         {
-            if (hasPreviewTab)
-            {
-                tabControl.TabPages.RemoveAt(tabControl.TabCount - 1);
-            }
-            hasPreviewTab = false;
-            OpenTabPage(e.Node);
+            isDoubleClick = true;
+            TreeViewSelection(e.Node, isDoubleClick);
             ChangeTabPageHeaderFontStyle(tabControl.SelectedTab, FontStyle.Regular);
         }
 
-        private void WellsTreeView_NodeMouseClick(object sender, TreeNodeMouseClickEventArgs e)
-        {
-            if (hasPreviewTab)
-            {
-                tabControl.TabPages.RemoveAt(tabControl.TabCount - 1);
-            }
-            hasPreviewTab = true;
-            OpenTabPage(e.Node);
-            ChangeTabPageHeaderFontStyle(tabControl.SelectedTab, FontStyle.Italic);
-        }
-
-        private void OpenTabPage(TreeNode node)
+        private void TreeViewSelection(TreeNode node, bool isDoubleClick)
         {
             if (node.Parent == null || node.Parent.Text == "Wells")
             {
@@ -144,38 +137,45 @@ namespace Well_Trajectory_Visualization
             {
                 string wellName = node.Parent.Text;
                 string trajectoryName = node.Text;
-                VisualizeWellTrajectoryInThreeViews(wellName, trajectoryName);
+                string tabPageText = $"{wellName}-{trajectoryName}";
+                if (IfTabPageOpened(tabPageText))
+                {
+                    return;
+                }
+                RemovePreviewTab();
+                OpenNewTabPage(wellName, trajectoryName);
             }
         }
 
-        private void ChangeTabPageHeaderFontStyle(TabPage tabpage, FontStyle fontStyle)
+        public bool IfTabPageOpened(string tabPageText)
         {
-            Graphics g = tabControl.CreateGraphics();
-            Rectangle rect = new Rectangle(tabControl.TabPages.IndexOf(tabpage) * tabControl.ItemSize.Width + 2, 2, tabControl.ItemSize.Width - 2, tabControl.ItemSize.Height - 2);
-            g.FillRectangle(Brushes.LightBlue, rect);
-            g.DrawString(tabpage.Text, new Font(tabControl.Font, fontStyle), Brushes.Black, rect);
-        }
-
-
-        private void VisualizeWellTrajectoryInThreeViews(string wellName, string trajectoryName)
-        {
-            defaultPagePanel.Visible = false;
-
-            string tabPageText = $"{wellName} - {trajectoryName}";
-
             foreach (TabPage tabpage in tabControl.TabPages)
             {
                 if (tabpage.Text == tabPageText)
                 {
                     tabControl.SelectedTab = tabpage;
-                    if (tabControl.TabPages.IndexOf(tabpage) == tabControl.TabCount - 1)
+                    if (isDoubleClick && tabControl.TabPages.IndexOf(tabpage) == tabControl.TabCount - 1)
                     {
                         ChangeTabPageHeaderFontStyle(tabpage, FontStyle.Regular);
                         hasPreviewTab = false;
                     }
-                    return;
+                    return true;
                 }
             }
+            return false;
+        }
+
+        private void RemovePreviewTab()
+        {
+            if (hasPreviewTab == true)
+            {
+                tabControl.TabPages.RemoveAt(tabControl.TabCount - 1);
+            }
+        }
+
+        private void OpenNewTabPage(string wellName, string trajectoryName)
+        {
+            defaultPagePanel.Visible = false;
 
             if (tabControl.TabCount >= 10)
             {
@@ -185,12 +185,33 @@ namespace Well_Trajectory_Visualization
 
             TabPage tabPage = new TabPage
             {
-                Text = tabPageText,
+                Text = $"{wellName}-{trajectoryName}",
+
             };
 
+            trajectory = wells.Find(x => x.WellName == wellName).Trajectories.Find(x => x.TrajectoryName == trajectoryName);
+            SetZoom();
+            TableLayoutPanel tableLayoutPanel = SetTableLayoutPanelForTabPage();
             tabPage.Controls.Add(tableLayoutPanel);
             tabControl.TabPages.Add(tabPage);
             tabControl.SelectedTab = tabPage;
+
+            hasPreviewTab = !isDoubleClick;
+            if (isDoubleClick)
+            {
+                ChangeTabPageHeaderFontStyle(tabControl.SelectedTab, FontStyle.Regular);
+            }
+            else
+            {
+                ChangeTabPageHeaderFontStyle(tabControl.SelectedTab, FontStyle.Italic);
+            }
+        }
+        private void ChangeTabPageHeaderFontStyle(TabPage tabpage, FontStyle fontStyle)
+        {
+            Graphics g = tabControl.CreateGraphics();
+            Rectangle rect = new Rectangle(tabControl.TabPages.IndexOf(tabpage) * tabControl.ItemSize.Width + 2, 2, tabControl.ItemSize.Width - 2, tabControl.ItemSize.Height - 2);
+            g.FillRectangle(Brushes.LightBlue, rect);
+            g.DrawString(tabpage.Text, new Font(tabControl.Font, fontStyle), Brushes.Black, rect);
         }
 
         private void UpdateSelectedTrajectory(Object sender, EventArgs e)
@@ -217,13 +238,13 @@ namespace Well_Trajectory_Visualization
         {
             if (tabControl.SelectedTab != null)
             {
-                if(tabControl.SelectedIndex == tabControl.TabCount-1  && hasPreviewTab == true)
+                if (tabControl.SelectedIndex == tabControl.TabCount - 1 && hasPreviewTab == true)
                 {
                     hasPreviewTab = false;
                 }
                 tabControl.TabPages.Remove(tabControl.SelectedTab);
-                tabControl.SelectedIndex = tabControl.TabCount - 1;
-                if(tabControl.SelectedIndex == -1)
+                //tabControl.SelectedIndex = tabControl.TabCount - 1;
+                if (tabControl.SelectedIndex == -1)
                 {
                     defaultPagePanel.Visible = true;
                 }
@@ -246,7 +267,7 @@ namespace Well_Trajectory_Visualization
             tableLayoutPanel.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 33));
             tableLayoutPanel.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 33));
             tableLayoutPanel.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 33));
-            
+
             Panel mainViewPanel = InitializePanelForProjection();
             Panel topViewPanel = InitializePanelForProjection();
             Panel leftViewPanel = InitializePanelForProjection();
