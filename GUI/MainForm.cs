@@ -211,14 +211,6 @@ namespace Well_Trajectory_Visualization
             g.DrawString(tabpage.Text, new Font(tabControl.Font, fontStyle), Brushes.Black, rect);
         }
 
-        private void ChangeTabPageHeaderFontStyle(TabPage tabpage, FontStyle fontStyle)
-        {
-            Graphics g = tabControl.CreateGraphics();
-            Rectangle rect = new Rectangle(tabControl.TabPages.IndexOf(tabpage) * tabControl.ItemSize.Width + 2, 2, tabControl.ItemSize.Width - 2, tabControl.ItemSize.Height - 2);
-            g.FillRectangle(Brushes.LightBlue, rect);
-            g.DrawString(tabpage.Text, new Font(tabControl.Font, fontStyle), Brushes.Black, rect);
-        }
-
         private void SetZoomForThreeViews()
         {
             Single maxX = trajectory.PolyLineNodes.Select(x => x.X).Max();
