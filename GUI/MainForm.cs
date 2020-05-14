@@ -271,18 +271,18 @@ namespace Well_Trajectory_Visualization
 
         private void SetTableLayoutPanel(TableLayoutPanel tableLayoutPanel)
         {
-            PictureBox mainViewPanel = InitializePictureBoxForProjection();
-            PictureBox topViewPanel = InitializePictureBoxForProjection();
+            PictureBox mainViewPictureBox = InitializePictureBoxForProjection();
+            PictureBox topViewPictureBox = InitializePictureBoxForProjection();
             PictureBox leftViewPictureBox = InitializePictureBoxForProjection();
 
             tableLayoutPanel.SuspendLayout();
-            tableLayoutPanel.Controls.Add(mainViewPanel, 0, 0);
-            tableLayoutPanel.Controls.Add(topViewPanel, 1, 0);
+            tableLayoutPanel.Controls.Add(mainViewPictureBox, 0, 0);
+            tableLayoutPanel.Controls.Add(topViewPictureBox, 1, 0);
             tableLayoutPanel.Controls.Add(leftViewPictureBox, 2, 0);
             tableLayoutPanel.ResumeLayout();
 
-            PaintPictureBox(topViewPanel, "Top View");
-            PaintPictureBox(mainViewPanel, "Main View");
+            PaintPictureBox(topViewPictureBox, "Top View");
+            PaintPictureBox(mainViewPictureBox, "Main View");
             PaintPictureBox(leftViewPictureBox, "Left View");
         }
 
