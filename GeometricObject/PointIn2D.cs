@@ -34,7 +34,5 @@ namespace GeometricObject
         {
             return X == p.X && Y == p.Y;
         }
-
     }
-
 }
