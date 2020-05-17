@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GUI", "GUI\GUI.csproj", "{5
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GeometricObject", "GeometricObject\GeometricObject.csproj", "{AC21D131-7147-4404-86AE-1149E9F8BF6B}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UnitTestForGeometricObject", "UnitTests\UnitTestForGeometricObject.csproj", "{6D738180-E78A-49E9-9732-1C3538F9EA41}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{AC21D131-7147-4404-86AE-1149E9F8BF6B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AC21D131-7147-4404-86AE-1149E9F8BF6B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AC21D131-7147-4404-86AE-1149E9F8BF6B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6D738180-E78A-49E9-9732-1C3538F9EA41}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6D738180-E78A-49E9-9732-1C3538F9EA41}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6D738180-E78A-49E9-9732-1C3538F9EA41}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6D738180-E78A-49E9-9732-1C3538F9EA41}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

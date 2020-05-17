@@ -17,4 +17,8 @@
     <Folder Include="TestData\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\GeometricObject\GeometricObject.csproj" />
+  </ItemGroup>
+
 </Project>
