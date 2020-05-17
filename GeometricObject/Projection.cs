@@ -29,7 +29,7 @@ namespace GeometricObject
                         projectionInPlane.Add(new PointIn2D(point.X, point.Y));
                     }
                     break;
-                case "Projection":
+                default:
                     foreach (var point in wellTrajectory)
                     {
                         Vector3 projectionPointIn3D = GetCoordinatesOfPointIn3D_AfterProjection_UsingNormalVector(normalVector, point, Vector3.Zero);
@@ -62,9 +62,9 @@ namespace GeometricObject
         }
        
         //vector 3 contains x, y, z in Single type
-        public Vector3 GetCoordinatesOfPointIn3D_AfterProjection_UsingNormalVector(Vector3 normalVector, Vector3 pointToProject, Vector3 onePointInProjectionPlane)
+        public Vector3 GetCoordinatesOfPointIn3D_AfterProjection_UsingNormalVector(Vector3 normalVector, Vector3 pointToProject, Vector3 onePointOnProjectionPlane)
         {
-            Single numerator = (normalVector.X * onePointInProjectionPlane.X + normalVector.Y * onePointInProjectionPlane.Y + normalVector.Z * onePointInProjectionPlane.Z) - (normalVector.X * pointToProject.X + normalVector.Y * pointToProject.Y + normalVector.Z * pointToProject.Z);
+            Single numerator = (normalVector.X * onePointOnProjectionPlane.X + normalVector.Y * onePointOnProjectionPlane.Y + normalVector.Z * onePointOnProjectionPlane.Z) - (normalVector.X * pointToProject.X + normalVector.Y * pointToProject.Y + normalVector.Z * pointToProject.Z);
             Single denominator = normalVector.X * normalVector.X + normalVector.Y * normalVector.Y + normalVector.Z * normalVector.Z;
             Single t = numerator / denominator;
 
@@ -83,7 +83,7 @@ namespace GeometricObject
             Single ordinate = rejection.Length();
             if (rejection.Z < 0)
             {
-                rejection = -rejection;
+                ordinate = -ordinate;
             }
             return new PointIn2D(abscissa, ordinate);
         }
