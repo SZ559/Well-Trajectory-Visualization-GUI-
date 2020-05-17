@@ -210,13 +210,8 @@ namespace Well_Trajectory_Visualization
             Single minY = trajectory.PolyLineNodes.Select(x => x.Y).Min();
             Single minZ = trajectory.PolyLineNodes.Select(x => x.Z).Min();
 
-            Single max_XAxis = Math.Max(maxX, maxY);
-            Single min_XAxis = Math.Min(minX, minY);
-
-            Single max_YAxis = Math.Max(maxZ, maxY);
-            Single min_YAxis = Math.Min(minZ, minY);
-            zoomX = max_XAxis - min_XAxis;
-            zoomY = max_YAxis - min_YAxis;
+            zoomX = Math.Max(maxX - minX, maxY - minY);
+            zoomY = Math.Max(maxY - minY, maxZ - minZ);
         }
 
         // Tab Page
@@ -241,8 +236,8 @@ namespace Well_Trajectory_Visualization
         {
             TableLayoutPanel tableLayoutPanel = new TableLayoutPanel
             {
-                BorderStyle = BorderStyle.FixedSingle,
-                CellBorderStyle = TableLayoutPanelCellBorderStyle.Inset,
+                BorderStyle = BorderStyle.None,
+                CellBorderStyle = TableLayoutPanelCellBorderStyle.Single,
                 RowCount = 1,
                 ColumnCount = 3,
                 AutoScroll = true,
@@ -280,7 +275,7 @@ namespace Well_Trajectory_Visualization
             PictureBox pictureBox = new PictureBox
             {
                 Dock = DockStyle.Fill,
-                BorderStyle = BorderStyle.Fixed3D,
+                BorderStyle = BorderStyle.None,
                 Name = viewName
             };
             return pictureBox;
@@ -310,55 +305,61 @@ namespace Well_Trajectory_Visualization
         private void LoadView(PictureBox pictureBox, Vector3 normalVector)
         {
             List<PointIn2D> projectionPointIn2D = projection.GetProjectionInPlane(trajectory.PolyLineNodes, normalVector);
-            Bitmap bitMap = LoadPicture(pictureBox, projectionPointIn2D);
+            Bitmap bitMap = PaintPicture(pictureBox, projectionPointIn2D);
             pictureBox.Image = bitMap;
+            pictureBox.SizeMode = PictureBoxSizeMode.Zoom;
         }
 
-        private Bitmap LoadPicture(PictureBox pictureBox, List<PointIn2D> projectionPointIn2D)
+        private Bitmap PaintPicture(PictureBox pictureBox, List<PointIn2D> projectionPointIn2D)
         {
-            int spaceX = 20;
-            int spaceY = 25;
-            int textPositionY = 5;
-            Single zoomInXAxisParameter = (pictureBox.Width - spaceX * 2) / zoomX;
-            Single zoomInYAxisParameter = (pictureBox.Height - spaceY * 2) / zoomY;
+            int paddingX = 20;
+            int paddingY = 25;
+            Single zoomInXAxisParameter = (pictureBox.Width - paddingX * 2) / zoomX;
+            Single zoomInYAxisParameter = (pictureBox.Height - paddingY * 2) / zoomY;
             Single minX = projectionPointIn2D.Select(x => x.X).Min();
             Single minY = projectionPointIn2D.Select(x => x.Y).Min();
-            spaceX = SetInitialPointToPaint(minX * zoomInXAxisParameter, spaceX);
-            spaceY = SetInitialPointToPaint(minY * zoomInYAxisParameter, spaceY);
+            int spaceX = (int)(paddingX - minX * zoomInXAxisParameter);
+            int spaceY = (int)(paddingY - minY * zoomInYAxisParameter);
 
-            Pen skyBluePen = new Pen(Color.DeepSkyBlue);
-            skyBluePen.Width = 2.0F;
-            Pen darkBluePen = new Pen(Color.DarkBlue);
-            SolidBrush darkBlueBrush = new SolidBrush(Color.DarkBlue);
+            Pen penForLine = new Pen(Color.FromArgb(204, 234, 187));
+            penForLine.Width = 3.0F;
+            SolidBrush brushForPoint = new SolidBrush(Color.FromArgb(63, 63 ,68));
             Bitmap bitMap = new Bitmap(pictureBox.Width, pictureBox.Height);
-            Graphics graphic = Graphics.FromImage(bitMap);
-            int radius = 3;
+            Graphics graphics = Graphics.FromImage(bitMap);
 
+            // draw line
             for (int i = 0; i < projectionPointIn2D.Count - 1; i = i + 1)
             {
                 float xForPaint = projectionPointIn2D[i].X * zoomInXAxisParameter + spaceX;
                 float yForPaint = projectionPointIn2D[i].Y * zoomInYAxisParameter + spaceY;
                 float x2ForPaint = projectionPointIn2D[i + 1].X * zoomInXAxisParameter + spaceX;
                 float y2ForPaint = projectionPointIn2D[i + 1].Y * zoomInYAxisParameter + spaceY;
-                graphic.DrawLine(skyBluePen, xForPaint, yForPaint, x2ForPaint, y2ForPaint);
-                graphic.FillEllipse(darkBlueBrush, xForPaint, yForPaint, radius, radius);
+                graphics.DrawLine(penForLine, xForPaint, yForPaint, x2ForPaint, y2ForPaint);
             }
 
-            graphic.FillEllipse(darkBlueBrush, projectionPointIn2D[projectionPointIn2D.Count - 1].X * zoomInXAxisParameter + spaceX, projectionPointIn2D[projectionPointIn2D.Count - 1].Y * zoomInYAxisParameter + spaceY, radius, radius);
-            graphic.DrawString(pictureBox.Name, new Font(Label.DefaultFont, FontStyle.Bold), Brushes.OrangeRed, new PointF(pictureBox.Width/2, textPositionY));
-            skyBluePen.Dispose();
-            darkBlueBrush.Dispose();
-            graphic.Dispose();
-            return bitMap;
-        }
-
-        private int SetInitialPointToPaint(Single minValue, int space)
-        {
-            if (minValue < 0)
+            // highlight data points
+            foreach (var point in projectionPointIn2D)
             {
-                space = (int)(space - minValue);
+                graphics.FillRectangle(brushForPoint, point.X * zoomInXAxisParameter + spaceX - 1, point.Y * zoomInYAxisParameter + spaceY - 1, 2, 2);
+                //graphics.FillEllipse(brushForPoint, point.X * zoomInXAxisParameter + spaceX - radius / 2, point.Y * zoomInYAxisParameter + spaceY - radius / 2, radius, radius);
             }
-            return space;
+
+            // draw caption
+            using (Font fontForCaption = new Font("Microsoft YaHei Light", 11, FontStyle.Regular, GraphicsUnit.Point))
+            {
+                Rectangle rect = new Rectangle(0, 0, pictureBox.Width, paddingY - 5);
+
+                StringFormat stringFormat = new StringFormat();
+                stringFormat.Alignment = StringAlignment.Center;
+                stringFormat.LineAlignment = StringAlignment.Center;
+                graphics.DrawString(pictureBox.Name, fontForCaption, Brushes.Black, rect, stringFormat);
+            }
+
+            penForLine.Dispose();
+            brushForPoint.Dispose();
+            graphics.Dispose();
+
+            return bitMap;
         }
 
         // Menu Bar
