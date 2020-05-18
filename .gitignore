@@ -1,0 +1,13 @@
+.vs
+
+.vscode
+
+**/bin
+
+**/obj
+
+.git
+
+CodeCoverageReport
+
+packages
