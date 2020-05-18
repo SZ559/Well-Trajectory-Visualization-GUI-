@@ -30,7 +30,7 @@
         {
             this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
-            System.Windows.Forms.TreeNode treeNode2 = new System.Windows.Forms.TreeNode("Wells");
+            System.Windows.Forms.TreeNode treeNode1 = new System.Windows.Forms.TreeNode("Wells");
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.openFileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -87,7 +87,7 @@
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
             this.menuStrip1.Padding = new System.Windows.Forms.Padding(2, 1, 0, 1);
-            this.menuStrip1.Size = new System.Drawing.Size(1338, 24);
+            this.menuStrip1.Size = new System.Drawing.Size(1062, 24);
             this.menuStrip1.TabIndex = 0;
             this.menuStrip1.Text = "menuStrip1";
             // 
@@ -190,7 +190,7 @@
             this.toolStrip1.Location = new System.Drawing.Point(0, 24);
             this.toolStrip1.Name = "toolStrip1";
             this.toolStrip1.Padding = new System.Windows.Forms.Padding(0, 0, 2, 0);
-            this.toolStrip1.Size = new System.Drawing.Size(1338, 25);
+            this.toolStrip1.Size = new System.Drawing.Size(1062, 25);
             this.toolStrip1.TabIndex = 1;
             this.toolStrip1.Text = "toolStrip1";
             // 
@@ -232,7 +232,7 @@
             this.statusStrip1.ImageScalingSize = new System.Drawing.Size(40, 40);
             this.statusStrip1.Location = new System.Drawing.Point(0, 558);
             this.statusStrip1.Name = "statusStrip1";
-            this.statusStrip1.Size = new System.Drawing.Size(1338, 22);
+            this.statusStrip1.Size = new System.Drawing.Size(1062, 22);
             this.statusStrip1.TabIndex = 2;
             this.statusStrip1.Text = "statusStrip1";
             // 
@@ -250,8 +250,8 @@
             // 
             this.splitContainer1.Panel2.Controls.Add(this.defaultPagePanel);
             this.splitContainer1.Panel2.Controls.Add(this.tabControl);
-            this.splitContainer1.Size = new System.Drawing.Size(1338, 509);
-            this.splitContainer1.SplitterDistance = 188;
+            this.splitContainer1.Size = new System.Drawing.Size(1062, 509);
+            this.splitContainer1.SplitterDistance = 149;
             this.splitContainer1.TabIndex = 3;
             // 
             // wellsTreeView
@@ -264,11 +264,11 @@
             this.wellsTreeView.LineColor = System.Drawing.Color.LightCoral;
             this.wellsTreeView.Location = new System.Drawing.Point(0, 0);
             this.wellsTreeView.Name = "wellsTreeView";
-            treeNode2.Name = "Root";
-            treeNode2.Text = "Wells";
+            treeNode1.Name = "Root";
+            treeNode1.Text = "Wells";
             this.wellsTreeView.Nodes.AddRange(new System.Windows.Forms.TreeNode[] {
-            treeNode2});
-            this.wellsTreeView.Size = new System.Drawing.Size(188, 509);
+            treeNode1});
+            this.wellsTreeView.Size = new System.Drawing.Size(149, 509);
             this.wellsTreeView.TabIndex = 0;
             this.wellsTreeView.NodeMouseClick += new System.Windows.Forms.TreeNodeMouseClickEventHandler(this.WellsTreeView_NodeMouseClick);
             this.wellsTreeView.NodeMouseDoubleClick += new System.Windows.Forms.TreeNodeMouseClickEventHandler(this.WellsTreeView_NodeMouseDoubleClick);
@@ -296,7 +296,7 @@
             this.defaultPagePanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 11.96957F));
             this.defaultPagePanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 11.96957F));
             this.defaultPagePanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 11.96957F));
-            this.defaultPagePanel.Size = new System.Drawing.Size(1146, 509);
+            this.defaultPagePanel.Size = new System.Drawing.Size(909, 509);
             this.defaultPagePanel.TabIndex = 0;
             // 
             // label8
@@ -304,7 +304,7 @@
             this.label8.Anchor = System.Windows.Forms.AnchorStyles.Right;
             this.label8.AutoSize = true;
             this.label8.Font = new System.Drawing.Font("Microsoft YaHei UI", 13F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.label8.Location = new System.Drawing.Point(404, 465);
+            this.label8.Location = new System.Drawing.Point(285, 465);
             this.label8.Name = "label8";
             this.label8.Size = new System.Drawing.Size(166, 24);
             this.label8.TabIndex = 8;
@@ -317,7 +317,7 @@
             this.label4.AutoSize = true;
             this.label4.Font = new System.Drawing.Font("Microsoft YaHei UI", 13F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.label4.ForeColor = System.Drawing.SystemColors.ControlText;
-            this.label4.Location = new System.Drawing.Point(576, 465);
+            this.label4.Location = new System.Drawing.Point(457, 465);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(85, 24);
             this.label4.TabIndex = 3;
@@ -329,7 +329,7 @@
             this.label1.Anchor = System.Windows.Forms.AnchorStyles.Right;
             this.label1.AutoSize = true;
             this.label1.Font = new System.Drawing.Font("Microsoft YaHei UI", 13F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.label1.Location = new System.Drawing.Point(418, 283);
+            this.label1.Location = new System.Drawing.Point(299, 283);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(152, 24);
             this.label1.TabIndex = 0;
@@ -341,7 +341,7 @@
             this.label2.Anchor = System.Windows.Forms.AnchorStyles.Right;
             this.label2.AutoSize = true;
             this.label2.Font = new System.Drawing.Font("Microsoft YaHei UI", 13F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.label2.Location = new System.Drawing.Point(466, 343);
+            this.label2.Location = new System.Drawing.Point(347, 343);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(104, 24);
             this.label2.TabIndex = 1;
@@ -353,7 +353,7 @@
             this.label3.Anchor = System.Windows.Forms.AnchorStyles.Right;
             this.label3.AutoSize = true;
             this.label3.Font = new System.Drawing.Font("Microsoft YaHei UI", 13F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.label3.Location = new System.Drawing.Point(293, 403);
+            this.label3.Location = new System.Drawing.Point(174, 403);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(277, 24);
             this.label3.TabIndex = 2;
@@ -370,7 +370,7 @@
             this.pictureBox1.Location = new System.Drawing.Point(3, 2);
             this.pictureBox1.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.pictureBox1.Name = "pictureBox1";
-            this.pictureBox1.Size = new System.Drawing.Size(1140, 261);
+            this.pictureBox1.Size = new System.Drawing.Size(903, 261);
             this.pictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
             this.pictureBox1.TabIndex = 4;
             this.pictureBox1.TabStop = false;
@@ -396,7 +396,7 @@
             this.label5.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
             this.label5.Font = new System.Drawing.Font("Microsoft YaHei UI", 13F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.label5.ForeColor = System.Drawing.SystemColors.ControlText;
-            this.label5.Location = new System.Drawing.Point(576, 283);
+            this.label5.Location = new System.Drawing.Point(457, 283);
             this.label5.Name = "label5";
             this.label5.Size = new System.Drawing.Size(141, 24);
             this.label5.TabIndex = 5;
@@ -409,7 +409,7 @@
             this.label6.AutoSize = true;
             this.label6.Font = new System.Drawing.Font("Microsoft YaHei UI", 13F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.label6.ForeColor = System.Drawing.SystemColors.ControlText;
-            this.label6.Location = new System.Drawing.Point(576, 343);
+            this.label6.Location = new System.Drawing.Point(457, 343);
             this.label6.Name = "label6";
             this.label6.Size = new System.Drawing.Size(141, 24);
             this.label6.TabIndex = 6;
@@ -422,7 +422,7 @@
             this.label7.AutoSize = true;
             this.label7.Font = new System.Drawing.Font("Microsoft YaHei UI", 13F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.label7.ForeColor = System.Drawing.SystemColors.ControlText;
-            this.label7.Location = new System.Drawing.Point(576, 403);
+            this.label7.Location = new System.Drawing.Point(457, 403);
             this.label7.Name = "label7";
             this.label7.Size = new System.Drawing.Size(136, 24);
             this.label7.TabIndex = 7;
@@ -436,7 +436,7 @@
             this.tabControl.Margin = new System.Windows.Forms.Padding(8);
             this.tabControl.Name = "tabControl";
             this.tabControl.SelectedIndex = 0;
-            this.tabControl.Size = new System.Drawing.Size(1146, 509);
+            this.tabControl.Size = new System.Drawing.Size(909, 509);
             this.tabControl.TabIndex = 0;
             // 
             // openFileDialog
@@ -453,7 +453,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1338, 580);
+            this.ClientSize = new System.Drawing.Size(1062, 580);
             this.Controls.Add(this.splitContainer1);
             this.Controls.Add(this.statusStrip1);
             this.Controls.Add(this.toolStrip1);

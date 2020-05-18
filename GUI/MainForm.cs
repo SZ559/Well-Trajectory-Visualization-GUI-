@@ -18,7 +18,9 @@ namespace Well_Trajectory_Visualization
         WellViewSaver wellViewSaver;
         Trajectory trajectory;
 
-        Single zoom;
+        Single zoomXY;
+        Single zoomZ;
+        Single zoomInAxisParameter;
         List<Well> wells;
 
         bool hasPreviewTab;
@@ -40,7 +42,7 @@ namespace Well_Trajectory_Visualization
         private void SaveViewToFigure(Control control, string viewName, Trajectory trajectory)
         {
             saveFileDialog.FileName = tabControl.SelectedTab.Text + "-" + viewName;
-            if(saveFileDialog.ShowDialog() == DialogResult.OK)
+            if (saveFileDialog.ShowDialog() == DialogResult.OK)
             {
                 string errorMessage;
                 string filePath = saveFileDialog.FileName;
@@ -48,7 +50,7 @@ namespace Well_Trajectory_Visualization
                 List<PointIn2D> projectionPointIn2D = projection.GetProjectionInPlane(trajectory.PolyLineNodes, normalVector);
                 Bitmap bitmap = PaintPicture(control, projectionPointIn2D);
                 wellViewSaver.SaveView(filePath, bitmap, out errorMessage);
-                if(string.IsNullOrEmpty(errorMessage))
+                if (string.IsNullOrEmpty(errorMessage))
                 {
                     MessageBox.Show($"Saving view to {filePath} succeed.", "Saving View", MessageBoxButtons.OK);
                 }
@@ -231,8 +233,10 @@ namespace Well_Trajectory_Visualization
             Single minY = trajectory.PolyLineNodes.Select(x => x.Y).Min();
             Single minZ = trajectory.PolyLineNodes.Select(x => x.Z).Min();
 
-            zoom = Math.Max(Math.Max(maxX - minX, maxY - minY), maxZ - minZ);
-            zoom = zoom > 0 ? zoom : 1;
+            zoomXY = Math.Max(maxX - minX, maxY - minY);
+            zoomXY = zoomXY > 0 ? zoomXY : 1;
+            zoomZ = maxZ - minZ;
+            zoomZ = zoomZ > 0 ? zoomZ : 1;
         }
 
 
@@ -330,11 +334,24 @@ namespace Well_Trajectory_Visualization
             pictureBox.SizeMode = PictureBoxSizeMode.Zoom;
         }
 
+        // use cuboid of control to try to include the whole trajectory
+        private void GetZoomInAxixParameter(Control control, int paddingX, int paddingY)
+        {
+            if (zoomZ * (control.Width - 2 * paddingX) > zoomXY * (control.Height - 2 * paddingY))
+            {
+                zoomInAxisParameter = (control.Height - 2 * paddingY)  / zoomZ;
+            }
+            else
+            {
+                zoomInAxisParameter = (control.Width - 2 * paddingX) / zoomXY;
+            }
+        }
+
         private Bitmap PaintPicture(Control control, List<PointIn2D> projectionPointIn2D)
         {
             int paddingX = 20;
             int paddingY = 25;
-            Single zoomInAxisParameter = Math.Min(control.Width - paddingX * 2, control.Height - paddingY * 2) / zoom;
+            GetZoomInAxixParameter(control, paddingX , paddingY);
             Single minX = projectionPointIn2D.Select(x => x.X).Min();
             Single minY = projectionPointIn2D.Select(x => x.Y).Min();
             int spaceX = (int)(paddingX - minX * zoomInAxisParameter);
@@ -342,7 +359,7 @@ namespace Well_Trajectory_Visualization
 
             Pen penForLine = new Pen(Color.FromArgb(204, 234, 187));
             penForLine.Width = 3.0F;
-            SolidBrush brushForPoint = new SolidBrush(Color.FromArgb(63, 63 ,68));
+            SolidBrush brushForPoint = new SolidBrush(Color.FromArgb(63, 63, 68));
             Bitmap bitMap = new Bitmap(control.Width, control.Height);
             Graphics graphics = Graphics.FromImage(bitMap);
 
@@ -402,7 +419,7 @@ namespace Well_Trajectory_Visualization
 
         private void saveToolStripButton_Click(object sender, EventArgs e)
         {
-            if(tabControl.SelectedIndex != -1)
+            if (tabControl.SelectedIndex != -1)
             {
 
                 TableLayoutPanel tableLayoutPanel = (TableLayoutPanel)tabControl.SelectedTab.Controls[0];
