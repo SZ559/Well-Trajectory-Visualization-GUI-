@@ -30,7 +30,7 @@
         {
             this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
-            System.Windows.Forms.TreeNode treeNode1 = new System.Windows.Forms.TreeNode("Wells");
+            System.Windows.Forms.TreeNode treeNode3 = new System.Windows.Forms.TreeNode("Wells");
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.openFileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -213,10 +213,10 @@
             this.wellsTreeView.LineColor = System.Drawing.Color.LightCoral;
             this.wellsTreeView.Location = new System.Drawing.Point(0, 0);
             this.wellsTreeView.Name = "wellsTreeView";
-            treeNode1.Name = "Root";
-            treeNode1.Text = "Wells";
+            treeNode3.Name = "Root";
+            treeNode3.Text = "Wells";
             this.wellsTreeView.Nodes.AddRange(new System.Windows.Forms.TreeNode[] {
-            treeNode1});
+            treeNode3});
             this.wellsTreeView.Size = new System.Drawing.Size(160, 558);
             this.wellsTreeView.TabIndex = 0;
             this.wellsTreeView.NodeMouseClick += new System.Windows.Forms.TreeNodeMouseClickEventHandler(this.WellsTreeView_NodeMouseClick);
@@ -382,12 +382,14 @@
             // tabControl
             // 
             this.tabControl.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tabControl.DrawMode = System.Windows.Forms.TabDrawMode.OwnerDrawFixed;
             this.tabControl.Location = new System.Drawing.Point(0, 0);
             this.tabControl.Margin = new System.Windows.Forms.Padding(8);
             this.tabControl.Name = "tabControl";
             this.tabControl.SelectedIndex = 0;
             this.tabControl.Size = new System.Drawing.Size(973, 558);
             this.tabControl.TabIndex = 0;
+            this.tabControl.DrawItem += new System.Windows.Forms.DrawItemEventHandler(this.DrawOnTab);
             this.tabControl.MouseDown += new System.Windows.Forms.MouseEventHandler(this.TabControl_MouseDown);
             // 
             // openFileDialog

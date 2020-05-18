@@ -36,8 +36,6 @@ namespace Well_Trajectory_Visualization
             trajectoryDataReader = new TrajectoryDataReader();
             wellViewSaver = new WellViewSaver();
             projection = new Projection();
-            tabControl.DrawMode = TabDrawMode.OwnerDrawFixed;
-            tabControl.DrawItem += new DrawItemEventHandler(DrawOnTab);
             tabControl.Padding = new Point(spaceForCloseIcon, 5);
             wells = new List<Well>();
             hasPreviewTab = false;
