@@ -54,6 +54,28 @@ namespace FileHandler
             return null;
         }
 
+
+        public bool TryParseFileName(string fileName, out string errorMessage)
+        {
+            errorMessage = "";
+            try
+            {
+                string[] names = fileName.Split('-');
+                if (names.Count() != 2 || names.Select(x => string.IsNullOrEmpty(x)).Contains(true))
+                {
+                    errorMessage = "File name format error.\nValid format: \"wellName-trajectoryName\"";
+                    return false;
+                }
+                return true;
+            }
+            catch (Exception ex)
+            {
+                errorMessage = $"File Name Error: {ex.Message}";
+                return false;
+            }
+        }
+
+
         public Vector3 ParseLine(int lineNumber, string line, out string errorMessage)
         {
             errorMessage = "";
