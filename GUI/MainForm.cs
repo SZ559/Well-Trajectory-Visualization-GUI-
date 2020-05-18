@@ -18,8 +18,7 @@ namespace Well_Trajectory_Visualization
         WellViewSaver wellViewSaver;
         Trajectory trajectory;
 
-        Single zoomX;
-        Single zoomY;
+        Single zoom;
         List<Well> wells;
 
         bool hasPreviewTab;
@@ -232,9 +231,10 @@ namespace Well_Trajectory_Visualization
             Single minY = trajectory.PolyLineNodes.Select(x => x.Y).Min();
             Single minZ = trajectory.PolyLineNodes.Select(x => x.Z).Min();
 
-            zoomX = Math.Max(maxX - minX, maxY - minY);
-            zoomY = Math.Max(maxY - minY, maxZ - minZ);
+            zoom = Math.Max(Math.Max(maxX - minX, maxY - minY), maxZ - minZ);
+            zoom = zoom > 0 ? zoom : 1;
         }
+
 
         // Tab Page
         private void CloseTheCurrentTabPageToolStripButton_Click(object sender, EventArgs e)
@@ -275,22 +275,21 @@ namespace Well_Trajectory_Visualization
 
         private void SetTableLayoutPanel(TableLayoutPanel tableLayoutPanel)
         {
-            PictureBox mainViewPictureBox = InitializePictureBoxForProjection("Top View");
-            PictureBox topViewPictureBox = InitializePictureBoxForProjection("Main View");
+            PictureBox mainViewPictureBox = InitializePictureBoxForProjection("Main View");
             PictureBox leftViewPictureBox = InitializePictureBoxForProjection("Left View");
+            PictureBox topViewPictureBox = InitializePictureBoxForProjection("Top View");
 
             tableLayoutPanel.SuspendLayout();
             tableLayoutPanel.Controls.Add(mainViewPictureBox, 0, 0);
-            tableLayoutPanel.Controls.Add(topViewPictureBox, 1, 0);
-            tableLayoutPanel.Controls.Add(leftViewPictureBox, 2, 0);
+            tableLayoutPanel.Controls.Add(leftViewPictureBox, 1, 0);
+            tableLayoutPanel.Controls.Add(topViewPictureBox, 2, 0);
 
             tableLayoutPanel.ResumeLayout();
 
-            PaintPictureBox(topViewPictureBox);
             PaintPictureBox(mainViewPictureBox);
             PaintPictureBox(leftViewPictureBox);
+            PaintPictureBox(topViewPictureBox);
         }
-
 
         private PictureBox InitializePictureBoxForProjection(string viewName)
         {
@@ -335,12 +334,11 @@ namespace Well_Trajectory_Visualization
         {
             int paddingX = 20;
             int paddingY = 25;
-            Single zoomInXAxisParameter = (control.Width - paddingX * 2) / zoomX;
-            Single zoomInYAxisParameter = (control.Height - paddingY * 2) / zoomY;
+            Single zoomInAxisParameter = Math.Min(control.Width - paddingX * 2, control.Height - paddingY * 2) / zoom;
             Single minX = projectionPointIn2D.Select(x => x.X).Min();
             Single minY = projectionPointIn2D.Select(x => x.Y).Min();
-            int spaceX = (int)(paddingX - minX * zoomInXAxisParameter);
-            int spaceY = (int)(paddingY - minY * zoomInYAxisParameter);
+            int spaceX = (int)(paddingX - minX * zoomInAxisParameter);
+            int spaceY = (int)(paddingY - minY * zoomInAxisParameter);
 
             Pen penForLine = new Pen(Color.FromArgb(204, 234, 187));
             penForLine.Width = 3.0F;
@@ -351,17 +349,17 @@ namespace Well_Trajectory_Visualization
             // draw line
             for (int i = 0; i < projectionPointIn2D.Count - 1; i = i + 1)
             {
-                float xForPaint = projectionPointIn2D[i].X * zoomInXAxisParameter + spaceX;
-                float yForPaint = projectionPointIn2D[i].Y * zoomInYAxisParameter + spaceY;
-                float x2ForPaint = projectionPointIn2D[i + 1].X * zoomInXAxisParameter + spaceX;
-                float y2ForPaint = projectionPointIn2D[i + 1].Y * zoomInYAxisParameter + spaceY;
+                float xForPaint = projectionPointIn2D[i].X * zoomInAxisParameter + spaceX;
+                float yForPaint = projectionPointIn2D[i].Y * zoomInAxisParameter + spaceY;
+                float x2ForPaint = projectionPointIn2D[i + 1].X * zoomInAxisParameter + spaceX;
+                float y2ForPaint = projectionPointIn2D[i + 1].Y * zoomInAxisParameter + spaceY;
                 graphics.DrawLine(penForLine, xForPaint, yForPaint, x2ForPaint, y2ForPaint);
             }
 
             // highlight data points
             foreach (var point in projectionPointIn2D)
             {
-                graphics.FillRectangle(brushForPoint, point.X * zoomInXAxisParameter + spaceX - 1, point.Y * zoomInYAxisParameter + spaceY - 1, 2, 2);
+                graphics.FillRectangle(brushForPoint, point.X * zoomInAxisParameter + spaceX - 1, point.Y * zoomInAxisParameter + spaceY - 1, 2, 2);
                 //graphics.FillEllipse(brushForPoint, point.X * zoomInXAxisParameter + spaceX - radius / 2, point.Y * zoomInYAxisParameter + spaceY - radius / 2, radius, radius);
             }
 
