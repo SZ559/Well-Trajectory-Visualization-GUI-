@@ -18,8 +18,9 @@ namespace Well_Trajectory_Visualization
         WellViewSaver wellViewSaver;
         Trajectory trajectory;
 
-        Single zoomX;
-        Single zoomY;
+        Single zoomXY;
+        Single zoomZ;
+        Single zoomInAxisParameter;
         List<Well> wells;
 
         bool hasPreviewTab;
@@ -36,6 +37,28 @@ namespace Well_Trajectory_Visualization
             wells = new List<Well>();
             hasPreviewTab = false;
             isDoubleClick = false;
+        }
+
+        private void SaveViewToFigure(Control control, string viewName, Trajectory trajectory)
+        {
+            saveFileDialog.FileName = tabControl.SelectedTab.Text + "-" + viewName;
+            if (saveFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                string errorMessage;
+                string filePath = saveFileDialog.FileName;
+                Vector3 normalVector = GetNormalVectorForView(viewName);
+                List<PointIn2D> projectionPointIn2D = projection.GetProjectionInPlane(trajectory.PolyLineNodes, normalVector);
+                Bitmap bitmap = PaintPicture(control, projectionPointIn2D);
+                wellViewSaver.SaveView(filePath, bitmap, out errorMessage);
+                if (string.IsNullOrEmpty(errorMessage))
+                {
+                    MessageBox.Show($"Saving view to {filePath} succeed.", "Saving View", MessageBoxButtons.OK);
+                }
+                else
+                {
+                    MessageBox.Show($"Saving view to {filePath} failed.\n{errorMessage}", "Saving View", MessageBoxButtons.OK);
+                }
+            }
         }
 
         private void LoadTrajectoryDataFromFile()
@@ -210,9 +233,12 @@ namespace Well_Trajectory_Visualization
             Single minY = trajectory.PolyLineNodes.Select(x => x.Y).Min();
             Single minZ = trajectory.PolyLineNodes.Select(x => x.Z).Min();
 
-            zoomX = Math.Max(maxX - minX, maxY - minY);
-            zoomY = Math.Max(maxY - minY, maxZ - minZ);
+            zoomXY = Math.Max(maxX - minX, maxY - minY);
+            zoomXY = zoomXY > 0 ? zoomXY : 1;
+            zoomZ = maxZ - minZ;
+            zoomZ = zoomZ > 0 ? zoomZ : 1;
         }
+
 
         // Tab Page
         private void CloseTheCurrentTabPageToolStripButton_Click(object sender, EventArgs e)
@@ -253,22 +279,21 @@ namespace Well_Trajectory_Visualization
 
         private void SetTableLayoutPanel(TableLayoutPanel tableLayoutPanel)
         {
-            PictureBox mainViewPictureBox = InitializePictureBoxForProjection("Top View");
-            PictureBox topViewPictureBox = InitializePictureBoxForProjection("Main View");
+            PictureBox mainViewPictureBox = InitializePictureBoxForProjection("Main View");
             PictureBox leftViewPictureBox = InitializePictureBoxForProjection("Left View");
+            PictureBox topViewPictureBox = InitializePictureBoxForProjection("Top View");
 
             tableLayoutPanel.SuspendLayout();
             tableLayoutPanel.Controls.Add(mainViewPictureBox, 0, 0);
-            tableLayoutPanel.Controls.Add(topViewPictureBox, 1, 0);
-            tableLayoutPanel.Controls.Add(leftViewPictureBox, 2, 0);
+            tableLayoutPanel.Controls.Add(leftViewPictureBox, 1, 0);
+            tableLayoutPanel.Controls.Add(topViewPictureBox, 2, 0);
 
             tableLayoutPanel.ResumeLayout();
 
-            PaintPictureBox(topViewPictureBox);
             PaintPictureBox(mainViewPictureBox);
             PaintPictureBox(leftViewPictureBox);
+            PaintPictureBox(topViewPictureBox);
         }
-
 
         private PictureBox InitializePictureBoxForProjection(string viewName)
         {
@@ -281,10 +306,10 @@ namespace Well_Trajectory_Visualization
             return pictureBox;
         }
 
-        private PictureBox PaintPictureBox(PictureBox pictureBox)
+        private Vector3 GetNormalVectorForView(string viewName)
         {
             Vector3 normalVector;
-            switch (pictureBox.Name)
+            switch (viewName)
             {
                 case "Top View":
                     normalVector = Vector3.UnitZ;
@@ -297,62 +322,73 @@ namespace Well_Trajectory_Visualization
                     normalVector = Vector3.UnitY;
                     break;
             }
-
-            LoadView(pictureBox, normalVector);
-            return pictureBox;
+            return normalVector;
         }
 
-        private void LoadView(PictureBox pictureBox, Vector3 normalVector)
+        private void PaintPictureBox(PictureBox pictureBox)
         {
+            Vector3 normalVector = GetNormalVectorForView(pictureBox.Name);
             List<PointIn2D> projectionPointIn2D = projection.GetProjectionInPlane(trajectory.PolyLineNodes, normalVector);
             Bitmap bitMap = PaintPicture(pictureBox, projectionPointIn2D);
             pictureBox.Image = bitMap;
             pictureBox.SizeMode = PictureBoxSizeMode.Zoom;
         }
 
-        private Bitmap PaintPicture(PictureBox pictureBox, List<PointIn2D> projectionPointIn2D)
+        // use cuboid of control to try to include the whole trajectory
+        private void GetZoomInAxixParameter(Control control, int paddingX, int paddingY)
+        {
+            if (zoomZ * (control.Width - 2 * paddingX) > zoomXY * (control.Height - 2 * paddingY))
+            {
+                zoomInAxisParameter = (control.Height - 2 * paddingY)  / zoomZ;
+            }
+            else
+            {
+                zoomInAxisParameter = (control.Width - 2 * paddingX) / zoomXY;
+            }
+        }
+
+        private Bitmap PaintPicture(Control control, List<PointIn2D> projectionPointIn2D)
         {
             int paddingX = 20;
             int paddingY = 25;
-            Single zoomInXAxisParameter = (pictureBox.Width - paddingX * 2) / zoomX;
-            Single zoomInYAxisParameter = (pictureBox.Height - paddingY * 2) / zoomY;
+            GetZoomInAxixParameter(control, paddingX , paddingY);
             Single minX = projectionPointIn2D.Select(x => x.X).Min();
             Single minY = projectionPointIn2D.Select(x => x.Y).Min();
-            int spaceX = (int)(paddingX - minX * zoomInXAxisParameter);
-            int spaceY = (int)(paddingY - minY * zoomInYAxisParameter);
+            int spaceX = (int)(paddingX - minX * zoomInAxisParameter);
+            int spaceY = (int)(paddingY - minY * zoomInAxisParameter);
 
             Pen penForLine = new Pen(Color.FromArgb(204, 234, 187));
             penForLine.Width = 3.0F;
-            SolidBrush brushForPoint = new SolidBrush(Color.FromArgb(63, 63 ,68));
-            Bitmap bitMap = new Bitmap(pictureBox.Width, pictureBox.Height);
+            SolidBrush brushForPoint = new SolidBrush(Color.FromArgb(63, 63, 68));
+            Bitmap bitMap = new Bitmap(control.Width, control.Height);
             Graphics graphics = Graphics.FromImage(bitMap);
 
             // draw line
             for (int i = 0; i < projectionPointIn2D.Count - 1; i = i + 1)
             {
-                float xForPaint = projectionPointIn2D[i].X * zoomInXAxisParameter + spaceX;
-                float yForPaint = projectionPointIn2D[i].Y * zoomInYAxisParameter + spaceY;
-                float x2ForPaint = projectionPointIn2D[i + 1].X * zoomInXAxisParameter + spaceX;
-                float y2ForPaint = projectionPointIn2D[i + 1].Y * zoomInYAxisParameter + spaceY;
+                float xForPaint = projectionPointIn2D[i].X * zoomInAxisParameter + spaceX;
+                float yForPaint = projectionPointIn2D[i].Y * zoomInAxisParameter + spaceY;
+                float x2ForPaint = projectionPointIn2D[i + 1].X * zoomInAxisParameter + spaceX;
+                float y2ForPaint = projectionPointIn2D[i + 1].Y * zoomInAxisParameter + spaceY;
                 graphics.DrawLine(penForLine, xForPaint, yForPaint, x2ForPaint, y2ForPaint);
             }
 
             // highlight data points
             foreach (var point in projectionPointIn2D)
             {
-                graphics.FillRectangle(brushForPoint, point.X * zoomInXAxisParameter + spaceX - 1, point.Y * zoomInYAxisParameter + spaceY - 1, 2, 2);
+                graphics.FillRectangle(brushForPoint, point.X * zoomInAxisParameter + spaceX - 1, point.Y * zoomInAxisParameter + spaceY - 1, 2, 2);
                 //graphics.FillEllipse(brushForPoint, point.X * zoomInXAxisParameter + spaceX - radius / 2, point.Y * zoomInYAxisParameter + spaceY - radius / 2, radius, radius);
             }
 
             // draw caption
             using (Font fontForCaption = new Font("Microsoft YaHei Light", 11, FontStyle.Regular, GraphicsUnit.Point))
             {
-                Rectangle rect = new Rectangle(0, 0, pictureBox.Width, paddingY - 5);
+                Rectangle rect = new Rectangle(0, 0, control.Width, paddingY - 5);
 
                 StringFormat stringFormat = new StringFormat();
                 stringFormat.Alignment = StringAlignment.Center;
                 stringFormat.LineAlignment = StringAlignment.Center;
-                graphics.DrawString(pictureBox.Name, fontForCaption, Brushes.Black, rect, stringFormat);
+                graphics.DrawString(control.Name, fontForCaption, Brushes.Black, rect, stringFormat);
             }
 
             penForLine.Dispose();
@@ -377,6 +413,93 @@ namespace Well_Trajectory_Visualization
         private void referenceToolStripMenuItem_Click(object sender, EventArgs e)
         {
             System.Diagnostics.Process.Start("https://commons.wikimedia.org/wiki/File:Third_angle_projecting.svg");
+        }
+
+
+
+        private void saveToolStripButton_Click(object sender, EventArgs e)
+        {
+            if (tabControl.SelectedIndex != -1)
+            {
+
+                TableLayoutPanel tableLayoutPanel = (TableLayoutPanel)tabControl.SelectedTab.Controls[0];
+                PictureBox mainViewPictureBox = (PictureBox)tableLayoutPanel.Controls.Find("Main View", true).First();
+                PictureBox leftViewPictureBox = (PictureBox)tableLayoutPanel.Controls.Find("Left View", true).First();
+                PictureBox topViewPictureBox = (PictureBox)tableLayoutPanel.Controls.Find("Top View", true).First();
+
+                Panel newPanel = new Panel();
+                newPanel.Size = mainViewPictureBox.Size;
+                newPanel.Name = "Main View";
+                SaveViewToFigure(newPanel, "Main View", trajectory);
+                newPanel.Name = "Left View";
+                SaveViewToFigure(newPanel, "Left View", trajectory);
+                newPanel.Name = "Top View";
+                SaveViewToFigure(newPanel, "Top View", trajectory);
+            }
+        }
+
+        private void mainViewToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (tabControl.SelectedIndex != -1)
+            {
+
+                TableLayoutPanel tableLayoutPanel = (TableLayoutPanel)tabControl.SelectedTab.Controls[0];
+                PictureBox mainViewPictureBox = (PictureBox)tableLayoutPanel.Controls.Find("Main View", true).First();
+
+                Panel newPanel = new Panel();
+                newPanel.Size = mainViewPictureBox.Size;
+                newPanel.Name = "Main View";
+                SaveViewToFigure(newPanel, "Main View", trajectory);
+            }
+        }
+
+        private void leftViewToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (tabControl.SelectedIndex != -1)
+            {
+
+                TableLayoutPanel tableLayoutPanel = (TableLayoutPanel)tabControl.SelectedTab.Controls[0];
+                PictureBox mainViewPictureBox = (PictureBox)tableLayoutPanel.Controls.Find("Main View", true).First();
+
+                Panel newPanel = new Panel();
+                newPanel.Size = mainViewPictureBox.Size;
+                newPanel.Name = "Left View";
+                SaveViewToFigure(newPanel, "Left View", trajectory);
+            }
+        }
+
+        private void topViewToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (tabControl.SelectedIndex != -1)
+            {
+
+                TableLayoutPanel tableLayoutPanel = (TableLayoutPanel)tabControl.SelectedTab.Controls[0];
+                PictureBox mainViewPictureBox = (PictureBox)tableLayoutPanel.Controls.Find("Main View", true).First();
+
+                Panel newPanel = new Panel();
+                newPanel.Size = mainViewPictureBox.Size;
+                newPanel.Name = "Top View";
+                SaveViewToFigure(newPanel, "Top View", trajectory);
+            }
+        }
+
+        private void allViewsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (tabControl.SelectedIndex != -1)
+            {
+
+                TableLayoutPanel tableLayoutPanel = (TableLayoutPanel)tabControl.SelectedTab.Controls[0];
+                PictureBox mainViewPictureBox = (PictureBox)tableLayoutPanel.Controls.Find("Main View", true).First();
+
+                Panel newPanel = new Panel();
+                newPanel.Size = mainViewPictureBox.Size;
+                newPanel.Name = "Main View";
+                SaveViewToFigure(newPanel, "Main View", trajectory);
+                newPanel.Name = "Left View";
+                SaveViewToFigure(newPanel, "Left View", trajectory);
+                newPanel.Name = "Top View";
+                SaveViewToFigure(newPanel, "Top View", trajectory);
+            }
         }
 
         //// TODO: ????

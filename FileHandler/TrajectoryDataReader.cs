@@ -63,7 +63,7 @@ namespace FileHandler
             try
             {
                 string[] names = fileName.Split('-');
-                if (names.Count() != 2)
+                if (names.Count() != 2 || names.Select(x => string.IsNullOrEmpty(x)).Contains(true))
                 {
                     errorMessage = "File name format error.\nValid format: \"wellName-trajectoryName\"";
                     return false;
