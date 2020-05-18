@@ -30,17 +30,22 @@
         {
             this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
-            System.Windows.Forms.TreeNode treeNode2 = new System.Windows.Forms.TreeNode("Wells");
+            System.Windows.Forms.TreeNode treeNode7 = new System.Windows.Forms.TreeNode("Wells");
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.openFileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.saveAsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.allViewsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.mainViewToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.leftViewToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.topViewToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.viewToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.viewSourceToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
             this.toolStripButton1 = new System.Windows.Forms.ToolStripButton();
+            this.saveToolStripButton = new System.Windows.Forms.ToolStripButton();
             this.closeTheCurrentTabPageToolStripButton = new System.Windows.Forms.ToolStripButton();
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
@@ -59,6 +64,7 @@
             this.label7 = new System.Windows.Forms.Label();
             this.tabControl = new System.Windows.Forms.TabControl();
             this.openFileDialog = new System.Windows.Forms.OpenFileDialog();
+            this.saveFileDialog = new System.Windows.Forms.SaveFileDialog();
             this.menuStrip1.SuspendLayout();
             this.toolStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
@@ -106,11 +112,44 @@
             // 
             // saveAsToolStripMenuItem
             // 
+            this.saveAsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.allViewsToolStripMenuItem,
+            this.mainViewToolStripMenuItem,
+            this.leftViewToolStripMenuItem,
+            this.topViewToolStripMenuItem});
             this.saveAsToolStripMenuItem.Name = "saveAsToolStripMenuItem";
             this.saveAsToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)(((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.Shift) 
             | System.Windows.Forms.Keys.S)));
             this.saveAsToolStripMenuItem.Size = new System.Drawing.Size(221, 22);
-            this.saveAsToolStripMenuItem.Text = "&Save as...";
+            this.saveAsToolStripMenuItem.Text = "&Save...";
+            // 
+            // allViewsToolStripMenuItem
+            // 
+            this.allViewsToolStripMenuItem.Name = "allViewsToolStripMenuItem";
+            this.allViewsToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.allViewsToolStripMenuItem.Text = "All Views";
+            this.allViewsToolStripMenuItem.Click += new System.EventHandler(this.allViewsToolStripMenuItem_Click);
+            // 
+            // mainViewToolStripMenuItem
+            // 
+            this.mainViewToolStripMenuItem.Name = "mainViewToolStripMenuItem";
+            this.mainViewToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.mainViewToolStripMenuItem.Text = "Main View";
+            this.mainViewToolStripMenuItem.Click += new System.EventHandler(this.mainViewToolStripMenuItem_Click);
+            // 
+            // leftViewToolStripMenuItem
+            // 
+            this.leftViewToolStripMenuItem.Name = "leftViewToolStripMenuItem";
+            this.leftViewToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.leftViewToolStripMenuItem.Text = "Left View";
+            this.leftViewToolStripMenuItem.Click += new System.EventHandler(this.leftViewToolStripMenuItem_Click);
+            // 
+            // topViewToolStripMenuItem
+            // 
+            this.topViewToolStripMenuItem.Name = "topViewToolStripMenuItem";
+            this.topViewToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.topViewToolStripMenuItem.Text = "Top View";
+            this.topViewToolStripMenuItem.Click += new System.EventHandler(this.topViewToolStripMenuItem_Click);
             // 
             // exitToolStripMenuItem
             // 
@@ -146,6 +185,7 @@
             this.toolStrip1.ImageScalingSize = new System.Drawing.Size(40, 40);
             this.toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripButton1,
+            this.saveToolStripButton,
             this.closeTheCurrentTabPageToolStripButton});
             this.toolStrip1.Location = new System.Drawing.Point(0, 24);
             this.toolStrip1.Name = "toolStrip1";
@@ -164,6 +204,17 @@
             this.toolStripButton1.Size = new System.Drawing.Size(23, 22);
             this.toolStripButton1.Text = "Open";
             this.toolStripButton1.Click += new System.EventHandler(this.OpenFileToolStripMenuItem_Click);
+            // 
+            // saveToolStripButton
+            // 
+            this.saveToolStripButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.saveToolStripButton.Image = ((System.Drawing.Image)(resources.GetObject("saveToolStripButton.Image")));
+            this.saveToolStripButton.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
+            this.saveToolStripButton.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.saveToolStripButton.Name = "saveToolStripButton";
+            this.saveToolStripButton.Size = new System.Drawing.Size(23, 22);
+            this.saveToolStripButton.Text = "toolStripButton2";
+            this.saveToolStripButton.Click += new System.EventHandler(this.saveToolStripButton_Click);
             // 
             // closeTheCurrentTabPageToolStripButton
             // 
@@ -213,10 +264,10 @@
             this.wellsTreeView.LineColor = System.Drawing.Color.LightCoral;
             this.wellsTreeView.Location = new System.Drawing.Point(0, 0);
             this.wellsTreeView.Name = "wellsTreeView";
-            treeNode2.Name = "Root";
-            treeNode2.Text = "Wells";
+            treeNode7.Name = "Root";
+            treeNode7.Text = "Wells";
             this.wellsTreeView.Nodes.AddRange(new System.Windows.Forms.TreeNode[] {
-            treeNode2});
+            treeNode7});
             this.wellsTreeView.Size = new System.Drawing.Size(160, 581);
             this.wellsTreeView.TabIndex = 0;
             this.wellsTreeView.NodeMouseClick += new System.Windows.Forms.TreeNodeMouseClickEventHandler(this.WellsTreeView_NodeMouseClick);
@@ -382,7 +433,7 @@
             // 
             this.tabControl.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tabControl.Location = new System.Drawing.Point(0, 0);
-            this.tabControl.Margin = new System.Windows.Forms.Padding(8, 8, 8, 8);
+            this.tabControl.Margin = new System.Windows.Forms.Padding(8);
             this.tabControl.Name = "tabControl";
             this.tabControl.SelectedIndex = 0;
             this.tabControl.Size = new System.Drawing.Size(973, 581);
@@ -393,6 +444,10 @@
             this.openFileDialog.FileName = "openFileDialog";
             this.openFileDialog.Filter = "\"CSV Files|*.csv|TXT Files|*.txt\"";
             this.openFileDialog.Multiselect = true;
+            // 
+            // saveFileDialog
+            // 
+            this.saveFileDialog.Filter = "\"Bitmap Files|*.bmp|JPEG Files|*.jpeg|PNG Files|*.png\"";
             // 
             // MainForm
             // 
@@ -455,6 +510,12 @@
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.Label label6;
         private System.Windows.Forms.Label label7;
+        private System.Windows.Forms.ToolStripButton saveToolStripButton;
+        private System.Windows.Forms.ToolStripMenuItem allViewsToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem mainViewToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem leftViewToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem topViewToolStripMenuItem;
+        private System.Windows.Forms.SaveFileDialog saveFileDialog;
     }
 }
 
