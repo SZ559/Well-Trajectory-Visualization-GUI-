@@ -172,7 +172,7 @@ namespace Well_Trajectory_Visualization
             {
                 string wellName = node.Parent.Text;
                 string trajectoryName = node.Text;
-                string tabPageText = GetHeaderTextForTabPage(wellName, trajectoryName);
+                string tabPageText = $"{wellName}-{trajectoryName}";
                 if (IfTabPageOpened(tabPageText))
                 {
                     return;
@@ -285,7 +285,7 @@ namespace Well_Trajectory_Visualization
             defaultPagePanel.Visible = false;
             foreach (TabPage page in tabControl.TabPages)
             {
-                if (page.Text == tabPageText)
+                if (page.Name == tabPageText)
                 {
                     if (isDoubleClick && tabControl.TabPages.IndexOf(page) == tabControl.TabCount - 1)
                     {
@@ -316,6 +316,7 @@ namespace Well_Trajectory_Visualization
             TabPage tabPage = new TabPage
             {
                 Text = GetHeaderTextForTabPage(wellName, trajectoryName),
+                Name = $"{wellName}-{trajectoryName}",
                 Font = tabControl.Font,
                 BorderStyle = BorderStyle.None
             };
@@ -498,7 +499,7 @@ namespace Well_Trajectory_Visualization
             }
 
             // draw caption
-            using (Font fontForCaption = new Font("Microsoft YaHei Light", 11, FontStyle.Regular, GraphicsUnit.Point))
+            using (Font fontForCaption = new Font("Microsoft YaHei Light", 8, FontStyle.Regular, GraphicsUnit.Point))
             {
                 Rectangle rect = new Rectangle(0, 0, control.Width, paddingY - 5);
 
@@ -507,6 +508,12 @@ namespace Well_Trajectory_Visualization
                 stringFormat.LineAlignment = StringAlignment.Center;
                 graphics.DrawString(control.Name, fontForCaption, Brushes.Black, rect, stringFormat);
             }
+
+            //draw Axis
+            string axisXCaption;
+            string axisYCaption;
+
+
 
             graphics.Dispose();
 
