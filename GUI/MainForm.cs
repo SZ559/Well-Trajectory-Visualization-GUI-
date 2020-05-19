@@ -22,9 +22,13 @@ namespace Well_Trajectory_Visualization
         Single zoomZ;
         Single zoomInAxisParameter;
         List<Well> wells;
+        const int spaceForCloseIcon = 15;
+        const int paddingYForTabHeaderRectangle = 3;
+        const int marginXForTabHeaderRectangle = 5;
 
         bool hasPreviewTab;
         private bool isDoubleClick;
+
 
         public MainForm()
         {
@@ -33,7 +37,7 @@ namespace Well_Trajectory_Visualization
             trajectoryDataReader = new TrajectoryDataReader();
             wellViewSaver = new WellViewSaver();
             projection = new Projection();
-
+            tabControl.Padding = new Point(spaceForCloseIcon, 5);
             wells = new List<Well>();
             hasPreviewTab = false;
             isDoubleClick = false;
@@ -105,6 +109,8 @@ namespace Well_Trajectory_Visualization
             }
         }
 
+
+
         // TreeView
         private void UpdateTreeView()
         {
@@ -171,6 +177,85 @@ namespace Well_Trajectory_Visualization
             }
         }
 
+        private void DrawOnTab(object sender, DrawItemEventArgs e)
+        {
+            Graphics graphic = e.Graphics;
+            Rectangle tabHeaderArea = tabControl.GetTabRect(e.Index);
+            int paddingX = 3;
+
+            using (Brush brBack = new SolidBrush(Color.AliceBlue))
+            {
+                if (tabControl.SelectedTab != null && e.Index == tabControl.SelectedIndex)
+                {
+                    graphic.FillRectangle(brBack, tabHeaderArea);
+                    
+                }
+            }
+            string text = tabControl.TabPages[e.Index].Text;
+            FontStyle fontStyle = FontStyle.Regular;
+            if ((bool)tabControl.TabPages[e.Index].Tag == false)
+            {
+                fontStyle = FontStyle.Italic;
+            }
+            Font tabTextFont = new Font("Arial", 10.0f, fontStyle);
+            
+            if (graphic.MeasureString(text, tabTextFont).Width > tabHeaderArea.Size.Width - marginXForTabHeaderRectangle)
+            {
+                while (graphic.MeasureString(text, tabTextFont).Width > tabHeaderArea.Size.Width - marginXForTabHeaderRectangle)
+                {
+                    text = text.Remove(text.Length - 1, 1);
+                }
+                text = text.Remove(text.Length - 3, 3);
+                text = text + "...";
+            }
+
+            graphic.DrawString(text,
+                tabTextFont, SystemBrushes.ControlText, tabHeaderArea.X + paddingX, tabHeaderArea.Y + paddingYForTabHeaderRectangle);
+
+            using (Pen transparentPen = new Pen(Color.Transparent))
+            {
+                tabHeaderArea.Offset(tabHeaderArea.Width - (spaceForCloseIcon + marginXForTabHeaderRectangle), paddingYForTabHeaderRectangle);
+                tabHeaderArea.Width = spaceForCloseIcon;
+                tabHeaderArea.Height = spaceForCloseIcon;
+                graphic.DrawRectangle(transparentPen, tabHeaderArea);
+            }
+
+            using (Brush transparentBrush = new SolidBrush(Color.Transparent))
+            {
+                graphic.FillRectangle(transparentBrush, tabHeaderArea);
+            }
+
+            using (Pen closeIconPen = new Pen(Color.Red, 1.8f))
+            {
+                Point p1 = new Point(tabHeaderArea.X + marginXForTabHeaderRectangle, tabHeaderArea.Y + paddingYForTabHeaderRectangle);
+                Point p2 = new Point(tabHeaderArea.X + tabHeaderArea.Width - marginXForTabHeaderRectangle, tabHeaderArea.Y + tabHeaderArea.Height - paddingYForTabHeaderRectangle);
+                graphic.DrawLine(closeIconPen, p1, p2);
+                Point p3 = new Point(tabHeaderArea.X + marginXForTabHeaderRectangle, tabHeaderArea.Y + tabHeaderArea.Height - paddingYForTabHeaderRectangle);
+                Point p4 = new Point(tabHeaderArea.X + tabHeaderArea.Width - marginXForTabHeaderRectangle, tabHeaderArea.Y + paddingYForTabHeaderRectangle);
+                graphic.DrawLine(closeIconPen, p3, p4);
+            }
+            e.Graphics.Dispose();
+        }
+        private void TabControl_MouseDown(object sender, MouseEventArgs e)
+        {
+            if (tabControl.SelectedTab != null)
+            {
+                if (e.Button == MouseButtons.Left)
+                {
+
+                    Rectangle tabCloseIconArea = tabControl.GetTabRect(tabControl.SelectedIndex);
+                    tabCloseIconArea.Offset(tabCloseIconArea.Width - (spaceForCloseIcon + marginXForTabHeaderRectangle), paddingYForTabHeaderRectangle);
+                    tabCloseIconArea.Width = spaceForCloseIcon;
+                    tabCloseIconArea.Height = spaceForCloseIcon;
+                    if (tabCloseIconArea.Contains(e.Location))
+                    {
+                        CloseTabPage();
+                    }
+                }
+            }
+        }
+
+
         // tab page
         public bool IfTabPageOpened(string tabPageText)
         {
@@ -178,14 +263,22 @@ namespace Well_Trajectory_Visualization
             foreach (TabPage page in tabControl.TabPages)
             {
                 if (page.Text == tabPageText)
-                {
+                {       
                     if (isDoubleClick && tabControl.TabPages.IndexOf(page) == tabControl.TabCount - 1)
                     {
                         page.Tag = true;
                         hasPreviewTab = false;
+                        tabControl.SelectedTab = null;
+                      
+
+                        /*
+                        Rectangle rectangle = new Rectangle();
+                        rectangle.Size = tabControl.ItemSize;
+                        rectangle.Location = page.Location;
+                        DrawOnTab(page, new DrawItemEventArgs(page.CreateGraphics(), this.Font, rectangle, tabControl.TabPages.IndexOf(page), DrawItemState.Default));
+                        */
                     }
                     tabControl.SelectedTab = page;
-
                     return true;
                 }
             }
@@ -209,14 +302,13 @@ namespace Well_Trajectory_Visualization
             {
                 Text = $"{wellName}-{trajectoryName}"
             };
-
+            tabPage.Tag = isDoubleClick; // opened or preview : true means opened
             trajectory = wells.Find(x => x.WellName == wellName).Trajectories.Find(x => x.TrajectoryName == trajectoryName);
 
             SetZoomForThreeViews();
             TableLayoutPanel tableLayoutPanel = InitializeTableLayoutPanelForTabPage();
             tabPage.Controls.Add(tableLayoutPanel);
-            tabPage.Tag = isDoubleClick; // opened or preview : true means opened
-            tabControl.TabPages.Add(tabPage);
+            tabControl.TabPages.Add(tabPage); 
             SetTableLayoutPanel(tableLayoutPanel);
             tabControl.SelectedTab = tabPage;
 
@@ -243,6 +335,11 @@ namespace Well_Trajectory_Visualization
         // Tab Page
         private void CloseTheCurrentTabPageToolStripButton_Click(object sender, EventArgs e)
         {
+            CloseTabPage();
+        }
+
+        private void CloseTabPage()
+        {
             if (tabControl.SelectedTab != null)
             {
                 if ((bool)tabControl.SelectedTab.Tag == false)
@@ -257,6 +354,8 @@ namespace Well_Trajectory_Visualization
                 }
             }
         }
+
+
 
         private TableLayoutPanel InitializeTableLayoutPanelForTabPage()
         {
@@ -398,6 +497,7 @@ namespace Well_Trajectory_Visualization
             return bitMap;
         }
 
+
         // Menu Bar
         private void OpenFileToolStripMenuItem_Click(object sender, EventArgs e)
         {
@@ -519,6 +619,16 @@ namespace Well_Trajectory_Visualization
         //        g.FillRectangle(Brushes.LightBlue, rect);
         //        g.DrawString(tabControl.SelectedTab.Text, new Font(tabControl.SelectedTab.Font, FontStyle.Bold), Brushes.Black, rect);
         //    }
+        //}
+
+
+        //private int GetSpace(int padding, float startPoint)
+        //{
+        //    if (startPoint < 0)
+        //    {
+        //        return (int) (padding - startPoint);
+        //    }
+        //    return padding;
         //}
     }
 }
