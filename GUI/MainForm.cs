@@ -543,8 +543,8 @@ namespace Well_Trajectory_Visualization
             {
                 graphics.DrawLine(penForAxis, xAxisStartPoint, xAxisEndPoint);
                 graphics.DrawLine(penForAxis, yAxisStartPoint, yAxisEndPoint);
-                graphics.DrawString(axisXCaption, textFont, Brushes.Black, xAxisEndPoint.X - spaceForTextAlignment, xAxisEndPoint.Y - spaceForTextInYDirection);
-                graphics.DrawString(axisYCaption, textFont, Brushes.Black, yAxisEndPoint.X - spaceForTextInXDirection / 2, yAxisEndPoint.Y - spaceForTextAlignment);
+                graphics.DrawString(axisXCaption, textFont, Brushes.Black, xAxisEndPoint.X - spaceForTextAlignment / 2, xAxisEndPoint.Y - spaceForTextInYDirection);
+                graphics.DrawString(axisYCaption, textFont, Brushes.Black, yAxisEndPoint.X - spaceForTextInXDirection / 2, yAxisEndPoint.Y - spaceForTextAlignment / 2);
                 graphics.DrawPolygon(penForAxis, xAxisArrowhead);
                 graphics.FillPolygon(Brushes.Black, xAxisArrowhead);
                 graphics.DrawPolygon(penForAxis, yAxisArrowhead);
@@ -557,7 +557,7 @@ namespace Well_Trajectory_Visualization
                 float coordinateXLocationY = xAxisStartPoint.Y - spaceForTextInYDirection;
                 StringFormat stringFormatRightAlignment = new StringFormat();
                 stringFormatRightAlignment.Alignment = StringAlignment.Far;
-                while (coordinateXLocationX <= xAxisEndPoint.X - scale)
+                while (coordinateXLocationX <= xAxisEndPoint.X - scale / 3)
                 {
                     Rectangle rectangle = new Rectangle((int)(coordinateXLocationX - spaceForTextAlignment), (int)coordinateXLocationY, spaceForTextAlignment * 2, (int)(spaceForTextInYDirection - lineLength));
                     graphics.DrawLine(penForAxis, coordinateXLocationX, xAxisStartPoint.Y, coordinateXLocationX, xAxisStartPoint.Y - lineLength);
@@ -568,7 +568,7 @@ namespace Well_Trajectory_Visualization
                 }
                 float coordinateYLocationX = yAxisStartPoint.X - spaceForTextInXDirection;
                 float coordinateYLocationY = (int) coordinateY * zoomInAxisParameter + spaceY;
-                while (coordinateYLocationY <= yAxisEndPoint.Y - scale)
+                while (coordinateYLocationY <= yAxisEndPoint.Y - scale / 3)
                 {
                     graphics.DrawLine(penForAxis, yAxisStartPoint.X, coordinateYLocationY, yAxisStartPoint.X - lineLength, coordinateYLocationY);
                     Rectangle rectangle = new Rectangle((int) coordinateYLocationX, (int) (coordinateYLocationY - 8), (int) (spaceForTextInXDirection - lineLength), spaceForTextInYDirection);
