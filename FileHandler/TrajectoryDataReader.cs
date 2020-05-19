@@ -19,7 +19,7 @@ namespace FileHandler
                     string line;
 
                     string fileName = path.Split('.')[0].Split('\\').Last();
-                    if(TryParseFileName(fileName, out errorMessage))
+                    if (TryParseFileName(fileName, out errorMessage))
                     {
                         string wellName = fileName.Split('-')[0];
                         string trajectoryName = fileName.Split('-')[1];
@@ -29,7 +29,7 @@ namespace FileHandler
                         while (!string.IsNullOrEmpty(line = sr.ReadLine()))
                         {
                             Vector3 point = ParseLine(lineNumber, line, out errorMessage);
-                            if (!string.IsNullOrEmpty(errorMessage))
+                            if(!string.IsNullOrEmpty(errorMessage))
                             {
                                 return null;
                             }
@@ -57,6 +57,7 @@ namespace FileHandler
             return null;
         }
 
+
         public bool TryParseFileName(string fileName, out string errorMessage)
         {
             errorMessage = "";
@@ -76,6 +77,7 @@ namespace FileHandler
                 return false;
             }
         }
+
 
         public Vector3 ParseLine(int lineNumber, string line, out string errorMessage)
         {
@@ -98,7 +100,7 @@ namespace FileHandler
                     return vector;
                 }
             }
-            catch (IndexOutOfRangeException)
+            catch(IndexOutOfRangeException)
             {
                 errorMessage = $"Error in Line {lineNumber}: Data lost.";
             }

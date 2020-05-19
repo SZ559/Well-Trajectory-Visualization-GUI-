@@ -79,6 +79,7 @@
             // menuStrip1
             // 
             this.menuStrip1.Font = new System.Drawing.Font("Microsoft YaHei UI", 9F);
+            this.menuStrip1.GripMargin = new System.Windows.Forms.Padding(2, 2, 0, 2);
             this.menuStrip1.ImageScalingSize = new System.Drawing.Size(40, 40);
             this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.fileToolStripMenuItem,
@@ -98,7 +99,7 @@
             this.saveAsToolStripMenuItem,
             this.exitToolStripMenuItem});
             this.fileToolStripMenuItem.Name = "fileToolStripMenuItem";
-            this.fileToolStripMenuItem.Size = new System.Drawing.Size(39, 22);
+            this.fileToolStripMenuItem.Size = new System.Drawing.Size(90, 43);
             this.fileToolStripMenuItem.Text = "&File";
             // 
             // openFileToolStripMenuItem
@@ -106,7 +107,7 @@
             this.openFileToolStripMenuItem.Name = "openFileToolStripMenuItem";
             this.openFileToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)(((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.Shift) 
             | System.Windows.Forms.Keys.O)));
-            this.openFileToolStripMenuItem.Size = new System.Drawing.Size(221, 22);
+            this.openFileToolStripMenuItem.Size = new System.Drawing.Size(538, 54);
             this.openFileToolStripMenuItem.Text = "&Open File...";
             this.openFileToolStripMenuItem.Click += new System.EventHandler(this.OpenFileToolStripMenuItem_Click);
             // 
@@ -120,6 +121,7 @@
             this.saveAsToolStripMenuItem.Name = "saveAsToolStripMenuItem";
             this.saveAsToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)(((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.Shift) 
             | System.Windows.Forms.Keys.S)));
+
             this.saveAsToolStripMenuItem.Size = new System.Drawing.Size(221, 22);
             this.saveAsToolStripMenuItem.Text = "&Save...";
             // 
@@ -155,13 +157,13 @@
             // 
             this.exitToolStripMenuItem.Name = "exitToolStripMenuItem";
             this.exitToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.Q)));
-            this.exitToolStripMenuItem.Size = new System.Drawing.Size(221, 22);
+            this.exitToolStripMenuItem.Size = new System.Drawing.Size(538, 54);
             this.exitToolStripMenuItem.Text = "E&xit";
             // 
             // viewToolStripMenuItem
             // 
             this.viewToolStripMenuItem.Name = "viewToolStripMenuItem";
-            this.viewToolStripMenuItem.Size = new System.Drawing.Size(47, 22);
+            this.viewToolStripMenuItem.Size = new System.Drawing.Size(110, 43);
             this.viewToolStripMenuItem.Text = "&View";
             // 
             // helpToolStripMenuItem
@@ -169,14 +171,14 @@
             this.helpToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.viewSourceToolStripMenuItem});
             this.helpToolStripMenuItem.Name = "helpToolStripMenuItem";
-            this.helpToolStripMenuItem.Size = new System.Drawing.Size(47, 22);
+            this.helpToolStripMenuItem.Size = new System.Drawing.Size(108, 43);
             this.helpToolStripMenuItem.Text = "&Help";
             // 
             // viewSourceToolStripMenuItem
             // 
             this.viewSourceToolStripMenuItem.Name = "viewSourceToolStripMenuItem";
             this.viewSourceToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.F7)));
-            this.viewSourceToolStripMenuItem.Size = new System.Drawing.Size(197, 22);
+            this.viewSourceToolStripMenuItem.Size = new System.Drawing.Size(480, 54);
             this.viewSourceToolStripMenuItem.Text = "View &Source";
             this.viewSourceToolStripMenuItem.Click += new System.EventHandler(this.viewSourceToolStripMenuItem_Click);
             // 
@@ -187,8 +189,9 @@
             this.toolStripButton1,
             this.saveToolStripButton,
             this.closeTheCurrentTabPageToolStripButton});
-            this.toolStrip1.Location = new System.Drawing.Point(0, 24);
+            this.toolStrip1.Location = new System.Drawing.Point(0, 45);
             this.toolStrip1.Name = "toolStrip1";
+
             this.toolStrip1.Padding = new System.Windows.Forms.Padding(0, 0, 2, 0);
             this.toolStrip1.Size = new System.Drawing.Size(1062, 25);
             this.toolStrip1.TabIndex = 1;
@@ -201,7 +204,7 @@
             this.toolStripButton1.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
             this.toolStripButton1.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton1.Name = "toolStripButton1";
-            this.toolStripButton1.Size = new System.Drawing.Size(23, 22);
+            this.toolStripButton1.Size = new System.Drawing.Size(58, 20);
             this.toolStripButton1.Text = "Open";
             this.toolStripButton1.Click += new System.EventHandler(this.OpenFileToolStripMenuItem_Click);
             // 
@@ -223,7 +226,7 @@
             this.closeTheCurrentTabPageToolStripButton.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
             this.closeTheCurrentTabPageToolStripButton.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.closeTheCurrentTabPageToolStripButton.Name = "closeTheCurrentTabPageToolStripButton";
-            this.closeTheCurrentTabPageToolStripButton.Size = new System.Drawing.Size(23, 22);
+            this.closeTheCurrentTabPageToolStripButton.Size = new System.Drawing.Size(58, 20);
             this.closeTheCurrentTabPageToolStripButton.Text = "Close Tab Page";
             this.closeTheCurrentTabPageToolStripButton.Click += new System.EventHandler(this.CloseTheCurrentTabPageToolStripButton_Click);
             // 
@@ -239,7 +242,7 @@
             // splitContainer1
             // 
             this.splitContainer1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.splitContainer1.Location = new System.Drawing.Point(0, 49);
+            this.splitContainer1.Location = new System.Drawing.Point(0, 72);
             this.splitContainer1.Name = "splitContainer1";
             // 
             // splitContainer1.Panel1
@@ -306,7 +309,7 @@
             this.label8.Font = new System.Drawing.Font("Microsoft YaHei UI", 13F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.label8.Location = new System.Drawing.Point(285, 465);
             this.label8.Name = "label8";
-            this.label8.Size = new System.Drawing.Size(166, 24);
+            this.label8.Size = new System.Drawing.Size(413, 57);
             this.label8.TabIndex = 8;
             this.label8.Text = "View Source Files :";
             this.label8.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -319,7 +322,7 @@
             this.label4.ForeColor = System.Drawing.SystemColors.ControlText;
             this.label4.Location = new System.Drawing.Point(457, 465);
             this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(85, 24);
+            this.label4.Size = new System.Drawing.Size(207, 57);
             this.label4.TabIndex = 3;
             this.label4.Text = "Ctrl + F7";
             this.label4.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -331,7 +334,7 @@
             this.label1.Font = new System.Drawing.Font("Microsoft YaHei UI", 13F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.label1.Location = new System.Drawing.Point(299, 283);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(152, 24);
+            this.label1.Size = new System.Drawing.Size(374, 57);
             this.label1.TabIndex = 0;
             this.label1.Text = "Load Trajectory :";
             this.label1.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -343,7 +346,7 @@
             this.label2.Font = new System.Drawing.Font("Microsoft YaHei UI", 13F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.label2.Location = new System.Drawing.Point(347, 343);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(104, 24);
+            this.label2.Size = new System.Drawing.Size(261, 57);
             this.label2.TabIndex = 1;
             this.label2.Text = "Save View :";
             this.label2.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -355,7 +358,7 @@
             this.label3.Font = new System.Drawing.Font("Microsoft YaHei UI", 13F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.label3.Location = new System.Drawing.Point(174, 403);
             this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(277, 24);
+            this.label3.Size = new System.Drawing.Size(402, 66);
             this.label3.TabIndex = 2;
             this.label3.Text = "Open Customized View Editor :";
             this.label3.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -377,15 +380,16 @@
             // 
             // imageSourceReference
             // 
+            this.imageSourceReference.ImageScalingSize = new System.Drawing.Size(40, 40);
             this.imageSourceReference.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.referenceToolStripMenuItem});
             this.imageSourceReference.Name = "imageSourceReference";
-            this.imageSourceReference.Size = new System.Drawing.Size(135, 26);
+            this.imageSourceReference.Size = new System.Drawing.Size(228, 52);
             // 
             // referenceToolStripMenuItem
             // 
             this.referenceToolStripMenuItem.Name = "referenceToolStripMenuItem";
-            this.referenceToolStripMenuItem.Size = new System.Drawing.Size(134, 22);
+            this.referenceToolStripMenuItem.Size = new System.Drawing.Size(227, 48);
             this.referenceToolStripMenuItem.Text = "Reference";
             this.referenceToolStripMenuItem.Click += new System.EventHandler(this.referenceToolStripMenuItem_Click);
             // 
@@ -398,7 +402,7 @@
             this.label5.ForeColor = System.Drawing.SystemColors.ControlText;
             this.label5.Location = new System.Drawing.Point(457, 283);
             this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(141, 24);
+            this.label5.Size = new System.Drawing.Size(348, 57);
             this.label5.TabIndex = 5;
             this.label5.Text = "Ctrl + Shift + O";
             this.label5.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -411,7 +415,7 @@
             this.label6.ForeColor = System.Drawing.SystemColors.ControlText;
             this.label6.Location = new System.Drawing.Point(457, 343);
             this.label6.Name = "label6";
-            this.label6.Size = new System.Drawing.Size(141, 24);
+            this.label6.Size = new System.Drawing.Size(349, 57);
             this.label6.TabIndex = 6;
             this.label6.Text = "Ctril + Shift + S";
             this.label6.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -424,7 +428,7 @@
             this.label7.ForeColor = System.Drawing.SystemColors.ControlText;
             this.label7.Location = new System.Drawing.Point(457, 403);
             this.label7.Name = "label7";
-            this.label7.Size = new System.Drawing.Size(136, 24);
+            this.label7.Size = new System.Drawing.Size(336, 57);
             this.label7.TabIndex = 7;
             this.label7.Text = "Ctrl + Shift + E";
             this.label7.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -432,12 +436,15 @@
             // tabControl
             // 
             this.tabControl.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tabControl.DrawMode = System.Windows.Forms.TabDrawMode.OwnerDrawFixed;
             this.tabControl.Location = new System.Drawing.Point(0, 0);
             this.tabControl.Margin = new System.Windows.Forms.Padding(8);
             this.tabControl.Name = "tabControl";
             this.tabControl.SelectedIndex = 0;
             this.tabControl.Size = new System.Drawing.Size(909, 509);
             this.tabControl.TabIndex = 0;
+            this.tabControl.DrawItem += new System.Windows.Forms.DrawItemEventHandler(this.DrawOnTab);
+            this.tabControl.MouseDown += new System.Windows.Forms.MouseEventHandler(this.TabControl_MouseDown);
             // 
             // openFileDialog
             // 
@@ -451,7 +458,7 @@
             // 
             // MainForm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(15F, 30F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1062, 580);
             this.Controls.Add(this.splitContainer1);
