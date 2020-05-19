@@ -19,23 +19,26 @@ namespace FileHandler
                     string line;
 
                     string fileName = path.Split('.')[0].Split('\\').Last();
-                    string wellName = fileName.Split('-')[0];
-                    string trajectoryName = fileName.Split('-')[1];
-                    Trajectory newTrajectory = new Trajectory(path, wellName, trajectoryName);
-
-                    int lineNumber = 1;
-                    while (!string.IsNullOrEmpty(line = sr.ReadLine()))
+                    if (TryParseFileName(fileName, out errorMessage))
                     {
-                        Vector3 point = ParseLine(lineNumber, line, out errorMessage);
-                        if(!string.IsNullOrEmpty(errorMessage))
-                        {
-                            return null;
-                        }
-                        newTrajectory.AddNode(point);
-                        lineNumber++;
-                    }
+                        string wellName = fileName.Split('-')[0];
+                        string trajectoryName = fileName.Split('-')[1];
+                        Trajectory newTrajectory = new Trajectory(path, wellName, trajectoryName);
 
-                    return newTrajectory;
+                        int lineNumber = 1;
+                        while (!string.IsNullOrEmpty(line = sr.ReadLine()))
+                        {
+                            Vector3 point = ParseLine(lineNumber, line, out errorMessage);
+                            if(!string.IsNullOrEmpty(errorMessage))
+                            {
+                                return null;
+                            }
+                            newTrajectory.AddNode(point);
+                            lineNumber++;
+                        }
+
+                        return newTrajectory;
+                    }
                 }
             }
             catch (FileNotFoundException)
