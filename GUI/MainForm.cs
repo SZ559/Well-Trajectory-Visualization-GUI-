@@ -162,7 +162,7 @@ namespace Well_Trajectory_Visualization
             {
                 string wellName = node.Parent.Text;
                 string trajectoryName = node.Text;
-                string tabPageText = GetTabPageText(wellName, trajectoryName);
+                string tabPageText = GetHeaderTextForTabPage(wellName, trajectoryName);
                 if (IfTabPageOpened(tabPageText))
                 {
                     return;
@@ -179,20 +179,28 @@ namespace Well_Trajectory_Visualization
             }
         }
 
-        private string GetTabPageText(string wellName, string trajectoryName)
+        private string GetHeaderTextForTabPage(string wellName, string trajectoryName)
         {
-            string tabPageText = $"{wellName}-{trajectoryName}";
-
-            if (tabPageText.Length > 30)
+            if (wellName.Length + trajectoryName.Length > 30)
             {
-                tabPageText = tabPageText.Remove(30, tabPageText.Length - 30);
-                StringBuilder tabPageTextString = new StringBuilder(tabPageText);
-                tabPageTextString[14] = '.';
-                tabPageTextString[15] = '.';
-                tabPageTextString[16] = '.';
-                return tabPageTextString.ToString();
+                if (wellName.Length > 15)
+                {
+                    if (trajectoryName.Length > 15)
+                    {
+                        wellName = wellName.Remove(13) + "...";
+                        trajectoryName = trajectoryName.Remove(13) + "...";
+                    }
+                    else
+                    {
+                        wellName = wellName.Remove(28 - trajectoryName.Length) + "...";
+                    }
+                }
+                else
+                {
+                    trajectoryName = trajectoryName.Remove(28 - wellName.Length) + "...";
+                }
             }
-            return tabPageText;
+            return $"{wellName}-{trajectoryName}";
         }
 
         private void DrawOnTab(object sender, DrawItemEventArgs e)
@@ -312,7 +320,7 @@ namespace Well_Trajectory_Visualization
 
             TabPage tabPage = new TabPage
             {
-                Text = GetTabPageText(wellName, trajectoryName),
+                Text = GetHeaderTextForTabPage(wellName, trajectoryName),
                 Font = tabControl.Font,
             };
             tabPage.Tag = isDoubleClick; // opened or preview : true means opened
