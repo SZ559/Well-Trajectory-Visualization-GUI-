@@ -226,6 +226,7 @@ namespace Well_Trajectory_Visualization
             Graphics graphic = e.Graphics;
             Rectangle tabHeaderArea = tabControl.GetTabRect(e.Index);
 
+            // draw background
             using (Brush brushForHeaderBackground = new SolidBrush(Color.FromArgb(240, 255, 255))) // color.Azure / color.mint-cream
             {
                 if (tabControl.SelectedTab != null && e.Index == tabControl.SelectedIndex)
@@ -318,7 +319,8 @@ namespace Well_Trajectory_Visualization
                 Text = GetHeaderTextForTabPage(wellName, trajectoryName),
                 Name = $"{wellName}-{trajectoryName}",
                 Font = tabControl.Font,
-                BorderStyle = BorderStyle.None
+                BorderStyle = BorderStyle.None,
+                Name = $"{wellName}-{trajectoryName}"
             };
             tabPage.Tag = isDoubleClick; // opened or preview : true means opened
             trajectory = wells.Find(x => x.WellName == wellName).Trajectories.Find(x => x.TrajectoryName == trajectoryName);
@@ -394,32 +396,48 @@ namespace Well_Trajectory_Visualization
 
         private void SetTableLayoutPanel(TableLayoutPanel tableLayoutPanel)
         {
-            PictureBox mainViewPictureBox = InitializePictureBoxForProjection("Main View");
-            PictureBox leftViewPictureBox = InitializePictureBoxForProjection("Left View");
-            PictureBox topViewPictureBox = InitializePictureBoxForProjection("Top View");
+            //PictureBox mainViewPictureBox = InitializePictureBoxForProjection("Main View");
+            //PictureBox leftViewPictureBox = InitializePictureBoxForProjection("Left View");
+            //PictureBox topViewPictureBox = InitializePictureBoxForProjection("Top View");
+            Panel mainViewPanel = InitializePanelForProjection("Main View");
+            Panel leftViewPanel = InitializePanelForProjection("Left View");
+            Panel topViewPanel = InitializePanelForProjection("Top View");
 
             tableLayoutPanel.SuspendLayout();
-            tableLayoutPanel.Controls.Add(mainViewPictureBox, 0, 0);
-            tableLayoutPanel.Controls.Add(leftViewPictureBox, 1, 0);
-            tableLayoutPanel.Controls.Add(topViewPictureBox, 2, 0);
+            //tableLayoutPanel.Controls.Add(mainViewPictureBox, 0, 0);
+            //tableLayoutPanel.Controls.Add(leftViewPictureBox, 1, 0);
+            //tableLayoutPanel.Controls.Add(topViewPictureBox, 2, 0);
+            tableLayoutPanel.Controls.Add(mainViewPanel, 0, 0);
+            tableLayoutPanel.Controls.Add(leftViewPanel, 1, 0);
+            tableLayoutPanel.Controls.Add(topViewPanel, 2, 0);
 
             tableLayoutPanel.ResumeLayout();
 
-            PaintPictureBox(mainViewPictureBox);
-            PaintPictureBox(leftViewPictureBox);
-            PaintPictureBox(topViewPictureBox);
+            //PaintPictureBox(mainViewPictureBox);
+            //PaintPictureBox(leftViewPictureBox);
+            //PaintPictureBox(topViewPictureBox);
         }
 
-        private PictureBox InitializePictureBoxForProjection(string viewName)
+        private Panel InitializePanelForProjection(string viewName)
         {
-            PictureBox pictureBox = new PictureBox
+            return new Panel
             {
                 Dock = DockStyle.Fill,
                 BorderStyle = BorderStyle.None,
                 Name = viewName
             };
-            return pictureBox;
         }
+
+        //private PictureBox InitializePictureBoxForProjection(string viewName)
+        //{
+        //    PictureBox pictureBox = new PictureBox
+        //    {
+        //        Dock = DockStyle.Fill,
+        //        BorderStyle = BorderStyle.None,
+        //        Name = viewName
+        //    };
+        //    return pictureBox;
+        //}
 
         private Vector3 GetNormalVectorForView(string viewName)
         {
@@ -438,6 +456,26 @@ namespace Well_Trajectory_Visualization
                     break;
             }
             return normalVector;
+        }
+
+        private void PaintSelectedTab(object sender, EventArgs e)
+        {
+            if (tabControl.SelectedIndex != -1)
+            {
+                string wellName = tabControl.SelectedTab.Name.Split('-')[0];
+                string trajectoryName = tabControl.SelectedTab.Name.Split('-')[1];
+                trajectory = wells.Find(x => x.WellName == wellName).Trajectories.Find(x => x.TrajectoryName == trajectoryName);
+                SetZoomForThreeViews();
+                TableLayoutPanel tableLayoutPanel = (TableLayoutPanel)tabControl.SelectedTab.Controls[0];
+
+                Panel mainViewPanel = (Panel)tableLayoutPanel.Controls.Find("Main View", true).First();
+                Panel leftViewPanel = (Panel)tableLayoutPanel.Controls.Find("Left View", true).First();
+                Panel topViewPanel = (Panel)tableLayoutPanel.Controls.Find("Top View", true).First();
+
+                DrawViewPanel(mainViewPanel);
+                DrawViewPanel(leftViewPanel);
+                DrawViewPanel(topViewPanel);
+            }
         }
 
         private void PaintPictureBox(PictureBox pictureBox)
@@ -687,5 +725,53 @@ namespace Well_Trajectory_Visualization
             }
         }
 
+        private void DrawViewPanel(Panel viewPanel)
+        {
+            int paddingX = 20;
+            int paddingY = 25;
+
+            Vector3 normalVector = GetNormalVectorForView(viewPanel.Name);
+            List<PointIn2D> projectionPointIn2D = projection.GetProjectionInPlane(trajectory.PolyLineNodes, normalVector);
+            GetZoomInAxixParameter(viewPanel, paddingX, paddingY);
+            Single minX = projectionPointIn2D.Select(x => x.X).Min();
+            Single minY = projectionPointIn2D.Select(x => x.Y).Min();
+            int spaceX = (int)(paddingX - minX * zoomInAxisParameter);
+            int spaceY = (int)(paddingY - minY * zoomInAxisParameter);
+
+            Graphics graphics = viewPanel.CreateGraphics();
+
+            // draw line
+            using (Pen penForLine = new Pen(Color.FromArgb(204, 234, 187), 3.0F))
+            {
+                for (int i = 0; i < projectionPointIn2D.Count - 1; i = i + 1)
+                {
+                    float xForPaint = projectionPointIn2D[i].X * zoomInAxisParameter + spaceX;
+                    float yForPaint = projectionPointIn2D[i].Y * zoomInAxisParameter + spaceY;
+                    float x2ForPaint = projectionPointIn2D[i + 1].X * zoomInAxisParameter + spaceX;
+                    float y2ForPaint = projectionPointIn2D[i + 1].Y * zoomInAxisParameter + spaceY;
+                    graphics.DrawLine(penForLine, xForPaint, yForPaint, x2ForPaint, y2ForPaint);
+                }
+            }
+
+            // highlight data points
+            using (SolidBrush brushForPoint = new SolidBrush(Color.FromArgb(63, 63, 68)))
+            {
+                foreach (var point in projectionPointIn2D)
+                {
+                    graphics.FillRectangle(brushForPoint, point.X * zoomInAxisParameter + spaceX - 1, point.Y * zoomInAxisParameter + spaceY - 1, 2, 2);
+                }
+            }
+
+            // draw caption
+            using (Font fontForCaption = new Font("Microsoft YaHei", 11, FontStyle.Regular, GraphicsUnit.Point))
+            {
+                Rectangle rect = new Rectangle(0, 0, viewPanel.Width, paddingY - 5);
+
+                StringFormat stringFormat = new StringFormat();
+                stringFormat.Alignment = StringAlignment.Center;
+                stringFormat.LineAlignment = StringAlignment.Center;
+                graphics.DrawString(viewPanel.Name, fontForCaption, Brushes.Black, rect, stringFormat);
+            }
+        }
     }
 }
