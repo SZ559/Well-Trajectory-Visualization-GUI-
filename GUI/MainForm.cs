@@ -24,9 +24,12 @@ namespace Well_Trajectory_Visualization
         Single zoomZ;
         Single zoomInAxisParameter;
         List<Well> wells;
-        const int spaceForCloseIcon = 18;
-        const int paddingYForTabHeaderRectangle = 3;
-        const int marginXForTabHeaderRectangle = 5;
+        readonly int widthOfCloseIcon;
+        readonly int paddingYForTabHeaderRectangle;
+        readonly int leftMarginXForTabHeaderRectangle;
+        readonly int rightMarginXForTabHeaderRectangle;
+        readonly int paddingXForCloseIcon;
+        readonly int paddingYForCloseIcon;
 
         bool hasPreviewTab;
         private bool isDoubleClick;
@@ -36,10 +39,17 @@ namespace Well_Trajectory_Visualization
         {
             InitializeComponent();
 
+            widthOfCloseIcon = 18;
+            paddingYForTabHeaderRectangle = 3;
+            leftMarginXForTabHeaderRectangle = 5;
+            rightMarginXForTabHeaderRectangle = 1;
+            paddingXForCloseIcon = 5;
+            paddingYForCloseIcon = 6;
+
             trajectoryDataReader = new TrajectoryDataReader();
             wellViewSaver = new WellViewSaver();
             projection = new Projection();
-            tabControl.Padding = new Point(spaceForCloseIcon, 5);
+            tabControl.Padding = new Point(widthOfCloseIcon, 5);
             wells = new List<Well>();
             hasPreviewTab = false;
             isDoubleClick = false;
@@ -162,7 +172,7 @@ namespace Well_Trajectory_Visualization
             {
                 string wellName = node.Parent.Text;
                 string trajectoryName = node.Text;
-                string tabPageText = GetTabPageText(wellName, trajectoryName);
+                string tabPageText = GetHeaderTextForTabPage(wellName, trajectoryName);
                 if (IfTabPageOpened(tabPageText))
                 {
                     return;
@@ -179,69 +189,74 @@ namespace Well_Trajectory_Visualization
             }
         }
 
-        private string GetTabPageText(string wellName, string trajectoryName)
-        {
-            string tabPageText = $"{wellName}-{trajectoryName}";
 
-            if (tabPageText.Length > 30)
+        // tab page
+        private string GetHeaderTextForTabPage(string wellName, string trajectoryName)
+        {
+            if (wellName.Length + trajectoryName.Length > 30)
             {
-                tabPageText = tabPageText.Remove(30, tabPageText.Length - 30);
-                StringBuilder tabPageTextString = new StringBuilder(tabPageText);
-                tabPageTextString[14] = '.';
-                tabPageTextString[15] = '.';
-                tabPageTextString[16] = '.';
-                return tabPageTextString.ToString();
+                if (wellName.Length > 15)
+                {
+                    if (trajectoryName.Length > 15)
+                    {
+                        wellName = wellName.Remove(13) + "...";
+                        trajectoryName = trajectoryName.Remove(13) + "...";
+                    }
+                    else
+                    {
+                        wellName = wellName.Remove(28 - trajectoryName.Length) + "...";
+                    }
+                }
+                else
+                {
+                    trajectoryName = trajectoryName.Remove(28 - wellName.Length) + "...";
+                }
             }
-            return tabPageText;
+            return $"{wellName}-{trajectoryName}";
         }
 
+        // tab header: 
+        // x: leftMarginX + filename + leftMarginX + rightMarginX + spaceForCloseIcon + rightMarginX
+        // y: paddingY + text + paddingY
+        // spaceForCloseIcon: 
+        // - x: paddingXForCloseIcon + clsoeIcon + paddingXForCloseIcon
+        // - y: paddingYForCloseIcon + clsoeIcon + paddingYForCloseIcon
         private void DrawOnTab(object sender, DrawItemEventArgs e)
         {
-            
-            
             Graphics graphic = e.Graphics;
             Rectangle tabHeaderArea = tabControl.GetTabRect(e.Index);
-            int paddingX = 3;
 
-            using (Brush aliceBlueBrush = new SolidBrush(Color.AliceBlue))
+            using (Brush brushForHeaderBackground = new SolidBrush(Color.FromArgb(240, 255, 255))) // color.Azure / color.mint-cream
             {
                 if (tabControl.SelectedTab != null && e.Index == tabControl.SelectedIndex)
                 {
-                    graphic.FillRectangle(aliceBlueBrush, tabHeaderArea);
-                    
+                    graphic.FillRectangle(brushForHeaderBackground, tabHeaderArea);
                 }
             }
+
             string text = tabControl.TabPages[e.Index].Text;
-            FontStyle fontStyle = FontStyle.Regular;
-            if ((bool)tabControl.TabPages[e.Index].Tag == false)
-            {
-                fontStyle = FontStyle.Italic;
-            }
-            //graphic.TextRenderingHint = TextRenderingHint.AntiAliasGridFit;
-            Font tabTextFont = new Font(tabControl.Font, fontStyle);
+            FontStyle fontStyle = (bool)tabControl.TabPages[e.Index].Tag == true ? FontStyle.Regular : FontStyle.Italic;
+
+            //draw filename
+            tabHeaderArea.Offset(leftMarginXForTabHeaderRectangle, paddingYForTabHeaderRectangle);
+            tabHeaderArea.Width = tabHeaderArea.Width - leftMarginXForTabHeaderRectangle - rightMarginXForTabHeaderRectangle - widthOfCloseIcon;
+            tabHeaderArea.Height = tabHeaderArea.Height - 2 * paddingYForTabHeaderRectangle;
             graphic.DrawString(text,
-                tabTextFont, SystemBrushes.ControlText, tabHeaderArea.X + paddingX, tabHeaderArea.Y + paddingYForTabHeaderRectangle);
+                tabControl.Font,
+                SystemBrushes.ControlText,
+                tabHeaderArea);
 
-            using (Pen transparentPen = new Pen(Color.Transparent))
+            // draw close icon
+            using (Pen closeIconPen = new Pen(Color.FromArgb(240, 128, 128), 2f))
             {
-                tabHeaderArea.Offset(tabHeaderArea.Width - (spaceForCloseIcon + marginXForTabHeaderRectangle), paddingYForTabHeaderRectangle);
-                tabHeaderArea.Width = spaceForCloseIcon;
-                tabHeaderArea.Height = spaceForCloseIcon;
-                graphic.DrawRectangle(transparentPen, tabHeaderArea);
-            }
-
-            using (Brush transparentBrush = new SolidBrush(Color.Transparent))
-            {
-                graphic.FillRectangle(transparentBrush, tabHeaderArea);
-            }
-
-            using (Pen closeIconPen = new Pen(Color.Red, 1.8f))
-            {
-                Point p1 = new Point(tabHeaderArea.X + marginXForTabHeaderRectangle, tabHeaderArea.Y + paddingYForTabHeaderRectangle);
-                Point p2 = new Point(tabHeaderArea.X + tabHeaderArea.Width - marginXForTabHeaderRectangle, tabHeaderArea.Y + tabHeaderArea.Height - paddingYForTabHeaderRectangle);
+                tabHeaderArea.Offset(tabHeaderArea.Width + paddingXForCloseIcon, paddingYForCloseIcon);
+                tabHeaderArea.Width = widthOfCloseIcon - 2 * paddingXForCloseIcon;
+                tabHeaderArea.Height = tabHeaderArea.Height - 2 * paddingYForCloseIcon;
+                Point p1 = new Point(tabHeaderArea.X, tabHeaderArea.Y);
+                Point p2 = new Point(tabHeaderArea.X + tabHeaderArea.Width, tabHeaderArea.Y + tabHeaderArea.Height);
                 graphic.DrawLine(closeIconPen, p1, p2);
-                Point p3 = new Point(tabHeaderArea.X + marginXForTabHeaderRectangle, tabHeaderArea.Y + tabHeaderArea.Height - paddingYForTabHeaderRectangle);
-                Point p4 = new Point(tabHeaderArea.X + tabHeaderArea.Width - marginXForTabHeaderRectangle, tabHeaderArea.Y + paddingYForTabHeaderRectangle);
+                Point p3 = new Point(tabHeaderArea.X, tabHeaderArea.Y + tabHeaderArea.Height);
+                Point p4 = new Point(tabHeaderArea.X + tabHeaderArea.Width, tabHeaderArea.Y);
                 graphic.DrawLine(closeIconPen, p3, p4);
             }
             e.Graphics.Dispose();
@@ -253,42 +268,30 @@ namespace Well_Trajectory_Visualization
             {
                 if (e.Button == MouseButtons.Left)
                 {
-
                     Rectangle tabCloseIconArea = tabControl.GetTabRect(tabControl.SelectedIndex);
-                    tabCloseIconArea.Offset(tabCloseIconArea.Width - (spaceForCloseIcon + marginXForTabHeaderRectangle), paddingYForTabHeaderRectangle);
-                    tabCloseIconArea.Width = spaceForCloseIcon;
-                    tabCloseIconArea.Height = spaceForCloseIcon;
+                    tabCloseIconArea.Offset(tabCloseIconArea.Width - (widthOfCloseIcon + rightMarginXForTabHeaderRectangle) + paddingXForCloseIcon, paddingYForTabHeaderRectangle + paddingYForCloseIcon);
+                    tabCloseIconArea.Width = widthOfCloseIcon - 2 * paddingXForCloseIcon;
+                    tabCloseIconArea.Height = tabCloseIconArea.Height - 2 * paddingYForTabHeaderRectangle;
                     if (tabCloseIconArea.Contains(e.Location))
                     {
                         CloseTabPage();
                     }
                 }
             }
-            
         }
 
-
-        // tab page
         public bool IfTabPageOpened(string tabPageText)
         {
             defaultPagePanel.Visible = false;
             foreach (TabPage page in tabControl.TabPages)
             {
                 if (page.Text == tabPageText)
-                {       
+                {
                     if (isDoubleClick && tabControl.TabPages.IndexOf(page) == tabControl.TabCount - 1)
                     {
                         page.Tag = true;
                         hasPreviewTab = false;
                         tabControl.SelectedTab = null;
-                      
-
-                        /*
-                        Rectangle rectangle = new Rectangle();
-                        rectangle.Size = tabControl.ItemSize;
-                        rectangle.Location = page.Location;
-                        DrawOnTab(page, new DrawItemEventArgs(page.CreateGraphics(), this.Font, rectangle, tabControl.TabPages.IndexOf(page), DrawItemState.Default));
-                        */
                     }
                     tabControl.SelectedTab = page;
                     return true;
@@ -312,8 +315,9 @@ namespace Well_Trajectory_Visualization
 
             TabPage tabPage = new TabPage
             {
-                Text = GetTabPageText(wellName, trajectoryName),
+                Text = GetHeaderTextForTabPage(wellName, trajectoryName),
                 Font = tabControl.Font,
+                BorderStyle = BorderStyle.None
             };
             tabPage.Tag = isDoubleClick; // opened or preview : true means opened
             trajectory = wells.Find(x => x.WellName == wellName).Trajectories.Find(x => x.TrajectoryName == trajectoryName);
@@ -321,7 +325,7 @@ namespace Well_Trajectory_Visualization
             SetZoomForThreeViews();
             TableLayoutPanel tableLayoutPanel = InitializeTableLayoutPanelForTabPage();
             tabPage.Controls.Add(tableLayoutPanel);
-            tabControl.TabPages.Add(tabPage); 
+            tabControl.TabPages.Add(tabPage);
             SetTableLayoutPanel(tableLayoutPanel);
             tabControl.SelectedTab = tabPage;
 
@@ -449,7 +453,7 @@ namespace Well_Trajectory_Visualization
         {
             if (zoomZ * (control.Width - 2 * paddingX) > zoomXY * (control.Height - 2 * paddingY))
             {
-                zoomInAxisParameter = (control.Height - 2 * paddingY)  / zoomZ;
+                zoomInAxisParameter = (control.Height - 2 * paddingY) / zoomZ;
             }
             else
             {
@@ -461,33 +465,36 @@ namespace Well_Trajectory_Visualization
         {
             int paddingX = 20;
             int paddingY = 25;
-            GetZoomInAxixParameter(control, paddingX , paddingY);
+            GetZoomInAxixParameter(control, paddingX, paddingY);
             Single minX = projectionPointIn2D.Select(x => x.X).Min();
             Single minY = projectionPointIn2D.Select(x => x.Y).Min();
             int spaceX = (int)(paddingX - minX * zoomInAxisParameter);
             int spaceY = (int)(paddingY - minY * zoomInAxisParameter);
 
-            Pen penForLine = new Pen(Color.FromArgb(204, 234, 187));
-            penForLine.Width = 3.0F;
-            SolidBrush brushForPoint = new SolidBrush(Color.FromArgb(63, 63, 68));
             Bitmap bitMap = new Bitmap(control.Width, control.Height);
             Graphics graphics = Graphics.FromImage(bitMap);
 
             // draw line
-            for (int i = 0; i < projectionPointIn2D.Count - 1; i = i + 1)
+            using (Pen penForLine = new Pen(Color.FromArgb(204, 234, 187), 3.0F))
             {
-                float xForPaint = projectionPointIn2D[i].X * zoomInAxisParameter + spaceX;
-                float yForPaint = projectionPointIn2D[i].Y * zoomInAxisParameter + spaceY;
-                float x2ForPaint = projectionPointIn2D[i + 1].X * zoomInAxisParameter + spaceX;
-                float y2ForPaint = projectionPointIn2D[i + 1].Y * zoomInAxisParameter + spaceY;
-                graphics.DrawLine(penForLine, xForPaint, yForPaint, x2ForPaint, y2ForPaint);
+                for (int i = 0; i < projectionPointIn2D.Count - 1; i = i + 1)
+                {
+                    float xForPaint = projectionPointIn2D[i].X * zoomInAxisParameter + spaceX;
+                    float yForPaint = projectionPointIn2D[i].Y * zoomInAxisParameter + spaceY;
+                    float x2ForPaint = projectionPointIn2D[i + 1].X * zoomInAxisParameter + spaceX;
+                    float y2ForPaint = projectionPointIn2D[i + 1].Y * zoomInAxisParameter + spaceY;
+                    graphics.DrawLine(penForLine, xForPaint, yForPaint, x2ForPaint, y2ForPaint);
+                }
             }
 
             // highlight data points
-            foreach (var point in projectionPointIn2D)
+            using (SolidBrush brushForPoint = new SolidBrush(Color.FromArgb(63, 63, 68)))
             {
-                graphics.FillRectangle(brushForPoint, point.X * zoomInAxisParameter + spaceX - 1, point.Y * zoomInAxisParameter + spaceY - 1, 2, 2);
-                //graphics.FillEllipse(brushForPoint, point.X * zoomInXAxisParameter + spaceX - radius / 2, point.Y * zoomInYAxisParameter + spaceY - radius / 2, radius, radius);
+                foreach (var point in projectionPointIn2D)
+                {
+                    graphics.FillRectangle(brushForPoint, point.X * zoomInAxisParameter + spaceX - 1, point.Y * zoomInAxisParameter + spaceY - 1, 2, 2);
+                    //graphics.FillEllipse(brushForPoint, point.X * zoomInXAxisParameter + spaceX - radius / 2, point.Y * zoomInYAxisParameter + spaceY - radius / 2, radius, radius);
+                }
             }
 
             // draw caption
@@ -501,8 +508,6 @@ namespace Well_Trajectory_Visualization
                 graphics.DrawString(control.Name, fontForCaption, Brushes.Black, rect, stringFormat);
             }
 
-            penForLine.Dispose();
-            brushForPoint.Dispose();
             graphics.Dispose();
 
             return bitMap;
@@ -532,7 +537,6 @@ namespace Well_Trajectory_Visualization
         {
             if (tabControl.SelectedIndex != -1)
             {
-
                 TableLayoutPanel tableLayoutPanel = (TableLayoutPanel)tabControl.SelectedTab.Controls[0];
                 PictureBox mainViewPictureBox = (PictureBox)tableLayoutPanel.Controls.Find("Main View", true).First();
                 PictureBox leftViewPictureBox = (PictureBox)tableLayoutPanel.Controls.Find("Left View", true).First();
@@ -553,7 +557,6 @@ namespace Well_Trajectory_Visualization
         {
             if (tabControl.SelectedIndex != -1)
             {
-
                 TableLayoutPanel tableLayoutPanel = (TableLayoutPanel)tabControl.SelectedTab.Controls[0];
                 PictureBox mainViewPictureBox = (PictureBox)tableLayoutPanel.Controls.Find("Main View", true).First();
 
@@ -568,7 +571,6 @@ namespace Well_Trajectory_Visualization
         {
             if (tabControl.SelectedIndex != -1)
             {
-
                 TableLayoutPanel tableLayoutPanel = (TableLayoutPanel)tabControl.SelectedTab.Controls[0];
                 PictureBox mainViewPictureBox = (PictureBox)tableLayoutPanel.Controls.Find("Main View", true).First();
 
@@ -583,7 +585,6 @@ namespace Well_Trajectory_Visualization
         {
             if (tabControl.SelectedIndex != -1)
             {
-
                 TableLayoutPanel tableLayoutPanel = (TableLayoutPanel)tabControl.SelectedTab.Controls[0];
                 PictureBox mainViewPictureBox = (PictureBox)tableLayoutPanel.Controls.Find("Main View", true).First();
 
@@ -598,7 +599,6 @@ namespace Well_Trajectory_Visualization
         {
             if (tabControl.SelectedIndex != -1)
             {
-
                 TableLayoutPanel tableLayoutPanel = (TableLayoutPanel)tabControl.SelectedTab.Controls[0];
                 PictureBox mainViewPictureBox = (PictureBox)tableLayoutPanel.Controls.Find("Main View", true).First();
 
@@ -613,33 +613,5 @@ namespace Well_Trajectory_Visualization
             }
         }
 
-        //// TODO: ????
-        //private void tabControl_SelectedIndexChanged(object sender, EventArgs e)
-        //{
-        //    if (tabControl.SelectedTab != null)
-        //    {
-        //        string wellName = tabControl.SelectedTab.Text.Split('-')[0];
-        //        string trajectoryName = tabControl.SelectedTab.Text.Split('-')[1];
-        //        trajectory = wells.Find(x => x.WellName == wellName).Trajectories.Find(x => x.TrajectoryName == trajectoryName);
-        //        SetZoom();
-
-        //        //FontStyle fontStyle = (bool)tabControl.SelectedTab.Tag ? FontStyle.Regular : FontStyle.Italic;
-
-        //        Graphics g = tabControl.CreateGraphics();
-        //        Rectangle rect = new Rectangle(tabControl.SelectedIndex * tabControl.ItemSize.Width + 2, 2, tabControl.ItemSize.Width - 2, tabControl.ItemSize.Height - 2);
-        //        g.FillRectangle(Brushes.LightBlue, rect);
-        //        g.DrawString(tabControl.SelectedTab.Text, new Font(tabControl.SelectedTab.Font, FontStyle.Bold), Brushes.Black, rect);
-        //    }
-        //}
-
-
-        //private int GetSpace(int padding, float startPoint)
-        //{
-        //    if (startPoint < 0)
-        //    {
-        //        return (int) (padding - startPoint);
-        //    }
-        //    return padding;
-        //}
     }
 }
