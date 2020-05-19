@@ -7,6 +7,8 @@ using System.Windows.Forms;
 using GeometricObject;
 using FileHandler;
 using System.Numerics;
+using System.Text;
+using System.Drawing.Text;
 
 namespace Well_Trajectory_Visualization
 {
@@ -22,7 +24,7 @@ namespace Well_Trajectory_Visualization
         Single zoomZ;
         Single zoomInAxisParameter;
         List<Well> wells;
-        const int spaceForCloseIcon = 15;
+        const int spaceForCloseIcon = 18;
         const int paddingYForTabHeaderRectangle = 3;
         const int marginXForTabHeaderRectangle = 5;
 
@@ -160,7 +162,7 @@ namespace Well_Trajectory_Visualization
             {
                 string wellName = node.Parent.Text;
                 string trajectoryName = node.Text;
-                string tabPageText = $"{wellName}-{trajectoryName}";
+                string tabPageText = GetTabPageText(wellName, trajectoryName);
                 if (IfTabPageOpened(tabPageText))
                 {
                     return;
@@ -177,17 +179,35 @@ namespace Well_Trajectory_Visualization
             }
         }
 
+        private string GetTabPageText(string wellName, string trajectoryName)
+        {
+            string tabPageText = $"{wellName}-{trajectoryName}";
+
+            if (tabPageText.Length > 30)
+            {
+                tabPageText = tabPageText.Remove(30, tabPageText.Length - 30);
+                StringBuilder tabPageTextString = new StringBuilder(tabPageText);
+                tabPageTextString[14] = '.';
+                tabPageTextString[15] = '.';
+                tabPageTextString[16] = '.';
+                return tabPageTextString.ToString();
+            }
+            return tabPageText;
+        }
+
         private void DrawOnTab(object sender, DrawItemEventArgs e)
         {
+            
+            
             Graphics graphic = e.Graphics;
             Rectangle tabHeaderArea = tabControl.GetTabRect(e.Index);
             int paddingX = 3;
 
-            using (Brush brBack = new SolidBrush(Color.AliceBlue))
+            using (Brush aliceBlueBrush = new SolidBrush(Color.AliceBlue))
             {
                 if (tabControl.SelectedTab != null && e.Index == tabControl.SelectedIndex)
                 {
-                    graphic.FillRectangle(brBack, tabHeaderArea);
+                    graphic.FillRectangle(aliceBlueBrush, tabHeaderArea);
                     
                 }
             }
@@ -197,18 +217,8 @@ namespace Well_Trajectory_Visualization
             {
                 fontStyle = FontStyle.Italic;
             }
-            Font tabTextFont = new Font("Arial", 10.0f, fontStyle);
-            
-            if (graphic.MeasureString(text, tabTextFont).Width > tabHeaderArea.Size.Width - marginXForTabHeaderRectangle)
-            {
-                while (graphic.MeasureString(text, tabTextFont).Width > tabHeaderArea.Size.Width - marginXForTabHeaderRectangle)
-                {
-                    text = text.Remove(text.Length - 1, 1);
-                }
-                text = text.Remove(text.Length - 3, 3);
-                text = text + "...";
-            }
-
+            //graphic.TextRenderingHint = TextRenderingHint.AntiAliasGridFit;
+            Font tabTextFont = new Font(tabControl.Font, fontStyle);
             graphic.DrawString(text,
                 tabTextFont, SystemBrushes.ControlText, tabHeaderArea.X + paddingX, tabHeaderArea.Y + paddingYForTabHeaderRectangle);
 
@@ -236,6 +246,7 @@ namespace Well_Trajectory_Visualization
             }
             e.Graphics.Dispose();
         }
+
         private void TabControl_MouseDown(object sender, MouseEventArgs e)
         {
             if (tabControl.SelectedTab != null)
@@ -253,6 +264,7 @@ namespace Well_Trajectory_Visualization
                     }
                 }
             }
+            
         }
 
 
@@ -300,7 +312,8 @@ namespace Well_Trajectory_Visualization
 
             TabPage tabPage = new TabPage
             {
-                Text = $"{wellName}-{trajectoryName}"
+                Text = GetTabPageText(wellName, trajectoryName),
+                Font = tabControl.Font,
             };
             tabPage.Tag = isDoubleClick; // opened or preview : true means opened
             trajectory = wells.Find(x => x.WellName == wellName).Trajectories.Find(x => x.TrajectoryName == trajectoryName);
@@ -354,8 +367,6 @@ namespace Well_Trajectory_Visualization
                 }
             }
         }
-
-
 
         private TableLayoutPanel InitializeTableLayoutPanelForTabPage()
         {
