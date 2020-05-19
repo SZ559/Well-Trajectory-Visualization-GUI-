@@ -172,7 +172,7 @@ namespace Well_Trajectory_Visualization
             {
                 string wellName = node.Parent.Text;
                 string trajectoryName = node.Text;
-                string tabPageText = GetTabPageText(wellName, trajectoryName);
+                string tabPageText = GetHeaderTextForTabPage(wellName, trajectoryName);
                 if (IfTabPageOpened(tabPageText))
                 {
                     return;
@@ -191,21 +191,28 @@ namespace Well_Trajectory_Visualization
 
 
         // tab page
-        private string GetTabPageText(string wellName, string trajectoryName)
+        private string GetHeaderTextForTabPage(string wellName, string trajectoryName)
         {
-            string tabPageText = $"{wellName}-{trajectoryName}";
-
-            if (tabPageText.Length > 15)
+            if (wellName.Length + trajectoryName.Length > 30)
             {
-                string partialWellName = tabPageText.Remove(9);
-                string partialTrajectoryName = tabPageText.Substring(tabPageText.Length - 11, 11);
-                StringBuilder tabPageTextString = new StringBuilder();
-                tabPageTextString.Append(partialWellName);
-                tabPageTextString.Append("..");
-                tabPageTextString.Append(partialTrajectoryName);
-                return tabPageTextString.ToString();
+                if (wellName.Length > 15)
+                {
+                    if (trajectoryName.Length > 15)
+                    {
+                        wellName = wellName.Remove(13) + "...";
+                        trajectoryName = trajectoryName.Remove(13) + "...";
+                    }
+                    else
+                    {
+                        wellName = wellName.Remove(28 - trajectoryName.Length) + "...";
+                    }
+                }
+                else
+                {
+                    trajectoryName = trajectoryName.Remove(28 - wellName.Length) + "...";
+                }
             }
-            return tabPageText;
+            return $"{wellName}-{trajectoryName}";
         }
 
         // tab header: 
@@ -235,7 +242,7 @@ namespace Well_Trajectory_Visualization
             tabHeaderArea.Width = tabHeaderArea.Width - leftMarginXForTabHeaderRectangle - rightMarginXForTabHeaderRectangle - widthOfCloseIcon;
             tabHeaderArea.Height = tabHeaderArea.Height - 2 * paddingYForTabHeaderRectangle;
             graphic.DrawString(text,
-                new Font("Microsoft YaHei", 10, fontStyle),
+                tabControl.Font,
                 SystemBrushes.ControlText,
                 tabHeaderArea);
 
@@ -308,7 +315,7 @@ namespace Well_Trajectory_Visualization
 
             TabPage tabPage = new TabPage
             {
-                Text = GetTabPageText(wellName, trajectoryName),
+                Text = GetHeaderTextForTabPage(wellName, trajectoryName),
                 Font = tabControl.Font,
                 BorderStyle = BorderStyle.None
             };
@@ -530,7 +537,6 @@ namespace Well_Trajectory_Visualization
         {
             if (tabControl.SelectedIndex != -1)
             {
-
                 TableLayoutPanel tableLayoutPanel = (TableLayoutPanel)tabControl.SelectedTab.Controls[0];
                 PictureBox mainViewPictureBox = (PictureBox)tableLayoutPanel.Controls.Find("Main View", true).First();
                 PictureBox leftViewPictureBox = (PictureBox)tableLayoutPanel.Controls.Find("Left View", true).First();
@@ -551,7 +557,6 @@ namespace Well_Trajectory_Visualization
         {
             if (tabControl.SelectedIndex != -1)
             {
-
                 TableLayoutPanel tableLayoutPanel = (TableLayoutPanel)tabControl.SelectedTab.Controls[0];
                 PictureBox mainViewPictureBox = (PictureBox)tableLayoutPanel.Controls.Find("Main View", true).First();
 
@@ -566,7 +571,6 @@ namespace Well_Trajectory_Visualization
         {
             if (tabControl.SelectedIndex != -1)
             {
-
                 TableLayoutPanel tableLayoutPanel = (TableLayoutPanel)tabControl.SelectedTab.Controls[0];
                 PictureBox mainViewPictureBox = (PictureBox)tableLayoutPanel.Controls.Find("Main View", true).First();
 
@@ -581,7 +585,6 @@ namespace Well_Trajectory_Visualization
         {
             if (tabControl.SelectedIndex != -1)
             {
-
                 TableLayoutPanel tableLayoutPanel = (TableLayoutPanel)tabControl.SelectedTab.Controls[0];
                 PictureBox mainViewPictureBox = (PictureBox)tableLayoutPanel.Controls.Find("Main View", true).First();
 
@@ -596,7 +599,6 @@ namespace Well_Trajectory_Visualization
         {
             if (tabControl.SelectedIndex != -1)
             {
-
                 TableLayoutPanel tableLayoutPanel = (TableLayoutPanel)tabControl.SelectedTab.Controls[0];
                 PictureBox mainViewPictureBox = (PictureBox)tableLayoutPanel.Controls.Find("Main View", true).First();
 
