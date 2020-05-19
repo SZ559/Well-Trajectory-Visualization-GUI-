@@ -1,4 +1,4 @@
-.vs
+**/.vs
 
 .vscode
 
@@ -10,4 +10,4 @@
 
 CodeCoverageReport
 
-packages
+**/packages
