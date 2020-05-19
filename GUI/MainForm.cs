@@ -64,7 +64,7 @@ namespace Well_Trajectory_Visualization
                 string filePath = saveFileDialog.FileName;
                 Vector3 normalVector = GetNormalVectorForView(viewName);
                 List<PointIn2D> projectionPointIn2D = projection.GetProjectionInPlane(trajectory.PolyLineNodes, normalVector);
-                Bitmap bitmap = PaintPicture(control, projectionPointIn2D);
+                Bitmap bitmap = PaintView(control, projectionPointIn2D);
                 wellViewSaver.SaveView(filePath, bitmap, out errorMessage);
                 if (string.IsNullOrEmpty(errorMessage))
                 {
@@ -444,7 +444,7 @@ namespace Well_Trajectory_Visualization
         {
             Vector3 normalVector = GetNormalVectorForView(pictureBox.Name);
             List<PointIn2D> projectionPointIn2D = projection.GetProjectionInPlane(trajectory.PolyLineNodes, normalVector);
-            Bitmap bitMap = PaintPicture(pictureBox, projectionPointIn2D);
+            Bitmap bitMap = PaintView(pictureBox, projectionPointIn2D);
             pictureBox.Image = bitMap;
             pictureBox.SizeMode = PictureBoxSizeMode.Zoom;
         }
@@ -462,10 +462,10 @@ namespace Well_Trajectory_Visualization
             }
         }
 
-        private Bitmap PaintPicture(Control control, List<PointIn2D> projectionPointIn2D)
+        private Bitmap PaintView(Control control, List<PointIn2D> projectionPointIn2D)
         {
-            int paddingX = 20;
-            int paddingY = 25;
+            int paddingX = 30;
+            int paddingY = 35;
             GetZoomInAxixParameter(control, paddingX, paddingY);
             Single minX = projectionPointIn2D.Select(x => x.X).Min();
             Single minY = projectionPointIn2D.Select(x => x.Y).Min();
@@ -499,9 +499,9 @@ namespace Well_Trajectory_Visualization
             }
 
             // draw caption
-            using (Font fontForCaption = new Font("Microsoft YaHei Light", 8, FontStyle.Regular, GraphicsUnit.Point))
+            using (Font fontForCaption = new Font("Microsoft YaHei Light", 10, FontStyle.Regular, GraphicsUnit.Point))
             {
-                Rectangle rect = new Rectangle(0, 0, control.Width, paddingY - 5);
+                Rectangle rect = new Rectangle(0, 0, control.Width, paddingY - 20);
 
                 StringFormat stringFormat = new StringFormat();
                 stringFormat.Alignment = StringAlignment.Center;
@@ -509,12 +509,72 @@ namespace Well_Trajectory_Visualization
                 graphics.DrawString(control.Name, fontForCaption, Brushes.Black, rect, stringFormat);
             }
 
-            //draw Axis
+            //draw axis
             string axisXCaption;
             string axisYCaption;
+            switch (control.Name)
+            {
+                case "Main View":
+                    axisXCaption = "x";
+                    axisYCaption = "z";
+                    break;
+                case "Left View":
+                    axisXCaption = "y";
+                    axisYCaption = "z";
+                    break;
+                default:
+                    axisXCaption = "x";
+                    axisYCaption = "y";
+                    break;
+            }
 
+            int lineLength = 5;
+            int spaceForTextInXDirection = 30;
+            int spaceForTextInYDirection = 20;
+            int spaceForTextAlignment = 10;
 
+            PointF xAxisStartPoint = new PointF(paddingX - lineLength, paddingY);
+            PointF yAxisStartPoint = new PointF(paddingX, paddingY - lineLength);
+            PointF xAxisEndPoint = new PointF(control.Width - paddingX, paddingY);
+            PointF yAxisEndPoint = new PointF(paddingX, control.Height - paddingY);
+            PointF[] xAxisArrowhead = new PointF[] { new PointF(xAxisEndPoint.X, xAxisEndPoint.Y - lineLength), new PointF(xAxisEndPoint.X, xAxisEndPoint.Y + lineLength), new PointF(xAxisEndPoint.X + lineLength, xAxisEndPoint.Y) };
+            PointF[] yAxisArrowhead = new PointF[] { new PointF(yAxisEndPoint.X - lineLength, yAxisEndPoint.Y), new PointF(yAxisEndPoint.X + lineLength, yAxisEndPoint.Y), new PointF(yAxisEndPoint.X, yAxisEndPoint.Y + lineLength) };
+            Font textFont = control.Font;
+            using (Pen penForAxis = new Pen(Color.Black, 0.3F))
+            {
+                graphics.DrawLine(penForAxis, xAxisStartPoint, xAxisEndPoint);
+                graphics.DrawLine(penForAxis, yAxisStartPoint, yAxisEndPoint);
+                graphics.DrawString(axisXCaption, textFont, Brushes.Black, xAxisEndPoint.X - spaceForTextAlignment, xAxisEndPoint.Y - spaceForTextInYDirection);
+                graphics.DrawString(axisYCaption, textFont, Brushes.Black, yAxisEndPoint.X - spaceForTextInXDirection / 2, yAxisEndPoint.Y - spaceForTextAlignment);
+                graphics.DrawPolygon(penForAxis, xAxisArrowhead);
+                graphics.FillPolygon(Brushes.Black, xAxisArrowhead);
+                graphics.DrawPolygon(penForAxis, yAxisArrowhead);
+                graphics.FillPolygon(Brushes.Black, yAxisArrowhead);
 
+                int scale = (int)(1 / zoomInAxisParameter) * 60;
+                int coordinateX = (int) minX;
+                int coordinateY = (int) minY;
+                float coordinateXLocationX = coordinateX * zoomInAxisParameter + spaceX;
+                float coordinateXLocationY = xAxisStartPoint.Y - spaceForTextInYDirection;
+                while (coordinateXLocationX <= xAxisEndPoint.X - scale)
+                {
+                    graphics.DrawLine(penForAxis, coordinateXLocationX, xAxisStartPoint.Y, coordinateXLocationX, xAxisStartPoint.Y - lineLength);
+                    graphics.DrawString(coordinateX.ToString(), textFont, Brushes.Black, coordinateXLocationX - spaceForTextAlignment, coordinateXLocationY);
+                    coordinateX = coordinateX + scale;
+                    coordinateXLocationX = coordinateX * zoomInAxisParameter + spaceX;
+                }
+                float coordinateYLocationX = yAxisStartPoint.X - spaceForTextInXDirection;
+                float coordinateYLocationY = (int) coordinateY * zoomInAxisParameter + spaceY;
+                while (coordinateYLocationY <= yAxisEndPoint.Y - scale)
+                {
+                    graphics.DrawLine(penForAxis, yAxisStartPoint.X, coordinateYLocationY, yAxisStartPoint.X - lineLength, coordinateYLocationY);
+                    graphics.DrawString(coordinateY.ToString(), textFont, Brushes.Black, coordinateYLocationX, coordinateYLocationY - spaceForTextAlignment / 2);
+                    coordinateY = coordinateY + scale;
+                    coordinateYLocationY = coordinateY * zoomInAxisParameter + spaceY;
+                }
+            }
+            
+            
             graphics.Dispose();
 
             return bitMap;
@@ -527,20 +587,20 @@ namespace Well_Trajectory_Visualization
             LoadTrajectoryDataFromFile();
         }
 
-        private void viewSourceToolStripMenuItem_Click(object sender, EventArgs e)
+        private void ViewSourceToolStripMenuItem_Click(object sender, EventArgs e)
         {
             // HACK
             System.Diagnostics.Process.Start("https://github.com/SZ559/Well-Trajectory-Visualization-GUI-");
         }
 
-        private void referenceToolStripMenuItem_Click(object sender, EventArgs e)
+        private void ReferenceToolStripMenuItem_Click(object sender, EventArgs e)
         {
             System.Diagnostics.Process.Start("https://commons.wikimedia.org/wiki/File:Third_angle_projecting.svg");
         }
 
 
 
-        private void saveToolStripButton_Click(object sender, EventArgs e)
+        private void SaveToolStripButton_Click(object sender, EventArgs e)
         {
             if (tabControl.SelectedIndex != -1)
             {
@@ -560,7 +620,7 @@ namespace Well_Trajectory_Visualization
             }
         }
 
-        private void mainViewToolStripMenuItem_Click(object sender, EventArgs e)
+        private void MainViewToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if (tabControl.SelectedIndex != -1)
             {
@@ -574,7 +634,7 @@ namespace Well_Trajectory_Visualization
             }
         }
 
-        private void leftViewToolStripMenuItem_Click(object sender, EventArgs e)
+        private void LeftViewToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if (tabControl.SelectedIndex != -1)
             {
@@ -588,7 +648,7 @@ namespace Well_Trajectory_Visualization
             }
         }
 
-        private void topViewToolStripMenuItem_Click(object sender, EventArgs e)
+        private void TopViewToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if (tabControl.SelectedIndex != -1)
             {
@@ -602,16 +662,18 @@ namespace Well_Trajectory_Visualization
             }
         }
 
-        private void allViewsToolStripMenuItem_Click(object sender, EventArgs e)
+        private void ThreeViewsToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if (tabControl.SelectedIndex != -1)
             {
                 TableLayoutPanel tableLayoutPanel = (TableLayoutPanel)tabControl.SelectedTab.Controls[0];
                 PictureBox mainViewPictureBox = (PictureBox)tableLayoutPanel.Controls.Find("Main View", true).First();
 
-                Panel newPanel = new Panel();
-                newPanel.Size = mainViewPictureBox.Size;
-                newPanel.Name = "Main View";
+                Panel newPanel = new Panel
+                {
+                    Size = mainViewPictureBox.Size,
+                    Name = "Main View",
+                };
                 SaveViewToFigure(newPanel, "Main View", trajectory);
                 newPanel.Name = "Left View";
                 SaveViewToFigure(newPanel, "Left View", trajectory);

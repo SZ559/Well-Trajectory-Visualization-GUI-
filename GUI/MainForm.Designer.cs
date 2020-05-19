@@ -128,28 +128,28 @@
             this.allViewsToolStripMenuItem.Name = "allViewsToolStripMenuItem";
             this.allViewsToolStripMenuItem.Size = new System.Drawing.Size(136, 22);
             this.allViewsToolStripMenuItem.Text = "All Views";
-            this.allViewsToolStripMenuItem.Click += new System.EventHandler(this.allViewsToolStripMenuItem_Click);
+            this.allViewsToolStripMenuItem.Click += new System.EventHandler(this.ThreeViewsToolStripMenuItem_Click);
             // 
             // mainViewToolStripMenuItem
             // 
             this.mainViewToolStripMenuItem.Name = "mainViewToolStripMenuItem";
             this.mainViewToolStripMenuItem.Size = new System.Drawing.Size(136, 22);
             this.mainViewToolStripMenuItem.Text = "Main View";
-            this.mainViewToolStripMenuItem.Click += new System.EventHandler(this.mainViewToolStripMenuItem_Click);
+            this.mainViewToolStripMenuItem.Click += new System.EventHandler(this.MainViewToolStripMenuItem_Click);
             // 
             // leftViewToolStripMenuItem
             // 
             this.leftViewToolStripMenuItem.Name = "leftViewToolStripMenuItem";
             this.leftViewToolStripMenuItem.Size = new System.Drawing.Size(136, 22);
             this.leftViewToolStripMenuItem.Text = "Left View";
-            this.leftViewToolStripMenuItem.Click += new System.EventHandler(this.leftViewToolStripMenuItem_Click);
+            this.leftViewToolStripMenuItem.Click += new System.EventHandler(this.LeftViewToolStripMenuItem_Click);
             // 
             // topViewToolStripMenuItem
             // 
             this.topViewToolStripMenuItem.Name = "topViewToolStripMenuItem";
             this.topViewToolStripMenuItem.Size = new System.Drawing.Size(136, 22);
             this.topViewToolStripMenuItem.Text = "Top View";
-            this.topViewToolStripMenuItem.Click += new System.EventHandler(this.topViewToolStripMenuItem_Click);
+            this.topViewToolStripMenuItem.Click += new System.EventHandler(this.TopViewToolStripMenuItem_Click);
             // 
             // exitToolStripMenuItem
             // 
@@ -178,7 +178,7 @@
             this.viewSourceToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.F7)));
             this.viewSourceToolStripMenuItem.Size = new System.Drawing.Size(197, 22);
             this.viewSourceToolStripMenuItem.Text = "View &Source";
-            this.viewSourceToolStripMenuItem.Click += new System.EventHandler(this.viewSourceToolStripMenuItem_Click);
+            this.viewSourceToolStripMenuItem.Click += new System.EventHandler(this.ViewSourceToolStripMenuItem_Click);
             // 
             // toolStrip1
             // 
@@ -214,7 +214,7 @@
             this.saveToolStripButton.Name = "saveToolStripButton";
             this.saveToolStripButton.Size = new System.Drawing.Size(23, 22);
             this.saveToolStripButton.Text = "toolStripButton2";
-            this.saveToolStripButton.Click += new System.EventHandler(this.saveToolStripButton_Click);
+            this.saveToolStripButton.Click += new System.EventHandler(this.SaveToolStripButton_Click);
             // 
             // closeTheCurrentTabPageToolStripButton
             // 
@@ -392,7 +392,7 @@
             this.referenceToolStripMenuItem.Name = "referenceToolStripMenuItem";
             this.referenceToolStripMenuItem.Size = new System.Drawing.Size(134, 22);
             this.referenceToolStripMenuItem.Text = "Reference";
-            this.referenceToolStripMenuItem.Click += new System.EventHandler(this.referenceToolStripMenuItem_Click);
+            this.referenceToolStripMenuItem.Click += new System.EventHandler(this.ReferenceToolStripMenuItem_Click);
             // 
             // label5
             // 
