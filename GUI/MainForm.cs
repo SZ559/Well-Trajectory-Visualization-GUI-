@@ -498,15 +498,14 @@ namespace Well_Trajectory_Visualization
                 }
             }
 
+            StringFormat stringFormatCenterAlignment = new StringFormat();
+            stringFormatCenterAlignment.Alignment = StringAlignment.Center;
+            stringFormatCenterAlignment.LineAlignment = StringAlignment.Center;
             // draw caption
             using (Font fontForCaption = new Font("Microsoft YaHei Light", 10, FontStyle.Regular, GraphicsUnit.Point))
             {
                 Rectangle rect = new Rectangle(0, 0, control.Width, paddingY - 20);
-
-                StringFormat stringFormat = new StringFormat();
-                stringFormat.Alignment = StringAlignment.Center;
-                stringFormat.LineAlignment = StringAlignment.Center;
-                graphics.DrawString(control.Name, fontForCaption, Brushes.Black, rect, stringFormat);
+                graphics.DrawString(control.Name, fontForCaption, Brushes.Black, rect, stringFormatCenterAlignment);
             }
 
             //draw axis
@@ -529,9 +528,9 @@ namespace Well_Trajectory_Visualization
             }
 
             int lineLength = 5;
-            int spaceForTextInXDirection = 30;
+            int spaceForTextInXDirection = 35;
             int spaceForTextInYDirection = 20;
-            int spaceForTextAlignment = 10;
+            int spaceForTextAlignment = 20;
 
             PointF xAxisStartPoint = new PointF(paddingX - lineLength, paddingY);
             PointF yAxisStartPoint = new PointF(paddingX, paddingY - lineLength);
@@ -556,10 +555,14 @@ namespace Well_Trajectory_Visualization
                 int coordinateY = (int) minY;
                 float coordinateXLocationX = coordinateX * zoomInAxisParameter + spaceX;
                 float coordinateXLocationY = xAxisStartPoint.Y - spaceForTextInYDirection;
+                StringFormat stringFormatRightAlignment = new StringFormat();
+                stringFormatRightAlignment.Alignment = StringAlignment.Far;
                 while (coordinateXLocationX <= xAxisEndPoint.X - scale)
                 {
+                    Rectangle rectangle = new Rectangle((int)(coordinateXLocationX - spaceForTextAlignment), (int)coordinateXLocationY, spaceForTextAlignment * 2, (int)(spaceForTextInYDirection - lineLength));
                     graphics.DrawLine(penForAxis, coordinateXLocationX, xAxisStartPoint.Y, coordinateXLocationX, xAxisStartPoint.Y - lineLength);
-                    graphics.DrawString(coordinateX.ToString(), textFont, Brushes.Black, coordinateXLocationX - spaceForTextAlignment, coordinateXLocationY);
+                    graphics.DrawString(coordinateX.ToString(), textFont, Brushes.Black, rectangle, stringFormatCenterAlignment);
+                    //graphics.DrawString(coordinateX.ToString(), textFont, Brushes.Black, coordinateXLocationX - spaceForTextAlignment, coordinateXLocationY);
                     coordinateX = coordinateX + scale;
                     coordinateXLocationX = coordinateX * zoomInAxisParameter + spaceX;
                 }
@@ -568,7 +571,9 @@ namespace Well_Trajectory_Visualization
                 while (coordinateYLocationY <= yAxisEndPoint.Y - scale)
                 {
                     graphics.DrawLine(penForAxis, yAxisStartPoint.X, coordinateYLocationY, yAxisStartPoint.X - lineLength, coordinateYLocationY);
-                    graphics.DrawString(coordinateY.ToString(), textFont, Brushes.Black, coordinateYLocationX, coordinateYLocationY - spaceForTextAlignment / 2);
+                    Rectangle rectangle = new Rectangle((int) coordinateYLocationX, (int) (coordinateYLocationY - 8), (int) (spaceForTextInXDirection - lineLength), spaceForTextInYDirection);
+                    graphics.DrawString(coordinateY.ToString(), textFont, Brushes.Black, rectangle, stringFormatRightAlignment);
+                    //graphics.DrawString(coordinateY.ToString(), textFont, Brushes.Black, coordinateYLocationX, coordinateYLocationY - spaceForTextAlignment / 2);
                     coordinateY = coordinateY + scale;
                     coordinateYLocationY = coordinateY * zoomInAxisParameter + spaceY;
                 }
