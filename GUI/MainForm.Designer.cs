@@ -445,7 +445,6 @@
             this.tabControl.Size = new System.Drawing.Size(1003, 599);
             this.tabControl.TabIndex = 0;
             this.tabControl.DrawItem += new System.Windows.Forms.DrawItemEventHandler(this.DrawTabHeaderText_DrawItem);
-            this.tabControl.SelectedIndexChanged += new System.EventHandler(this.tabControl_SelectedIndexChanged);
             this.tabControl.MouseDown += new System.Windows.Forms.MouseEventHandler(this.DrawCloseIcon_MouseDown);
             // 
             // openFileDialog
@@ -473,7 +472,6 @@
             this.MinimumSize = new System.Drawing.Size(875, 628);
             this.Name = "MainForm";
             this.Text = "Well Trajectory Visualizer";
-            this.Resize += new System.EventHandler(this.MainForm_Resize);
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
             this.toolStrip1.ResumeLayout(false);
