@@ -7,8 +7,6 @@ using System.Windows.Forms;
 using GeometricObject;
 using FileHandler;
 using System.Numerics;
-using System.Text;
-using System.Drawing.Text;
 
 namespace Well_Trajectory_Visualization
 {
@@ -38,7 +36,6 @@ namespace Well_Trajectory_Visualization
         public MainForm()
         {
             InitializeComponent();
-
             widthOfCloseIcon = 18;
             paddingYForTabHeaderRectangle = 3;
             leftMarginXForTabHeaderRectangle = 5;
@@ -55,16 +52,15 @@ namespace Well_Trajectory_Visualization
             isDoubleClick = false;
         }
 
-        private void SaveViewToFigure(Control control, string viewName, Trajectory trajectory)
+        private void SaveViewToFigure(Control control, string viewName)
         {
             saveFileDialog.FileName = tabControl.SelectedTab.Text + "-" + viewName;
             if (saveFileDialog.ShowDialog() == DialogResult.OK)
             {
                 string errorMessage;
                 string filePath = saveFileDialog.FileName;
-                Vector3 normalVector = GetNormalVectorForView(viewName);
-                List<PointIn2D> projectionPointIn2D = projection.GetProjectionInPlane(trajectory.PolyLineNodes, normalVector);
-                Bitmap bitmap = PaintView(control, projectionPointIn2D);
+                Bitmap bitmap = new Bitmap(control.Width, control.Height);
+                control.DrawToBitmap(bitmap, new Rectangle(0, 0, control.Width, control.Height));
                 wellViewSaver.SaveView(filePath, bitmap, out errorMessage);
                 if (string.IsNullOrEmpty(errorMessage))
                 {
@@ -74,6 +70,29 @@ namespace Well_Trajectory_Visualization
                 {
                     MessageBox.Show($"Saving view to {filePath} failed.\n{errorMessage}", "Saving View", MessageBoxButtons.OK);
                 }
+            }
+        }
+
+        private void SaveViewOnTabPage(object sender, EventArgs e)
+        {
+            
+            if (tabControl.SelectedIndex != -1)
+            {
+                TableLayoutPanel tableLayoutPanel = (TableLayoutPanel)tabControl.SelectedTab.Controls[0];
+                foreach (Control control in tableLayoutPanel.Controls)
+                {
+                    SaveViewToFigure(control, control.Name);
+                }
+            }
+        }
+
+        private void ViewToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (tabControl.SelectedIndex != -1)
+            {
+                ToolStripMenuItem toolStripMenuItem = (ToolStripMenuItem) sender;
+                Control controlForView = tabControl.SelectedTab.Controls.Find(toolStripMenuItem.Text, true).First();
+                SaveViewToFigure(controlForView, toolStripMenuItem.Text);
             }
         }
 
@@ -577,9 +596,7 @@ namespace Well_Trajectory_Visualization
                     coordinateY = coordinateY + scale;
                     coordinateYLocationY = coordinateY * zoomInAxisParameter + spaceY;
                 }
-            }
-            
-            
+            }           
             graphics.Dispose();
 
             return bitMap;
@@ -602,90 +619,5 @@ namespace Well_Trajectory_Visualization
         {
             System.Diagnostics.Process.Start("https://commons.wikimedia.org/wiki/File:Third_angle_projecting.svg");
         }
-
-
-
-        private void SaveToolStripButton_Click(object sender, EventArgs e)
-        {
-            if (tabControl.SelectedIndex != -1)
-            {
-                TableLayoutPanel tableLayoutPanel = (TableLayoutPanel)tabControl.SelectedTab.Controls[0];
-                PictureBox mainViewPictureBox = (PictureBox)tableLayoutPanel.Controls.Find("Main View", true).First();
-                PictureBox leftViewPictureBox = (PictureBox)tableLayoutPanel.Controls.Find("Left View", true).First();
-                PictureBox topViewPictureBox = (PictureBox)tableLayoutPanel.Controls.Find("Top View", true).First();
-
-                Panel newPanel = new Panel();
-                newPanel.Size = mainViewPictureBox.Size;
-                newPanel.Name = "Main View";
-                SaveViewToFigure(newPanel, "Main View", trajectory);
-                newPanel.Name = "Left View";
-                SaveViewToFigure(newPanel, "Left View", trajectory);
-                newPanel.Name = "Top View";
-                SaveViewToFigure(newPanel, "Top View", trajectory);
-            }
-        }
-
-        private void MainViewToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            if (tabControl.SelectedIndex != -1)
-            {
-                TableLayoutPanel tableLayoutPanel = (TableLayoutPanel)tabControl.SelectedTab.Controls[0];
-                PictureBox mainViewPictureBox = (PictureBox)tableLayoutPanel.Controls.Find("Main View", true).First();
-
-                Panel newPanel = new Panel();
-                newPanel.Size = mainViewPictureBox.Size;
-                newPanel.Name = "Main View";
-                SaveViewToFigure(newPanel, "Main View", trajectory);
-            }
-        }
-
-        private void LeftViewToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            if (tabControl.SelectedIndex != -1)
-            {
-                TableLayoutPanel tableLayoutPanel = (TableLayoutPanel)tabControl.SelectedTab.Controls[0];
-                PictureBox mainViewPictureBox = (PictureBox)tableLayoutPanel.Controls.Find("Main View", true).First();
-
-                Panel newPanel = new Panel();
-                newPanel.Size = mainViewPictureBox.Size;
-                newPanel.Name = "Left View";
-                SaveViewToFigure(newPanel, "Left View", trajectory);
-            }
-        }
-
-        private void TopViewToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            if (tabControl.SelectedIndex != -1)
-            {
-                TableLayoutPanel tableLayoutPanel = (TableLayoutPanel)tabControl.SelectedTab.Controls[0];
-                PictureBox mainViewPictureBox = (PictureBox)tableLayoutPanel.Controls.Find("Main View", true).First();
-
-                Panel newPanel = new Panel();
-                newPanel.Size = mainViewPictureBox.Size;
-                newPanel.Name = "Top View";
-                SaveViewToFigure(newPanel, "Top View", trajectory);
-            }
-        }
-
-        private void ThreeViewsToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            if (tabControl.SelectedIndex != -1)
-            {
-                TableLayoutPanel tableLayoutPanel = (TableLayoutPanel)tabControl.SelectedTab.Controls[0];
-                PictureBox mainViewPictureBox = (PictureBox)tableLayoutPanel.Controls.Find("Main View", true).First();
-
-                Panel newPanel = new Panel
-                {
-                    Size = mainViewPictureBox.Size,
-                    Name = "Main View",
-                };
-                SaveViewToFigure(newPanel, "Main View", trajectory);
-                newPanel.Name = "Left View";
-                SaveViewToFigure(newPanel, "Left View", trajectory);
-                newPanel.Name = "Top View";
-                SaveViewToFigure(newPanel, "Top View", trajectory);
-            }
-        }
-
     }
 }
