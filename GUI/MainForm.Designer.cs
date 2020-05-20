@@ -30,7 +30,7 @@
         {
             this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
-            System.Windows.Forms.TreeNode treeNode4 = new System.Windows.Forms.TreeNode("Wells");
+            System.Windows.Forms.TreeNode treeNode1 = new System.Windows.Forms.TreeNode("Wells");
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.openFileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -261,17 +261,16 @@
             // 
             this.wellsTreeView.Dock = System.Windows.Forms.DockStyle.Fill;
             this.wellsTreeView.Font = new System.Drawing.Font("Microsoft YaHei UI", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.wellsTreeView.FullRowSelect = true;
             this.wellsTreeView.Indent = 25;
             this.wellsTreeView.ItemHeight = 20;
             this.wellsTreeView.LineColor = System.Drawing.Color.LightCoral;
             this.wellsTreeView.Location = new System.Drawing.Point(0, 0);
             this.wellsTreeView.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.wellsTreeView.Name = "wellsTreeView";
-            treeNode4.Name = "Root";
-            treeNode4.Text = "Wells";
+            treeNode1.Name = "Root";
+            treeNode1.Text = "Wells";
             this.wellsTreeView.Nodes.AddRange(new System.Windows.Forms.TreeNode[] {
-            treeNode4});
+            treeNode1});
             this.wellsTreeView.Size = new System.Drawing.Size(164, 599);
             this.wellsTreeView.TabIndex = 0;
             this.wellsTreeView.NodeMouseClick += new System.Windows.Forms.TreeNodeMouseClickEventHandler(this.WellsTreeView_NodeMouseClick);
@@ -445,9 +444,9 @@
             this.tabControl.SelectedIndex = 0;
             this.tabControl.Size = new System.Drawing.Size(1003, 599);
             this.tabControl.TabIndex = 0;
-            this.tabControl.DrawItem += new System.Windows.Forms.DrawItemEventHandler(this.DrawOnTab);
-            this.tabControl.SelectedIndexChanged += new System.EventHandler(this.PaintSelectedTab);
-            this.tabControl.MouseDown += new System.Windows.Forms.MouseEventHandler(this.TabControl_MouseDown);
+            this.tabControl.DrawItem += new System.Windows.Forms.DrawItemEventHandler(this.DrawTabHeaderText_DrawItem);
+            this.tabControl.SelectedIndexChanged += new System.EventHandler(this.tabControl_SelectedIndexChanged);
+            this.tabControl.MouseDown += new System.Windows.Forms.MouseEventHandler(this.DrawCloseIcon_MouseDown);
             // 
             // openFileDialog
             // 
@@ -474,7 +473,7 @@
             this.MinimumSize = new System.Drawing.Size(875, 628);
             this.Name = "MainForm";
             this.Text = "Well Trajectory Visualizer";
-            this.Resize += new System.EventHandler(this.PaintSelectedTab);
+            this.Resize += new System.EventHandler(this.MainForm_Resize);
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
             this.toolStrip1.ResumeLayout(false);
