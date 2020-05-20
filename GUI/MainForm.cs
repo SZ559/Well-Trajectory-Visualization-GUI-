@@ -206,11 +206,12 @@ namespace Well_Trajectory_Visualization
                 defaultPagePanel.Visible = false;
                 if (HasSameTabPage(tabPageName))
                 {
-                    tabControl.SelectedIndex = tabControl.TabPages.IndexOfKey(tabPageName);
                     if (isDoubleClick)
                     {
                         tabControl.SelectedTab.Tag = true;
+                        tabControl.SelectedTab = null; // force drawitem method
                     }
+                    tabControl.SelectedIndex = tabControl.TabPages.IndexOfKey(tabPageName);
                     return;
                 }
                 else
@@ -370,7 +371,7 @@ namespace Well_Trajectory_Visualization
             tabHeaderArea.Width = tabHeaderArea.Width - leftMarginXForTabHeaderRectangle - rightMarginXForTabHeaderRectangle - widthOfCloseIcon;
             tabHeaderArea.Height = tabHeaderArea.Height - 2 * paddingYForTabHeaderRectangle;
             graphic.DrawString(tabHeaderText,
-                tabControl.Font,
+                new Font(tabControl.Font, fontStyle),
                 SystemBrushes.ControlText,
                 tabHeaderArea);
 
