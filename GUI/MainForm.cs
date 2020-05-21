@@ -46,6 +46,7 @@ namespace Well_Trajectory_Visualization
         readonly int paddingXForCloseIcon;
         readonly int paddingYForCloseIcon;
 
+
         int PreviewTabIndex
         {
             get
@@ -62,7 +63,7 @@ namespace Well_Trajectory_Visualization
         }
         private bool isDoubleClick;
 
-
+        bool hasAnnotation;
         public MainForm()
         {
             InitializeComponent();
@@ -335,9 +336,9 @@ namespace Well_Trajectory_Visualization
 
         private void AddViewPanelForTableLayoutPanel(TableLayoutPanel tableLayoutPanel)
         {
-            Panel mainViewPanel = InitializePanelForProjection("Main View");
-            Panel leftViewPanel = InitializePanelForProjection("Left View");
-            Panel topViewPanel = InitializePanelForProjection("Top View");
+            NewPanel mainViewPanel = InitializePanelForProjection("Main View");
+            NewPanel leftViewPanel = InitializePanelForProjection("Left View");
+            NewPanel topViewPanel = InitializePanelForProjection("Top View");
             mainViewPanel.Paint += new PaintEventHandler(PaintPanel);
             leftViewPanel.Paint += new PaintEventHandler(PaintPanel);
             topViewPanel.Paint += new PaintEventHandler(PaintPanel);
@@ -349,20 +350,20 @@ namespace Well_Trajectory_Visualization
             tableLayoutPanel.ResumeLayout();
         }
 
-        private Panel InitializePanelForProjection(string viewName)
+        private NewPanel InitializePanelForProjection(string viewName)
         {
-            return new Panel
+            return new NewPanel
             {
                 Dock = DockStyle.Fill,
                 BorderStyle = BorderStyle.None,
-                Name = viewName
+                Name = viewName,
             };
         }
 
         private void PaintPanel(object sender, PaintEventArgs e)
         {
             SetZoomForThreeViews();
-            DrawViewPanel((Panel)sender, e.Graphics);
+            DrawViewPanel((NewPanel) sender, e.Graphics);
         }
 
 
@@ -510,7 +511,6 @@ namespace Well_Trajectory_Visualization
                     axisXCaption = "y";
                     axisYCaption = "z";
                     break;
-                case "Top View":
                 default:
                     axisXCaption = "x";
                     axisYCaption = "y";
@@ -551,11 +551,10 @@ namespace Well_Trajectory_Visualization
             }
         }
 
-        private void DrawViewPanel(Panel viewPanel, Graphics graphics)
+        private void DrawViewPanel(NewPanel viewPanel, Graphics graphics)
         {
             int paddingX = 50;
             int paddingY = 55;
-
             Vector3 normalVector = GetNormalVectorForView(viewPanel.Name);
             List<PointIn2D> projectionPointIn2D = projection.GetProjectionInPlane(CurrentTrajectory.PolyLineNodes, normalVector);
             GetZoomInAxisParameter(viewPanel, paddingX, paddingY);
@@ -582,6 +581,7 @@ namespace Well_Trajectory_Visualization
             {
                 foreach (var point in projectionPointIn2D)
                 {
+                   
                     graphics.FillRectangle(brushForPoint, point.X * zoomInAxisParameter + spaceX - 1, point.Y * zoomInAxisParameter + spaceY - 1, 2, 2);
                 }
             }
@@ -596,6 +596,7 @@ namespace Well_Trajectory_Visualization
                 stringFormat.LineAlignment = StringAlignment.Center;
                 graphics.DrawString(viewPanel.Name, fontForCaption, Brushes.Black, rect, stringFormat);
             }
+
 
             //draw axis
             string axisXCaption = GetAxisCaption(viewPanel.Name)[0];
@@ -634,17 +635,19 @@ namespace Well_Trajectory_Visualization
                 StringFormat stringFormatCenterAlignment = new StringFormat();
                 stringFormatCenterAlignment.Alignment = StringAlignment.Center;
                 stringFormatCenterAlignment.LineAlignment = StringAlignment.Center;
-                while (coordinateXLocationX <= xAxisEndPoint.X - scale / 3)
+
+                while (coordinateXLocationX <= xAxisEndPoint.X - 10)
                 {
                     Rectangle rectangle = new Rectangle((int)(coordinateXLocationX - spaceForTextAlignment), (int)coordinateXLocationY, spaceForTextAlignment * 2, (int)(spaceForTextInYDirection - lineLength));
                     graphics.DrawLine(penForAxis, coordinateXLocationX, xAxisStartPoint.Y, coordinateXLocationX, xAxisStartPoint.Y - lineLength);
                     graphics.DrawString(coordinateX.ToString(), textFont, Brushes.Black, rectangle, stringFormatCenterAlignment);
                     coordinateX = coordinateX + scale;
+
                     coordinateXLocationX = coordinateX * zoomInAxisParameter + spaceX;
                 }
                 float coordinateYLocationX = yAxisStartPoint.X - spaceForTextInXDirection;
                 float coordinateYLocationY = (int)coordinateY * zoomInAxisParameter + spaceY;
-                while (coordinateYLocationY <= yAxisEndPoint.Y - scale / 3)
+                while (coordinateYLocationY <= yAxisEndPoint.Y - 10)
                 {
                     graphics.DrawLine(penForAxis, yAxisStartPoint.X, coordinateYLocationY, yAxisStartPoint.X - lineLength, coordinateYLocationY);
                     Rectangle rectangle = new Rectangle((int)coordinateYLocationX, (int)(coordinateYLocationY - spaceForTextInYDirection / 2), (int)(spaceForTextInXDirection - lineLength), spaceForTextInYDirection);
@@ -654,7 +657,44 @@ namespace Well_Trajectory_Visualization
                 }
             }
 
+            if (hasAnnotation)
+            {
+                graphics = DrawAnnotation(graphics, projectionPointIn2D, spaceX, spaceY);
+            }
             graphics.Dispose();
+        }
+
+        private Graphics DrawAnnotation(Graphics graphics, List<PointIn2D> projectionPointIn2D, int spaceX, int spaceY)
+        {
+            using (Font textFont = new Font("Microsoft YaHei", 6, FontStyle.Regular, GraphicsUnit.Point))
+            {
+                Dictionary<String, int> pointAnnotationDictionary = new Dictionary<String, int>();
+                foreach (var point in projectionPointIn2D)
+                {                
+                    float xForPaint = point.X * zoomInAxisParameter + spaceX;
+                    float yForPaint = point.Y * zoomInAxisParameter + spaceY;
+                    PointF locationOfPoint = new PointF(xForPaint + 3, yForPaint - 4);
+                    String pointAnnotation = point.ToString();
+                    if (!pointAnnotationDictionary.ContainsKey(pointAnnotation))
+                    {
+                        graphics.DrawString(pointAnnotation, textFont, Brushes.Black, locationOfPoint);
+                        pointAnnotationDictionary.Add(pointAnnotation, 1);
+                    }
+                }
+            }
+            return graphics;
+        }
+
+
+        private void AnnnotationToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            hasAnnotation = annnotationToolStripMenuItem.Checked;
+            if (tabControl.SelectedTab != null)
+            {
+                //tabControl.SelectedTab.Invalidate();
+                //tabControl.SelectedTab.Update();
+                tabControl.SelectedTab.Refresh();
+            }
         }
 
     }
