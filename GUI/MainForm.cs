@@ -7,8 +7,6 @@ using System.Windows.Forms;
 using GeometricObject;
 using FileHandler;
 using System.Numerics;
-using System.Text;
-using System.Drawing.Text;
 
 namespace Well_Trajectory_Visualization
 {
@@ -68,7 +66,6 @@ namespace Well_Trajectory_Visualization
         public MainForm()
         {
             InitializeComponent();
-
             widthOfCloseIcon = 18;
             paddingYForTabHeaderRectangle = 3;
             leftMarginXForTabHeaderRectangle = 5;
@@ -84,6 +81,26 @@ namespace Well_Trajectory_Visualization
             isDoubleClick = false;
         }
 
+        ///////////// Menu Bar /////////////////
+
+        private void OpenFileToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            LoadTrajectoryDataFromFile();
+        }
+
+        private void ViewSourceToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            // HACK
+            System.Diagnostics.Process.Start("https://github.com/SZ559/Well-Trajectory-Visualization-GUI-");
+        }
+
+        private void ReferenceToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            System.Diagnostics.Process.Start("https://commons.wikimedia.org/wiki/File:Third_angle_projecting.svg");
+        }
+
+        /////////////// Save Views ///////////////////
+
         private void SaveViewToFigure(Control control)
         {
             saveFileDialog.FileName = tabControl.SelectedTab.Name + "-" + control.Name;
@@ -91,8 +108,6 @@ namespace Well_Trajectory_Visualization
             {
                 string errorMessage;
                 string filePath = saveFileDialog.FileName;
-                Vector3 normalVector = GetNormalVectorForView(control.Name);
-                List<PointIn2D> projectionPointIn2D = projection.GetProjectionInPlane(CurrentTrajectory.PolyLineNodes, normalVector);
                 Bitmap bitmap = new Bitmap(control.Width, control.Height);
                 control.DrawToBitmap(bitmap, new Rectangle(0, 0, control.Width, control.Height));
                 wellViewSaver.SaveView(filePath, bitmap, out errorMessage);
@@ -106,6 +121,33 @@ namespace Well_Trajectory_Visualization
                 }
             }
         }
+
+        // save all views
+        private void SaveViewOnTabPage(object sender, EventArgs e)
+        {    
+            if (tabControl.SelectedIndex != -1)
+            {
+                TableLayoutPanel tableLayoutPanel = (TableLayoutPanel)tabControl.SelectedTab.Controls[0];
+                foreach (Control control in tableLayoutPanel.Controls)
+                {
+                    SaveViewToFigure(control);
+                }
+            }
+        }
+
+        // save single view
+        private void ViewToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (tabControl.SelectedIndex != -1)
+            {
+                ToolStripMenuItem toolStripMenuItem = (ToolStripMenuItem) sender;
+                Control controlForView = tabControl.SelectedTab.Controls.Find(toolStripMenuItem.Text, true).First();
+                SaveViewToFigure(controlForView);
+            }
+        }
+
+
+        /////////////// Load trajectory from file ///////////////////
 
         private void LoadTrajectoryDataFromFile()
         {
@@ -151,9 +193,8 @@ namespace Well_Trajectory_Visualization
             }
         }
 
+        //////////////// Tree View //////////////////////////
 
-
-        // TreeView
         private void UpdateTreeView()
         {
             wellsTreeView.BeginUpdate();
@@ -229,6 +270,9 @@ namespace Well_Trajectory_Visualization
             }
         }
 
+
+        /////////////// Tab Page ////////////////////
+
         private bool HasSameTabPage(string tabPageName)
         {
             foreach (TabPage tabpage in tabControl.TabPages)
@@ -267,6 +311,8 @@ namespace Well_Trajectory_Visualization
             tabControl.SelectedTab = tabPage;
         }
 
+        ///////////// Panels inside Tab Page //////////////////
+
         private TableLayoutPanel InitializeTableLayoutPanelForTabPage()
         {
             TableLayoutPanel tableLayoutPanel = new TableLayoutPanel
@@ -303,12 +349,6 @@ namespace Well_Trajectory_Visualization
             tableLayoutPanel.ResumeLayout();
         }
 
-        private void PaintPanel(object sender, PaintEventArgs e)
-        {
-            SetZoomForThreeViews();
-            DrawViewPanel((Panel)sender, e.Graphics);
-        }
-
         private Panel InitializePanelForProjection(string viewName)
         {
             return new Panel
@@ -318,6 +358,15 @@ namespace Well_Trajectory_Visualization
                 Name = viewName
             };
         }
+
+        private void PaintPanel(object sender, PaintEventArgs e)
+        {
+            SetZoomForThreeViews();
+            DrawViewPanel((Panel)sender, e.Graphics);
+        }
+
+
+        /////////// Draw Tab Page Header //////////////////
 
         private string GetHeaderTextForTabPage(string wellName, string trajectoryName)
         {
@@ -409,15 +458,6 @@ namespace Well_Trajectory_Visualization
             }
         }
 
-
-
-
-        // Tab Page
-        private void CloseTheCurrentTabPageToolStripButton_Click(object sender, EventArgs e)
-        {
-            CloseSelectedTab();
-        }
-
         private void CloseSelectedTab()
         {
             int selectedTabIndex = tabControl.SelectedIndex;
@@ -429,6 +469,13 @@ namespace Well_Trajectory_Visualization
             SwitchDefaultPage();
         }
 
+        private void SwitchDefaultPage()
+        {
+            defaultPagePanel.Visible = (tabControl.TabPages.Count == 0) ? true : false;
+        }
+
+
+        /////////////// Helper functions //////////////
 
         private Vector3 GetNormalVectorForView(string viewName)
         {
@@ -448,6 +495,32 @@ namespace Well_Trajectory_Visualization
             }
             return normalVector;
         }
+
+        private string[] GetAxisCaption(string viewPanelName)
+        {
+            string axisXCaption;
+            string axisYCaption;
+            switch (viewPanelName)
+            {
+                case "Main View":
+                    axisXCaption = "x";
+                    axisYCaption = "z";
+                    break;
+                case "Left View":
+                    axisXCaption = "y";
+                    axisYCaption = "z";
+                    break;
+                case "Top View":
+                default:
+                    axisXCaption = "x";
+                    axisYCaption = "y";
+                    break;
+            }
+            return new string[] { axisXCaption, axisYCaption };
+        }
+
+
+        ///////////// Paint Panels ////////////////////
 
         private void SetZoomForThreeViews()
         {
@@ -582,114 +655,6 @@ namespace Well_Trajectory_Visualization
             }
 
             graphics.Dispose();
-        }
-
-        private string[] GetAxisCaption(string viewPanelName)
-        {
-            string axisXCaption;
-            string axisYCaption;
-            switch (viewPanelName)
-            {
-                case "Main View":
-                    axisXCaption = "x";
-                    axisYCaption = "z";
-                    break;
-                case "Left View":
-                    axisXCaption = "y";
-                    axisYCaption = "z";
-                    break;
-                case "Top View":
-                default:
-                    axisXCaption = "x";
-                    axisYCaption = "y";
-                    break;
-            }
-            return new string[] { axisXCaption, axisYCaption };
-        }
-
-
-        // Menu Bar
-        private void OpenFileToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            LoadTrajectoryDataFromFile();
-        }
-
-        private void ViewSourceToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            // HACK
-            System.Diagnostics.Process.Start("https://github.com/SZ559/Well-Trajectory-Visualization-GUI-");
-        }
-
-        private void ReferenceToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            System.Diagnostics.Process.Start("https://commons.wikimedia.org/wiki/File:Third_angle_projecting.svg");
-        }
-
-
-
-        private void SaveToolStripButton_Click(object sender, EventArgs e)
-        {
-            if (tabControl.SelectedIndex != -1)
-            {
-                TableLayoutPanel tableLayoutPanel = (TableLayoutPanel)tabControl.SelectedTab.Controls[0];
-                Panel mainViewPanel = (Panel)tableLayoutPanel.Controls.Find("Main View", true).First();
-                SaveViewToFigure(mainViewPanel);
-                Panel leftViewPanel = (Panel)tableLayoutPanel.Controls.Find("Left View", true).First();
-                SaveViewToFigure(leftViewPanel);
-                Panel TopViewPictureBox = (Panel)tableLayoutPanel.Controls.Find("Top View", true).First();
-                SaveViewToFigure(TopViewPictureBox);
-            }
-        }
-
-        private void MainViewToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            if (tabControl.SelectedIndex != -1)
-            {
-                TableLayoutPanel tableLayoutPanel = (TableLayoutPanel)tabControl.SelectedTab.Controls[0];
-                Panel mainViewPanel = (Panel)tableLayoutPanel.Controls.Find("Main View", true).First();
-                SaveViewToFigure(mainViewPanel);
-            }
-        }
-
-        private void LeftViewToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            if (tabControl.SelectedIndex != -1)
-            {
-                TableLayoutPanel tableLayoutPanel = (TableLayoutPanel)tabControl.SelectedTab.Controls[0];
-                Panel leftViewPanel = (Panel)tableLayoutPanel.Controls.Find("Left View", true).First();
-
-                SaveViewToFigure(leftViewPanel);
-            }
-        }
-
-        private void TopViewToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            if (tabControl.SelectedIndex != -1)
-            {
-                TableLayoutPanel tableLayoutPanel = (TableLayoutPanel)tabControl.SelectedTab.Controls[0];
-                Panel TopViewPictureBox = (Panel)tableLayoutPanel.Controls.Find("Top View", true).First();
-
-                SaveViewToFigure(TopViewPictureBox);
-            }
-        }
-
-        private void ThreeViewsToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            if (tabControl.SelectedIndex != -1)
-            {
-                TableLayoutPanel tableLayoutPanel = (TableLayoutPanel)tabControl.SelectedTab.Controls[0];
-                Panel mainViewPanel = (Panel)tableLayoutPanel.Controls.Find("Main View", true).First();
-                SaveViewToFigure(mainViewPanel);
-                Panel leftViewPanel = (Panel)tableLayoutPanel.Controls.Find("Left View", true).First();
-                SaveViewToFigure(leftViewPanel);
-                Panel TopViewPictureBox = (Panel)tableLayoutPanel.Controls.Find("Top View", true).First();
-                SaveViewToFigure(TopViewPictureBox);
-            }
-        }
-
-        private void SwitchDefaultPage()
-        {
-            defaultPagePanel.Visible = (tabControl.TabPages.Count == 0) ? true : false;
         }
 
     }

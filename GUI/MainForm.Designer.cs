@@ -46,7 +46,6 @@
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
             this.toolStripButton1 = new System.Windows.Forms.ToolStripButton();
             this.saveToolStripButton = new System.Windows.Forms.ToolStripButton();
-            this.closeTheCurrentTabPageToolStripButton = new System.Windows.Forms.ToolStripButton();
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
             this.wellsTreeView = new System.Windows.Forms.TreeView();
@@ -126,30 +125,30 @@
             // allViewsToolStripMenuItem
             // 
             this.allViewsToolStripMenuItem.Name = "allViewsToolStripMenuItem";
-            this.allViewsToolStripMenuItem.Size = new System.Drawing.Size(136, 22);
+            this.allViewsToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.allViewsToolStripMenuItem.Text = "All Views";
-            this.allViewsToolStripMenuItem.Click += new System.EventHandler(this.ThreeViewsToolStripMenuItem_Click);
+            this.allViewsToolStripMenuItem.Click += new System.EventHandler(this.SaveViewOnTabPage);
             // 
             // mainViewToolStripMenuItem
             // 
             this.mainViewToolStripMenuItem.Name = "mainViewToolStripMenuItem";
-            this.mainViewToolStripMenuItem.Size = new System.Drawing.Size(136, 22);
+            this.mainViewToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.mainViewToolStripMenuItem.Text = "Main View";
-            this.mainViewToolStripMenuItem.Click += new System.EventHandler(this.MainViewToolStripMenuItem_Click);
+            this.mainViewToolStripMenuItem.Click += new System.EventHandler(this.ViewToolStripMenuItem_Click);
             // 
             // leftViewToolStripMenuItem
             // 
             this.leftViewToolStripMenuItem.Name = "leftViewToolStripMenuItem";
-            this.leftViewToolStripMenuItem.Size = new System.Drawing.Size(136, 22);
+            this.leftViewToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.leftViewToolStripMenuItem.Text = "Left View";
-            this.leftViewToolStripMenuItem.Click += new System.EventHandler(this.LeftViewToolStripMenuItem_Click);
+            this.leftViewToolStripMenuItem.Click += new System.EventHandler(this.ViewToolStripMenuItem_Click);
             // 
             // topViewToolStripMenuItem
             // 
             this.topViewToolStripMenuItem.Name = "topViewToolStripMenuItem";
-            this.topViewToolStripMenuItem.Size = new System.Drawing.Size(136, 22);
+            this.topViewToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.topViewToolStripMenuItem.Text = "Top View";
-            this.topViewToolStripMenuItem.Click += new System.EventHandler(this.TopViewToolStripMenuItem_Click);
+            this.topViewToolStripMenuItem.Click += new System.EventHandler(this.ViewToolStripMenuItem_Click);
             // 
             // exitToolStripMenuItem
             // 
@@ -185,11 +184,9 @@
             this.toolStrip1.ImageScalingSize = new System.Drawing.Size(40, 40);
             this.toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripButton1,
-            this.saveToolStripButton,
-            this.closeTheCurrentTabPageToolStripButton});
+            this.saveToolStripButton});
             this.toolStrip1.Location = new System.Drawing.Point(0, 24);
             this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Padding = new System.Windows.Forms.Padding(0, 0, 2, 0);
             this.toolStrip1.Size = new System.Drawing.Size(1172, 25);
             this.toolStrip1.TabIndex = 1;
             this.toolStrip1.Text = "toolStrip1";
@@ -214,18 +211,7 @@
             this.saveToolStripButton.Name = "saveToolStripButton";
             this.saveToolStripButton.Size = new System.Drawing.Size(23, 22);
             this.saveToolStripButton.Text = "toolStripButton2";
-            this.saveToolStripButton.Click += new System.EventHandler(this.SaveToolStripButton_Click);
-            // 
-            // closeTheCurrentTabPageToolStripButton
-            // 
-            this.closeTheCurrentTabPageToolStripButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.closeTheCurrentTabPageToolStripButton.Image = ((System.Drawing.Image)(resources.GetObject("closeTheCurrentTabPageToolStripButton.Image")));
-            this.closeTheCurrentTabPageToolStripButton.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
-            this.closeTheCurrentTabPageToolStripButton.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.closeTheCurrentTabPageToolStripButton.Name = "closeTheCurrentTabPageToolStripButton";
-            this.closeTheCurrentTabPageToolStripButton.Size = new System.Drawing.Size(23, 22);
-            this.closeTheCurrentTabPageToolStripButton.Text = "Close Tab Page";
-            this.closeTheCurrentTabPageToolStripButton.Click += new System.EventHandler(this.CloseTheCurrentTabPageToolStripButton_Click);
+            this.saveToolStripButton.Click += new System.EventHandler(this.SaveViewOnTabPage);
             // 
             // statusStrip1
             // 
@@ -504,7 +490,6 @@
         private System.Windows.Forms.ToolStripMenuItem exitToolStripMenuItem;
         private System.Windows.Forms.OpenFileDialog openFileDialog;
         private System.Windows.Forms.TabControl tabControl;
-        private System.Windows.Forms.ToolStripButton closeTheCurrentTabPageToolStripButton;
         private System.Windows.Forms.TableLayoutPanel defaultPagePanel;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Label label4;
