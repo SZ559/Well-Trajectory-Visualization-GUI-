@@ -16,24 +16,7 @@ namespace Well_Trajectory_Visualization
         TrajectoryDataReader trajectoryDataReader;
         Projection projection;
         WellViewSaver wellViewSaver;
-        Trajectory CurrentTrajectory
-        {
-            get
-            {
-                Trajectory currentTrajectory;
-                if (tabControl.SelectedTab != null)
-                {
-                    string wellName = tabControl.SelectedTab.Name.Split('-')[0];
-                    string trajectoryName = tabControl.SelectedTab.Name.Split('-')[1];
-                    currentTrajectory = wells.Find(x => x.WellName == wellName).Trajectories.Find(x => x.TrajectoryName == trajectoryName);
-                    return currentTrajectory;
-                }
-                else
-                {
-                    return null;
-                }
-            }
-        }
+        Trajectory currentTrajectory;
 
         Single zoomXY;
         Single zoomZ;
@@ -63,7 +46,9 @@ namespace Well_Trajectory_Visualization
         }
         private bool isDoubleClick;
 
-        bool hasAnnotation;
+        bool addAnnotation;
+        ToolTip toolTipForAnnotation;
+
         public MainForm()
         {
             InitializeComponent();
@@ -80,6 +65,13 @@ namespace Well_Trajectory_Visualization
             tabControl.Padding = new Point(widthOfCloseIcon, 5);
             wells = new List<Well>();
             isDoubleClick = false;
+            toolTipForAnnotation = new ToolTip()
+            {
+                AutoPopDelay = 5000,
+                InitialDelay = 500,
+                ReshowDelay = 100,
+                ShowAlways = true,
+            };
         }
 
         ///////////// Menu Bar /////////////////
@@ -339,9 +331,7 @@ namespace Well_Trajectory_Visualization
             NewPanel mainViewPanel = InitializePanelForProjection("Main View");
             NewPanel leftViewPanel = InitializePanelForProjection("Left View");
             NewPanel topViewPanel = InitializePanelForProjection("Top View");
-            mainViewPanel.Paint += new PaintEventHandler(PaintPanel);
-            leftViewPanel.Paint += new PaintEventHandler(PaintPanel);
-            topViewPanel.Paint += new PaintEventHandler(PaintPanel);
+
 
             tableLayoutPanel.SuspendLayout();
             tableLayoutPanel.Controls.Add(mainViewPanel, 0, 0);
@@ -352,17 +342,20 @@ namespace Well_Trajectory_Visualization
 
         private NewPanel InitializePanelForProjection(string viewName)
         {
-            return new NewPanel
+            NewPanel panel = new NewPanel()
             {
                 Dock = DockStyle.Fill,
                 BorderStyle = BorderStyle.None,
                 Name = viewName,
             };
+            panel.Paint += new PaintEventHandler(PaintPanel);
+            panel.MouseMove += new MouseEventHandler(Panel_MouseMove);
+            return panel;
         }
 
         private void PaintPanel(object sender, PaintEventArgs e)
         {
-            SetZoomForThreeViews();
+            UpdateParametersOfCurrentTrajectory();
             DrawViewPanel((NewPanel) sender, e.Graphics);
         }
 
@@ -521,21 +514,43 @@ namespace Well_Trajectory_Visualization
 
 
         ///////////// Paint Panels ////////////////////
+        private void UpdateParametersOfCurrentTrajectory()
+        {
+            SetCurrentTrajectory();
+            SetZoomForThreeViews();
+        }
 
         private void SetZoomForThreeViews()
         {
-            Single maxX = CurrentTrajectory.PolyLineNodes.Select(x => x.X).Max();
-            Single maxY = CurrentTrajectory.PolyLineNodes.Select(x => x.Y).Max();
-            Single maxZ = CurrentTrajectory.PolyLineNodes.Select(x => x.Z).Max();
+            if (currentTrajectory != null)
+            {
+                Single maxX = currentTrajectory.PolyLineNodes.Select(x => x.X).Max();
+                Single maxY = currentTrajectory.PolyLineNodes.Select(x => x.Y).Max();
+                Single maxZ = currentTrajectory.PolyLineNodes.Select(x => x.Z).Max();
 
-            Single minX = CurrentTrajectory.PolyLineNodes.Select(x => x.X).Min();
-            Single minY = CurrentTrajectory.PolyLineNodes.Select(x => x.Y).Min();
-            Single minZ = CurrentTrajectory.PolyLineNodes.Select(x => x.Z).Min();
+                Single minX = currentTrajectory.PolyLineNodes.Select(x => x.X).Min();
+                Single minY = currentTrajectory.PolyLineNodes.Select(x => x.Y).Min();
+                Single minZ = currentTrajectory.PolyLineNodes.Select(x => x.Z).Min();
 
-            zoomXY = Math.Max(maxX - minX, maxY - minY);
-            zoomXY = zoomXY > 0 ? zoomXY : 1;
-            zoomZ = maxZ - minZ;
-            zoomZ = zoomZ > 0 ? zoomZ : 1;
+                zoomXY = Math.Max(maxX - minX, maxY - minY);
+                zoomXY = zoomXY > 0 ? zoomXY : 1;
+                zoomZ = maxZ - minZ;
+                zoomZ = zoomZ > 0 ? zoomZ : 1;
+            }
+        }
+
+        private void SetCurrentTrajectory()
+        {
+            if (tabControl.SelectedTab != null)
+            {
+                string wellName = tabControl.SelectedTab.Name.Split('-')[0];
+                string trajectoryName = tabControl.SelectedTab.Name.Split('-')[1];
+                currentTrajectory = wells.Find(x => x.WellName == wellName).Trajectories.Find(x => x.TrajectoryName == trajectoryName);
+            }
+            else
+            {
+                currentTrajectory = null;
+            }
         }
 
         // use cuboid of control to try to include the whole trajectory
@@ -551,38 +566,49 @@ namespace Well_Trajectory_Visualization
             }
         }
 
+
         private void DrawViewPanel(NewPanel viewPanel, Graphics graphics)
         {
             int paddingX = 50;
             int paddingY = 55;
             Vector3 normalVector = GetNormalVectorForView(viewPanel.Name);
-            List<PointIn2D> projectionPointIn2D = projection.GetProjectionInPlane(CurrentTrajectory.PolyLineNodes, normalVector);
+            List<PointIn2D> projectionPointIn2D = projection.GetProjectionInPlane(currentTrajectory.PolyLineNodes, normalVector);
             GetZoomInAxisParameter(viewPanel, paddingX, paddingY);
             Single minX = projectionPointIn2D.Select(x => x.X).Min();
             Single minY = projectionPointIn2D.Select(x => x.Y).Min();
             int spaceX = (int)(paddingX - minX * zoomInAxisParameter);
             int spaceY = (int)(paddingY - minY * zoomInAxisParameter);
 
-            // draw line
+            PointF[] locationOfProjectionPointIn2DOnPanel = new PointF[projectionPointIn2D.Count];
+            PointF[] dataPointsProjection = new PointF[projectionPointIn2D.Count];
+            List<PointF[]> dataPointProjectionIn2DAndLocationOnPanel = new List<PointF[]> ();
+            //Dictionary<PointIn2D, PointF> dataPointProjectionIn2DAndLocationOnPanel = new Dictionary<PointIn2D, PointF>();
+            for (int i = 0; i < projectionPointIn2D.Count; i = i + 1)
+            {
+                float xForPaint = projectionPointIn2D[i].X * zoomInAxisParameter + spaceX;
+                float yForPaint = projectionPointIn2D[i].Y * zoomInAxisParameter + spaceY;
+                //dataPointProjectionIn2DAndLocationOnPanel.Add(projectionPointIn2D[i], new PointF(xForPaint, yForPaint));
+                locationOfProjectionPointIn2DOnPanel[i] = new PointF(xForPaint, yForPaint);
+                dataPointsProjection[i] = new PointF(projectionPointIn2D[i].X, projectionPointIn2D[i].Y);
+            }
+            dataPointProjectionIn2DAndLocationOnPanel.Add(dataPointsProjection);
+            dataPointProjectionIn2DAndLocationOnPanel.Add(locationOfProjectionPointIn2DOnPanel);
+
+            viewPanel.Tag = dataPointProjectionIn2DAndLocationOnPanel;
+            //viewPanel.Tag = dataPointProjectionIn2DAndLocationOnPanel;
+            // draw line; 
+            //PointF[] locationOfProjectionPointIn2DOnPanel = dataPointProjectionIn2DAndLocationOnPanel.Values.ToArray();
             using (Pen penForLine = new Pen(Color.FromArgb(204, 234, 187), 3.0F))
             {
-                for (int i = 0; i < projectionPointIn2D.Count - 1; i = i + 1)
-                {
-                    float xForPaint = projectionPointIn2D[i].X * zoomInAxisParameter + spaceX;
-                    float yForPaint = projectionPointIn2D[i].Y * zoomInAxisParameter + spaceY;
-                    float x2ForPaint = projectionPointIn2D[i + 1].X * zoomInAxisParameter + spaceX;
-                    float y2ForPaint = projectionPointIn2D[i + 1].Y * zoomInAxisParameter + spaceY;
-                    graphics.DrawLine(penForLine, xForPaint, yForPaint, x2ForPaint, y2ForPaint);
-                }
+                graphics.DrawLines(penForLine, locationOfProjectionPointIn2DOnPanel);
             }
 
             // highlight data points
             using (SolidBrush brushForPoint = new SolidBrush(Color.FromArgb(63, 63, 68)))
             {
-                foreach (var point in projectionPointIn2D)
+                foreach (var location in locationOfProjectionPointIn2DOnPanel)
                 {
-                   
-                    graphics.FillRectangle(brushForPoint, point.X * zoomInAxisParameter + spaceX - 1, point.Y * zoomInAxisParameter + spaceY - 1, 2, 2);
+                    graphics.FillRectangle(brushForPoint, location.X - 1, location.Y - 1, 2, 2);
                 }
             }
 
@@ -636,7 +662,7 @@ namespace Well_Trajectory_Visualization
                 stringFormatCenterAlignment.Alignment = StringAlignment.Center;
                 stringFormatCenterAlignment.LineAlignment = StringAlignment.Center;
 
-                while (coordinateXLocationX <= xAxisEndPoint.X - 10)
+                while (coordinateXLocationX <= xAxisEndPoint.X - 20)
                 {
                     Rectangle rectangle = new Rectangle((int)(coordinateXLocationX - spaceForTextAlignment), (int)coordinateXLocationY, spaceForTextAlignment * 2, (int)(spaceForTextInYDirection - lineLength));
                     graphics.DrawLine(penForAxis, coordinateXLocationX, xAxisStartPoint.Y, coordinateXLocationX, xAxisStartPoint.Y - lineLength);
@@ -647,7 +673,7 @@ namespace Well_Trajectory_Visualization
                 }
                 float coordinateYLocationX = yAxisStartPoint.X - spaceForTextInXDirection;
                 float coordinateYLocationY = (int)coordinateY * zoomInAxisParameter + spaceY;
-                while (coordinateYLocationY <= yAxisEndPoint.Y - 10)
+                while (coordinateYLocationY <= yAxisEndPoint.Y - 20)
                 {
                     graphics.DrawLine(penForAxis, yAxisStartPoint.X, coordinateYLocationY, yAxisStartPoint.X - lineLength, coordinateYLocationY);
                     Rectangle rectangle = new Rectangle((int)coordinateYLocationX, (int)(coordinateYLocationY - spaceForTextInYDirection / 2), (int)(spaceForTextInXDirection - lineLength), spaceForTextInYDirection);
@@ -657,7 +683,7 @@ namespace Well_Trajectory_Visualization
                 }
             }
 
-            if (hasAnnotation)
+            if (addAnnotation)
             {
                 graphics = DrawAnnotation(graphics, projectionPointIn2D, spaceX, spaceY);
             }
@@ -688,7 +714,7 @@ namespace Well_Trajectory_Visualization
 
         private void AnnnotationToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            hasAnnotation = annnotationToolStripMenuItem.Checked;
+            addAnnotation = annnotationToolStripMenuItem.Checked;
             if (tabControl.SelectedTab != null)
             {
                 //tabControl.SelectedTab.Invalidate();
@@ -697,5 +723,35 @@ namespace Well_Trajectory_Visualization
             }
         }
 
+
+        private void Panel_MouseMove(object sender, MouseEventArgs e)
+        {
+            NewPanel panel = (NewPanel)sender;
+            if (panel.Tag == null)
+            {
+                return;
+            }
+            string tip = "";
+            int radius = 4;
+            //Rectangle tabCloseIconArea
+            //if (tabCloseIconArea.Contains(e.Location))
+
+            int index = 0;
+            foreach (var location in ((List<PointF[]>)panel.Tag)[1])      
+            //if((List<PointF[]>)panel.Tag).ContainsKey())
+            {
+                if ((Math.Abs(e.X - location.X) < radius) &&
+                    (Math.Abs(e.Y - location.Y) < radius))
+                {
+                    tip = $"({((List<PointF[]>) panel.Tag)[0][index].X}, {((List<PointF[]>)panel.Tag)[0][index].Y})";
+                    break;
+                }
+                index = index + 1;
+            }
+            if (toolTipForAnnotation.GetToolTip(panel) != tip)
+            {
+                toolTipForAnnotation.SetToolTip(panel, tip);
+            }
+        }
     }
 }
