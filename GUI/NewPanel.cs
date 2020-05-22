@@ -1,63 +1,31 @@
-﻿using System.Windows.Forms;
+﻿using GeometricObject;
+using System.Collections.Generic;
+using System.Drawing;
+using System.Windows.Forms;
 
 
 namespace Well_Trajectory_Visualization
 {
     public class NewPanel : Panel
     {
-        public NewPanel()
+        public List<PointIn2D> TrajectoryProjectionIn2D
         {
-            //SetStyle(ControlStyles.UserPaint | ControlStyles.AllPaintingInWmPaint | ControlStyles.OptimizedDoubleBuffer | ControlStyles.ResizeRedraw | ControlStyles.SupportsTransparentBackColor, true);
+            get; set;
+        }
+        public string ViewName
+        {
+            get; set;
         }
 
-        /*
-                    protected override void OnPaintBackground(PaintEventArgs e)
+        public PointF[] TrajectoryProjectionLocationOnPanel
+        {
+            get; set;
+        }
 
-                    {
+        public NewPanel()
+        {
 
-                        return;
-
-                    }
-
-
-                    protected override void OnPaint(PaintEventArgs e)
-
-                    {
-
-
-                        this.DoubleBuffered = true;
-
-                        if (this.BackgroundImage != null)
-
-                        {
-
-                            e.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighQuality;
-
-                            e.Graphics.DrawImage(
-
-                            this.BackgroundImage,
-
-                            new System.Drawing.Rectangle(0, 0, this.Width, this.Height),
-
-                            0,
-
-                            0,
-
-                            this.BackgroundImage.Width,
-
-                            this.BackgroundImage.Height,
-
-                            System.Drawing.GraphicsUnit.Pixel);
-
-                        }
-
-                        base.OnPaint(e);
-
-                    }
-
-                }
-
-            */
+        }
     }
 }
 

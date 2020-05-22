@@ -7,6 +7,7 @@ using System.Windows.Forms;
 using GeometricObject;
 using FileHandler;
 using System.Numerics;
+using System.ComponentModel;
 
 namespace Well_Trajectory_Visualization
 {
@@ -22,12 +23,22 @@ namespace Well_Trajectory_Visualization
         Single zoomZ;
         Single zoomInAxisParameter;
         List<Well> wells;
-        readonly int widthOfCloseIcon;
-        readonly int paddingYForTabHeaderRectangle;
-        readonly int leftMarginXForTabHeaderRectangle;
-        readonly int rightMarginXForTabHeaderRectangle;
-        readonly int paddingXForCloseIcon;
-        readonly int paddingYForCloseIcon;
+
+        readonly int leftPadding;
+        readonly int rightPadding;
+        readonly int middleMargin;
+        readonly int verticalPaddingForHeaderName;
+        readonly int verticalPaddingForCloseIcon;
+
+        readonly int numberOfDataInAxisX;
+        readonly int numberOfDataInAxisY;
+        readonly int spaceHeightForViewName;
+        readonly int segementLength;
+        readonly int paddingX;
+        readonly int paddingY;
+        readonly int marginAxis;
+        readonly int widthOfCoordinate;
+        readonly int heightOfCoordinate;
 
 
         int PreviewTabIndex
@@ -52,17 +63,27 @@ namespace Well_Trajectory_Visualization
         public MainForm()
         {
             InitializeComponent();
-            widthOfCloseIcon = 18;
-            paddingYForTabHeaderRectangle = 3;
-            leftMarginXForTabHeaderRectangle = 5;
-            rightMarginXForTabHeaderRectangle = 1;
-            paddingXForCloseIcon = 5;
-            paddingYForCloseIcon = 6;
+
+            leftPadding = 5;
+            rightPadding = 5;
+            middleMargin = 5;
+            verticalPaddingForHeaderName = 5;
+            verticalPaddingForCloseIcon = 9;
+
+            numberOfDataInAxisX = 5;
+            numberOfDataInAxisY = 10;
+            spaceHeightForViewName = 25;
+            segementLength = 5;
+            marginAxis = 10;
+            widthOfCoordinate = 40;
+            heightOfCoordinate = 18;
+            paddingX = segementLength * 3 / 2 + marginAxis + widthOfCoordinate + 5;
+            paddingY = segementLength * 3 / 2 + marginAxis + heightOfCoordinate + 5;
 
             trajectoryDataReader = new TrajectoryDataReader();
             wellViewSaver = new WellViewSaver();
             projection = new Projection();
-            tabControl.Padding = new Point(widthOfCloseIcon, 5);
+            tabControl.Padding = new Point(18, 5);
             wells = new List<Well>();
             isDoubleClick = false;
             toolTipForAnnotation = new ToolTip()
@@ -117,7 +138,7 @@ namespace Well_Trajectory_Visualization
 
         // save all views
         private void SaveViewOnTabPage(object sender, EventArgs e)
-        {    
+        {
             if (tabControl.SelectedIndex != -1)
             {
                 TableLayoutPanel tableLayoutPanel = (TableLayoutPanel)tabControl.SelectedTab.Controls[0];
@@ -133,7 +154,7 @@ namespace Well_Trajectory_Visualization
         {
             if (tabControl.SelectedIndex != -1)
             {
-                ToolStripMenuItem toolStripMenuItem = (ToolStripMenuItem) sender;
+                ToolStripMenuItem toolStripMenuItem = (ToolStripMenuItem)sender;
                 Control controlForView = tabControl.SelectedTab.Controls.Find(toolStripMenuItem.Text, true).First();
                 SaveViewToFigure(controlForView);
             }
@@ -386,12 +407,7 @@ namespace Well_Trajectory_Visualization
             return $"{wellName}-{trajectoryName}";
         }
 
-        // tab header: 
-        // x: leftMarginX + filename + leftMarginX + rightMarginX + spaceForCloseIcon + rightMarginX
-        // y: paddingY + text + paddingY
-        // spaceForCloseIcon: 
-        // - x: paddingXForCloseIcon + clsoeIcon + paddingXForCloseIcon
-        // - y: paddingYForCloseIcon + clsoeIcon + paddingYForCloseIcon
+        // tab header: https://github.com/SZ559/Well-Trajectory-Visualization-GUI-/wiki/Drawing-Tab-Page
         private void DrawTabHeaderText_DrawItem(object sender, DrawItemEventArgs e)
         {
             Graphics graphic = e.Graphics;
@@ -409,10 +425,11 @@ namespace Well_Trajectory_Visualization
             string tabHeaderText = tabControl.TabPages[e.Index].Text;
             FontStyle fontStyle = (bool)tabControl.TabPages[e.Index].Tag == true ? FontStyle.Regular : FontStyle.Italic;
 
+            int sizeOfCloseIcon = tabHeaderArea.Height - 2 * verticalPaddingForCloseIcon;
             //draw filename
-            tabHeaderArea.Offset(leftMarginXForTabHeaderRectangle, paddingYForTabHeaderRectangle);
-            tabHeaderArea.Width = tabHeaderArea.Width - leftMarginXForTabHeaderRectangle - rightMarginXForTabHeaderRectangle - widthOfCloseIcon;
-            tabHeaderArea.Height = tabHeaderArea.Height - 2 * paddingYForTabHeaderRectangle;
+            tabHeaderArea.Offset(leftPadding, verticalPaddingForHeaderName);
+            tabHeaderArea.Width = tabHeaderArea.Width - leftPadding - middleMargin - rightPadding - sizeOfCloseIcon;
+            tabHeaderArea.Height = tabHeaderArea.Height - 2 * verticalPaddingForHeaderName;
             graphic.DrawString(tabHeaderText,
                 new Font(tabControl.Font, fontStyle),
                 SystemBrushes.ControlText,
@@ -421,9 +438,9 @@ namespace Well_Trajectory_Visualization
             // draw close icon
             using (Pen closeIconPen = new Pen(Color.FromArgb(240, 128, 128), 2f))
             {
-                tabHeaderArea.Offset(tabHeaderArea.Width + paddingXForCloseIcon, paddingYForCloseIcon);
-                tabHeaderArea.Width = widthOfCloseIcon - 2 * paddingXForCloseIcon;
-                tabHeaderArea.Height = tabHeaderArea.Height - 2 * paddingYForCloseIcon;
+                tabHeaderArea.Offset(tabHeaderArea.Width + middleMargin, -tabHeaderArea.Y + verticalPaddingForCloseIcon);
+                tabHeaderArea.Width = sizeOfCloseIcon;
+                tabHeaderArea.Height = sizeOfCloseIcon;
                 Point p1 = new Point(tabHeaderArea.X, tabHeaderArea.Y);
                 Point p2 = new Point(tabHeaderArea.X + tabHeaderArea.Width, tabHeaderArea.Y + tabHeaderArea.Height);
                 graphic.DrawLine(closeIconPen, p1, p2);
@@ -441,9 +458,10 @@ namespace Well_Trajectory_Visualization
                 if (e.Button == MouseButtons.Left)
                 {
                     Rectangle tabCloseIconArea = tabControl.GetTabRect(tabControl.SelectedIndex);
-                    tabCloseIconArea.Offset(tabCloseIconArea.Width - (widthOfCloseIcon + rightMarginXForTabHeaderRectangle) + paddingXForCloseIcon, paddingYForTabHeaderRectangle + paddingYForCloseIcon);
-                    tabCloseIconArea.Width = widthOfCloseIcon - 2 * paddingXForCloseIcon;
-                    tabCloseIconArea.Height = tabCloseIconArea.Height - 2 * paddingYForTabHeaderRectangle;
+                    int sizeOfCloseIcon = tabCloseIconArea.Height - 2 * verticalPaddingForCloseIcon;
+                    tabCloseIconArea.Offset(tabCloseIconArea.Width - (sizeOfCloseIcon + rightPadding), verticalPaddingForCloseIcon);
+                    tabCloseIconArea.Width = sizeOfCloseIcon;
+                    tabCloseIconArea.Height = sizeOfCloseIcon;
                     if (tabCloseIconArea.Contains(e.Location))
                     {
                         CloseSelectedTab();
@@ -554,11 +572,11 @@ namespace Well_Trajectory_Visualization
         }
 
         // use cuboid of control to try to include the whole trajectory
-        private void GetZoomInAxisParameter(Control control, int paddingX, int paddingY)
+        private void GetZoomInAxisParameter(Control control)
         {
-            if (zoomZ * (control.Width - 2 * paddingX) > zoomXY * (control.Height - 2 * paddingY))
+            if (zoomZ * (control.Width - 2 * paddingX) > zoomXY * (control.Height - 2 * paddingY - spaceHeightForViewName))
             {
-                zoomInAxisParameter = (control.Height - 2 * paddingY) / zoomZ;
+                zoomInAxisParameter = (control.Height - 2 * paddingY - spaceHeightForViewName) / zoomZ;
             }
             else
             {
@@ -569,15 +587,21 @@ namespace Well_Trajectory_Visualization
 
         private void DrawViewPanel(NewPanel viewPanel, Graphics graphics)
         {
+/*
             int paddingX = 50;
             int paddingY = 55;
             Vector3 normalVector = GetNormalVectorForView(viewPanel.Name);
             List<PointIn2D> projectionPointIn2D = projection.GetProjectionInPlane(currentTrajectory.PolyLineNodes, normalVector);
             GetZoomInAxisParameter(viewPanel, paddingX, paddingY);
+*/
+            Vector3 normalVector = GetNormalVectorForView(viewPanel.Name);
+            List<PointIn2D> projectionPointIn2D = projection.GetProjectionInPlane(currentTrajectory.PolyLineNodes, normalVector);
+            GetZoomInAxisParameter(viewPanel);
+
             Single minX = projectionPointIn2D.Select(x => x.X).Min();
             Single minY = projectionPointIn2D.Select(x => x.Y).Min();
             int spaceX = (int)(paddingX - minX * zoomInAxisParameter);
-            int spaceY = (int)(paddingY - minY * zoomInAxisParameter);
+            int spaceY = (int)(paddingY + spaceHeightForViewName - minY * zoomInAxisParameter);
 
             PointF[] locationOfProjectionPointIn2DOnPanel = new PointF[projectionPointIn2D.Count];
             PointF[] dataPointsProjection = new PointF[projectionPointIn2D.Count];
@@ -615,7 +639,7 @@ namespace Well_Trajectory_Visualization
             // draw caption
             using (Font fontForCaption = new Font("Microsoft YaHei", 11, FontStyle.Regular, GraphicsUnit.Point))
             {
-                Rectangle rect = new Rectangle(0, 0, viewPanel.Width, paddingY - 30);
+                Rectangle rect = new Rectangle(0, 0, viewPanel.Width, spaceHeightForViewName);
 
                 StringFormat stringFormat = new StringFormat();
                 stringFormat.Alignment = StringAlignment.Center;
@@ -628,58 +652,56 @@ namespace Well_Trajectory_Visualization
             string axisXCaption = GetAxisCaption(viewPanel.Name)[0];
             string axisYCaption = GetAxisCaption(viewPanel.Name)[1];
 
-            int lineLength = 5;
-            int spaceForTextInXDirection = 40;
-            int spaceForTextInYDirection = 20;
-            int spaceForTextAlignment = 20;
 
-            PointF xAxisStartPoint = new PointF(paddingX - 2 * lineLength, paddingY - lineLength);
-            PointF yAxisStartPoint = new PointF(paddingX - lineLength, paddingY - 2 * lineLength);
-            PointF xAxisEndPoint = new PointF(viewPanel.Width - paddingX + lineLength, paddingY - lineLength);
-            PointF yAxisEndPoint = new PointF(paddingX - lineLength, viewPanel.Height - paddingY + lineLength);
-            PointF[] xAxisArrowhead = new PointF[] { new PointF(xAxisEndPoint.X, xAxisEndPoint.Y - lineLength), new PointF(xAxisEndPoint.X, xAxisEndPoint.Y + lineLength), new PointF(xAxisEndPoint.X + lineLength, xAxisEndPoint.Y) };
-            PointF[] yAxisArrowhead = new PointF[] { new PointF(yAxisEndPoint.X - lineLength, yAxisEndPoint.Y), new PointF(yAxisEndPoint.X + lineLength, yAxisEndPoint.Y), new PointF(yAxisEndPoint.X, yAxisEndPoint.Y + lineLength) };
+            PointF upperLeftAxisPoint = new PointF(paddingX - marginAxis, spaceHeightForViewName + paddingY - marginAxis);
+            PointF upperRightAxisPoint = new PointF(viewPanel.Width - paddingX + marginAxis, spaceHeightForViewName + paddingY - marginAxis);
+            PointF lowerLeftAxisPoint = new PointF(paddingX - marginAxis, viewPanel.Height - paddingY + marginAxis);
+            PointF lowerRightAxisPoint = new PointF(viewPanel.Width - paddingX + marginAxis, viewPanel.Height - paddingY + marginAxis);
             Font textFont = viewPanel.Font;
             using (Pen penForAxis = new Pen(Color.Black, 0.3F))
             {
-                graphics.DrawLine(penForAxis, xAxisStartPoint, xAxisEndPoint);
-                graphics.DrawLine(penForAxis, yAxisStartPoint, yAxisEndPoint);
-                graphics.DrawString(axisXCaption, textFont, Brushes.Black, xAxisEndPoint.X - spaceForTextAlignment / 2, xAxisEndPoint.Y - spaceForTextInYDirection);
-                graphics.DrawString(axisYCaption, textFont, Brushes.Black, yAxisEndPoint.X - spaceForTextInXDirection / 2, yAxisEndPoint.Y - spaceForTextAlignment / 2);
-                //graphics.DrawPolygon(penForAxis, xAxisArrowhead);
-                graphics.FillPolygon(Brushes.Black, xAxisArrowhead);
-                //graphics.DrawPolygon(penForAxis, yAxisArrowhead);
-                graphics.FillPolygon(Brushes.Black, yAxisArrowhead);
+                // draw axis border
+                graphics.DrawLine(penForAxis, upperLeftAxisPoint, upperRightAxisPoint);
+                graphics.DrawLine(penForAxis, upperRightAxisPoint, lowerRightAxisPoint);
+                graphics.DrawLine(penForAxis, lowerRightAxisPoint, lowerLeftAxisPoint);
+                graphics.DrawLine(penForAxis, lowerLeftAxisPoint, upperLeftAxisPoint);
 
-                int scale = (int)(1 / zoomInAxisParameter) * 60;
-                int coordinateX = (int)minX;
-                int coordinateY = (int)minY;
-                float coordinateXLocationX = coordinateX * zoomInAxisParameter + spaceX;
-                float coordinateXLocationY = xAxisStartPoint.Y - spaceForTextInYDirection;
-                StringFormat stringFormatRightAlignment = new StringFormat();
-                stringFormatRightAlignment.Alignment = StringAlignment.Far;
-                StringFormat stringFormatCenterAlignment = new StringFormat();
-                stringFormatCenterAlignment.Alignment = StringAlignment.Center;
-                stringFormatCenterAlignment.LineAlignment = StringAlignment.Center;
+                // draw axis name
+                graphics.DrawString(axisXCaption, textFont, Brushes.Black, upperRightAxisPoint.X + segementLength, upperRightAxisPoint.Y - heightOfCoordinate / 2);
+                graphics.DrawString(axisYCaption, textFont, Brushes.Black, lowerLeftAxisPoint.X - widthOfCoordinate / 2, lowerLeftAxisPoint.Y + segementLength);
 
-                while (coordinateXLocationX <= xAxisEndPoint.X - 20)
+                // draw number in axis
+
+                float widthOfAxis = upperRightAxisPoint.X - upperLeftAxisPoint.X;
+                float heightOfAxis = lowerLeftAxisPoint.Y - upperLeftAxisPoint.Y;
+                StringFormat xAxisNumberFormat = new StringFormat();
+                xAxisNumberFormat.Alignment = StringAlignment.Center;
+
+                float coordinateX = upperLeftAxisPoint.X;
+                while (coordinateX <= upperRightAxisPoint.X)
                 {
-                    Rectangle rectangle = new Rectangle((int)(coordinateXLocationX - spaceForTextAlignment), (int)coordinateXLocationY, spaceForTextAlignment * 2, (int)(spaceForTextInYDirection - lineLength));
-                    graphics.DrawLine(penForAxis, coordinateXLocationX, xAxisStartPoint.Y, coordinateXLocationX, xAxisStartPoint.Y - lineLength);
-                    graphics.DrawString(coordinateX.ToString(), textFont, Brushes.Black, rectangle, stringFormatCenterAlignment);
-                    coordinateX = coordinateX + scale;
+                    float coordinateXInReal = (coordinateX - spaceX) / zoomInAxisParameter;
 
-                    coordinateXLocationX = coordinateX * zoomInAxisParameter + spaceX;
+                    Rectangle rectangleForNumberInAxisX = new Rectangle((int)(coordinateX - widthOfCoordinate / 2), (int)(upperLeftAxisPoint.Y - segementLength * 3 / 2 - heightOfCoordinate), widthOfCoordinate, heightOfCoordinate);
+                    graphics.DrawLine(penForAxis, coordinateX, upperLeftAxisPoint.Y, coordinateX, upperLeftAxisPoint.Y - segementLength);
+                    graphics.DrawString(((int)coordinateXInReal).ToString(), textFont, Brushes.Black, rectangleForNumberInAxisX, xAxisNumberFormat);
+
+                    coordinateX = coordinateX + widthOfAxis / numberOfDataInAxisX;
                 }
-                float coordinateYLocationX = yAxisStartPoint.X - spaceForTextInXDirection;
-                float coordinateYLocationY = (int)coordinateY * zoomInAxisParameter + spaceY;
-                while (coordinateYLocationY <= yAxisEndPoint.Y - 20)
+
+                StringFormat yAxisNumberFormat = new StringFormat();
+                yAxisNumberFormat.Alignment = StringAlignment.Far;
+
+                float coordinateY = upperLeftAxisPoint.Y;
+                while (coordinateY <= lowerLeftAxisPoint.Y)
                 {
-                    graphics.DrawLine(penForAxis, yAxisStartPoint.X, coordinateYLocationY, yAxisStartPoint.X - lineLength, coordinateYLocationY);
-                    Rectangle rectangle = new Rectangle((int)coordinateYLocationX, (int)(coordinateYLocationY - spaceForTextInYDirection / 2), (int)(spaceForTextInXDirection - lineLength), spaceForTextInYDirection);
-                    graphics.DrawString(coordinateY.ToString(), textFont, Brushes.Black, rectangle, stringFormatRightAlignment);
-                    coordinateY = coordinateY + scale;
-                    coordinateYLocationY = coordinateY * zoomInAxisParameter + spaceY;
+                    float coordinateYInReal = (coordinateY - spaceY) / zoomInAxisParameter;
+
+                    Rectangle rectangleForNumberInAxisY = new Rectangle((int)(upperLeftAxisPoint.X - segementLength * 3 / 2 - widthOfCoordinate), (int)(coordinateY - heightOfCoordinate / 2), widthOfCoordinate, heightOfCoordinate);
+                    graphics.DrawLine(penForAxis, upperLeftAxisPoint.X, coordinateY, upperLeftAxisPoint.X - segementLength, coordinateY);
+                    graphics.DrawString(((int)coordinateYInReal).ToString(), textFont, Brushes.Black, rectangleForNumberInAxisY, yAxisNumberFormat);
+
+                    coordinateY = coordinateY + heightOfAxis / numberOfDataInAxisY;
                 }
             }
 
@@ -700,7 +722,7 @@ namespace Well_Trajectory_Visualization
                     float xForPaint = point.X * zoomInAxisParameter + spaceX;
                     float yForPaint = point.Y * zoomInAxisParameter + spaceY;
                     PointF locationOfPoint = new PointF(xForPaint + 3, yForPaint - 4);
-                    String pointAnnotation = point.ToString();
+                    String pointAnnotation = $"({Math.Round(point.X,1)}, {Math.Round(point.Y, 1)})";
                     if (!pointAnnotationDictionary.ContainsKey(pointAnnotation))
                     {
                         graphics.DrawString(pointAnnotation, textFont, Brushes.Black, locationOfPoint);
@@ -710,7 +732,6 @@ namespace Well_Trajectory_Visualization
             }
             return graphics;
         }
-
 
         private void AnnnotationToolStripMenuItem_Click(object sender, EventArgs e)
         {
@@ -722,7 +743,6 @@ namespace Well_Trajectory_Visualization
                 tabControl.SelectedTab.Refresh();
             }
         }
-
 
         private void Panel_MouseMove(object sender, MouseEventArgs e)
         {
@@ -743,7 +763,7 @@ namespace Well_Trajectory_Visualization
                 if ((Math.Abs(e.X - location.X) < radius) &&
                     (Math.Abs(e.Y - location.Y) < radius))
                 {
-                    tip = $"({((List<PointF[]>) panel.Tag)[0][index].X}, {((List<PointF[]>)panel.Tag)[0][index].Y})";
+                    tip = $"({Math.Round(((List<PointF[]>) panel.Tag)[0][index].X,1)}, {Math.Round(((List<PointF[]>)panel.Tag)[0][index].Y, 1)})";
                     break;
                 }
                 index = index + 1;
