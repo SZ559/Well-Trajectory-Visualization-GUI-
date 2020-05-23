@@ -50,7 +50,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="NewPanel.cs">
+    <Compile Include="PanelForProjection.cs">
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="MainForm.cs">
