@@ -7,7 +7,6 @@ using System.Windows.Forms;
 using GeometricObject;
 using FileHandler;
 using System.Numerics;
-using System.ComponentModel;
 
 namespace Well_Trajectory_Visualization
 {
@@ -15,30 +14,8 @@ namespace Well_Trajectory_Visualization
     {
 
         TrajectoryDataReader trajectoryDataReader;
-        Projection projection;
         WellViewSaver wellViewSaver;
-        Trajectory CurrentTrajectory
-        {
-            get
-            {
-                Trajectory currentTrajectory;
-                if (tabControl.SelectedTab != null)
-                {
-                    string wellName = tabControl.SelectedTab.Name.Split('-')[0];
-                    string trajectoryName = tabControl.SelectedTab.Name.Split('-')[1];
-                    currentTrajectory = wells.Find(x => x.WellName == wellName).Trajectories.Find(x => x.TrajectoryName == trajectoryName);
-                    return currentTrajectory;
-                }
-                else
-                {
-                    return null;
-                }
-            }
-        }
 
-        Single zoomXY;
-        Single zoomZ;
-        Single zoomInAxisParameter;
         List<Well> wells;
 
         readonly int leftPadding;
@@ -47,22 +24,13 @@ namespace Well_Trajectory_Visualization
         readonly int verticalPaddingForHeaderName;
         readonly int verticalPaddingForCloseIcon;
 
-        readonly int numberOfDataInAxisX;
-        readonly int numberOfDataInAxisY;
-        readonly int spaceHeightForViewName;
-        readonly int segementLength;
-        readonly int paddingX;
-        readonly int paddingY;
-        readonly int marginAxis;
-        readonly int widthOfCoordinate;
-        readonly int heightOfCoordinate;
-
         int PreviewTabIndex
         {
             get
             {
                 foreach (TabPage tabpage in tabControl.TabPages)
                 {
+                    //tabpage tag
                     if ((bool)tabpage.Tag == false)
                     {
                         return tabControl.TabPages.IndexOf(tabpage);
@@ -72,7 +40,6 @@ namespace Well_Trajectory_Visualization
             }
         }
         private bool isDoubleClick;
-
 
         public MainForm()
         {
@@ -84,24 +51,12 @@ namespace Well_Trajectory_Visualization
             verticalPaddingForHeaderName = 5;
             verticalPaddingForCloseIcon = 9;
 
-            numberOfDataInAxisX = 5;
-            numberOfDataInAxisY = 10;
-            spaceHeightForViewName = 25;
-            segementLength = 5;
-            marginAxis = 5;
-            widthOfCoordinate = 40;
-            heightOfCoordinate = 18;
-            paddingX = segementLength * 3 / 2 + marginAxis + widthOfCoordinate + 10;
-            paddingY = segementLength * 3 / 2 + marginAxis + heightOfCoordinate + 10;
-
-
-
             trajectoryDataReader = new TrajectoryDataReader();
             wellViewSaver = new WellViewSaver();
-            projection = new Projection();
             tabControl.Padding = new Point(18, 5);
             wells = new List<Well>();
             isDoubleClick = false;
+
         }
 
         ///////////// Menu Bar /////////////////
@@ -287,8 +242,7 @@ namespace Well_Trajectory_Visualization
                         MessageBox.Show("Only 10 pages can be opened. Please close a page before opening a new one.");
                         return;
                     }
-
-                    OpenNewTabPage(wellName, trajectoryName);
+                    OpenNewTabPage(wellName, trajectoryName, (Trajectory) node.Tag);
                 }
             }
         }
@@ -317,7 +271,7 @@ namespace Well_Trajectory_Visualization
             }
         }
 
-        private void OpenNewTabPage(string wellName, string trajectoryName)
+        private void OpenNewTabPage(string wellName, string trajectoryName, Trajectory trajectory)
         {
             TabPage tabPage = new TabPage
             {
@@ -328,7 +282,7 @@ namespace Well_Trajectory_Visualization
                 Tag = isDoubleClick // opened or preview : true means opened
             };
 
-            TableLayoutPanel tableLayoutPanel = InitializeTableLayoutPanelForTabPage();
+            TableLayoutPanel tableLayoutPanel = InitializeTableLayoutPanelForTabPage(trajectory);
             tabPage.Controls.Add(tableLayoutPanel);
             tabControl.TabPages.Add(tabPage);
             tabControl.SelectedTab = tabPage;
@@ -336,7 +290,7 @@ namespace Well_Trajectory_Visualization
 
         ///////////// Panels inside Tab Page //////////////////
 
-        private TableLayoutPanel InitializeTableLayoutPanelForTabPage()
+        private TableLayoutPanel InitializeTableLayoutPanelForTabPage(Trajectory trajectory)
         {
             TableLayoutPanel tableLayoutPanel = new TableLayoutPanel
             {
@@ -346,6 +300,7 @@ namespace Well_Trajectory_Visualization
                 ColumnCount = 3,
                 AutoScroll = true,
                 Dock = DockStyle.Fill,
+                Tag = trajectory,
             };
             tableLayoutPanel.SuspendLayout();
             tableLayoutPanel.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 33));
@@ -358,12 +313,12 @@ namespace Well_Trajectory_Visualization
 
         private void AddViewPanelForTableLayoutPanel(TableLayoutPanel tableLayoutPanel)
         {
-            Panel mainViewPanel = InitializePanelForProjection("Main View");
-            Panel leftViewPanel = InitializePanelForProjection("Left View");
-            Panel topViewPanel = InitializePanelForProjection("Top View");
-            mainViewPanel.Paint += new PaintEventHandler(PaintPanel);
-            leftViewPanel.Paint += new PaintEventHandler(PaintPanel);
-            topViewPanel.Paint += new PaintEventHandler(PaintPanel);
+            Single zoomXY = GetZoomXYForThreeViews((Trajectory)tableLayoutPanel.Tag);
+            Single zoomZ = GetZoomZForThreeViews((Trajectory)tableLayoutPanel.Tag);
+
+            PanelForProjection mainViewPanel = new PanelForProjection(Vector3.UnitY, (Trajectory)tableLayoutPanel.Tag, zoomXY, zoomZ);
+            PanelForProjection leftViewPanel = new PanelForProjection(Vector3.UnitX, (Trajectory)tableLayoutPanel.Tag, zoomXY, zoomZ);
+            PanelForProjection topViewPanel = new PanelForProjection(Vector3.UnitZ, (Trajectory)tableLayoutPanel.Tag, zoomXY, zoomZ);
 
             tableLayoutPanel.SuspendLayout();
             tableLayoutPanel.Controls.Add(mainViewPanel, 0, 0);
@@ -372,22 +327,27 @@ namespace Well_Trajectory_Visualization
             tableLayoutPanel.ResumeLayout();
         }
 
-        private Panel InitializePanelForProjection(string viewName)
+        /////////////// Helper functions //////////////
+        private Single GetZoomXYForThreeViews(Trajectory trajectory)
         {
-            return new Panel
-            {
-                Dock = DockStyle.Fill,
-                BorderStyle = BorderStyle.None,
-                Name = viewName
-            };
+            Single zoomXY;
+            Single maxX = trajectory.PolyLineNodes.Select(x => x.X).Max();
+            Single maxY = trajectory.PolyLineNodes.Select(x => x.Y).Max();
+            Single minX = trajectory.PolyLineNodes.Select(x => x.X).Min();
+            Single minY = trajectory.PolyLineNodes.Select(x => x.Y).Min();
+         
+            zoomXY = Math.Max(maxX - minX, maxY - minY);
+            return zoomXY > 0 ? zoomXY : 1;
         }
 
-        private void PaintPanel(object sender, PaintEventArgs e)
+        private Single GetZoomZForThreeViews(Trajectory trajectory)
         {
-            SetZoomForThreeViews();
-            DrawViewPanel((Panel)sender, e.Graphics);
+            Single zoomZ;
+            Single maxZ = trajectory.PolyLineNodes.Select(x => x.Z).Max();
+            Single minZ = trajectory.PolyLineNodes.Select(x => x.Z).Min();
+            zoomZ = maxZ - minZ;
+            return zoomZ > 0 ? zoomZ : 1;
         }
-
 
         /////////// Draw Tab Page Header //////////////////
 
@@ -432,7 +392,6 @@ namespace Well_Trajectory_Visualization
 
             string tabHeaderText = tabControl.TabPages[e.Index].Text;
             FontStyle fontStyle = (bool)tabControl.TabPages[e.Index].Tag == true ? FontStyle.Regular : FontStyle.Italic;
-
             int sizeOfCloseIcon = tabHeaderArea.Height - 2 * verticalPaddingForCloseIcon;
             //draw filename
             tabHeaderArea.Offset(leftPadding, verticalPaddingForHeaderName);
@@ -494,185 +453,23 @@ namespace Well_Trajectory_Visualization
             defaultPagePanel.Visible = (tabControl.TabPages.Count == 0) ? true : false;
         }
 
-
-        /////////////// Helper functions //////////////
-
-        private Vector3 GetNormalVectorForView(string viewName)
+        private void AnnnotationToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            Vector3 normalVector;
-            switch (viewName)
+            foreach (TabPage tabPage in tabControl.Controls)
             {
-                case "Top View":
-                    normalVector = Vector3.UnitZ;
-                    break;
-                case "Left View":
-                    normalVector = Vector3.UnitX;
-                    break;
-                case "Main View":
-                default:
-                    normalVector = Vector3.UnitY;
-                    break;
-            }
-            return normalVector;
-        }
-
-        private string[] GetAxisCaption(string viewPanelName)
-        {
-            string axisXCaption;
-            string axisYCaption;
-            switch (viewPanelName)
-            {
-                case "Main View":
-                    axisXCaption = "x";
-                    axisYCaption = "z";
-                    break;
-                case "Left View":
-                    axisXCaption = "y";
-                    axisYCaption = "z";
-                    break;
-                case "Top View":
-                default:
-                    axisXCaption = "x";
-                    axisYCaption = "y";
-                    break;
-            }
-            return new string[] { axisXCaption, axisYCaption };
-        }
-
-
-        ///////////// Paint Panels ////////////////////
-
-        private void SetZoomForThreeViews()
-        {
-            Single maxX = CurrentTrajectory.PolyLineNodes.Select(x => x.X).Max();
-            Single maxY = CurrentTrajectory.PolyLineNodes.Select(x => x.Y).Max();
-            Single maxZ = CurrentTrajectory.PolyLineNodes.Select(x => x.Z).Max();
-
-            Single minX = CurrentTrajectory.PolyLineNodes.Select(x => x.X).Min();
-            Single minY = CurrentTrajectory.PolyLineNodes.Select(x => x.Y).Min();
-            Single minZ = CurrentTrajectory.PolyLineNodes.Select(x => x.Z).Min();
-
-            zoomXY = Math.Max(maxX - minX, maxY - minY);
-            zoomXY = zoomXY > 0 ? zoomXY : 1;
-            zoomZ = maxZ - minZ;
-            zoomZ = zoomZ > 0 ? zoomZ : 1;
-        }
-
-        // use cuboid of control to try to include the whole trajectory
-        private void GetZoomInAxisParameter(Control control)
-        {
-            if (zoomZ * (control.Width - 2 * paddingX) > zoomXY * (control.Height - 2 * paddingY - spaceHeightForViewName))
-            {
-                zoomInAxisParameter = (control.Height - 2 * paddingY - spaceHeightForViewName) / zoomZ;
-            }
-            else
-            {
-                zoomInAxisParameter = (control.Width - 2 * paddingX) / zoomXY;
-            }
-        }
-
-        private void DrawViewPanel(Panel viewPanel, Graphics graphics)
-        {
-            Vector3 normalVector = GetNormalVectorForView(viewPanel.Name);
-            List<PointIn2D> projectionPointIn2D = projection.GetProjectionInPlane(CurrentTrajectory.PolyLineNodes, normalVector);
-            GetZoomInAxisParameter(viewPanel);
-            Single minX = projectionPointIn2D.Select(x => x.X).Min();
-            Single minY = projectionPointIn2D.Select(x => x.Y).Min();
-            int spaceX = (int)(paddingX - minX * zoomInAxisParameter);
-            int spaceY = (int)(paddingY + spaceHeightForViewName - minY * zoomInAxisParameter);
-
-            // draw line
-            using (Pen penForLine = new Pen(Color.FromArgb(204, 234, 187), 3.0F))
-            {
-                for (int i = 0; i < projectionPointIn2D.Count - 1; i = i + 1)
+                TableLayoutPanel tableLayoutPanel = (TableLayoutPanel) tabPage.Controls[0];
+                foreach (PanelForProjection panel in tableLayoutPanel.Controls)
                 {
-                    float xForPaint = projectionPointIn2D[i].X * zoomInAxisParameter + spaceX;
-                    float yForPaint = projectionPointIn2D[i].Y * zoomInAxisParameter + spaceY;
-                    float x2ForPaint = projectionPointIn2D[i + 1].X * zoomInAxisParameter + spaceX;
-                    float y2ForPaint = projectionPointIn2D[i + 1].Y * zoomInAxisParameter + spaceY;
-                    graphics.DrawLine(penForLine, xForPaint, yForPaint, x2ForPaint, y2ForPaint);
+                    panel.AddAnnotation = annnotationToolStripMenuItem.Checked;
                 }
             }
-
-            // highlight data points
-            using (SolidBrush brushForPoint = new SolidBrush(Color.FromArgb(63, 63, 68)))
+           
+            if (tabControl.SelectedTab != null)
             {
-                foreach (var point in projectionPointIn2D)
-                {
-                    graphics.FillRectangle(brushForPoint, point.X * zoomInAxisParameter + spaceX - 1, point.Y * zoomInAxisParameter + spaceY - 1, 2, 2);
-                }
+                tabControl.SelectedTab.Refresh();
             }
-
-            // draw caption
-            using (Font fontForCaption = new Font("Microsoft YaHei", 11, FontStyle.Regular, GraphicsUnit.Point))
-            {
-                Rectangle rect = new Rectangle(0, 0, viewPanel.Width, spaceHeightForViewName);
-
-                StringFormat stringFormat = new StringFormat();
-                stringFormat.Alignment = StringAlignment.Center;
-                stringFormat.LineAlignment = StringAlignment.Center;
-                graphics.DrawString(viewPanel.Name, fontForCaption, Brushes.Black, rect, stringFormat);
-            }
-
-            //draw axis
-            string axisXCaption = GetAxisCaption(viewPanel.Name)[0];
-            string axisYCaption = GetAxisCaption(viewPanel.Name)[1];
-
-
-            PointF upperLeftAxisPoint = new PointF(paddingX - marginAxis, spaceHeightForViewName + paddingY - marginAxis);
-            PointF upperRightAxisPoint = new PointF(viewPanel.Width - paddingX + marginAxis, spaceHeightForViewName + paddingY - marginAxis);
-            PointF lowerLeftAxisPoint = new PointF(paddingX - marginAxis, viewPanel.Height - paddingY + marginAxis);
-            PointF lowerRightAxisPoint = new PointF(viewPanel.Width - paddingX + marginAxis, viewPanel.Height - paddingY + marginAxis);
-            Font textFont = viewPanel.Font;
-            using (Pen penForAxis = new Pen(Color.Black, 0.3F))
-            {
-                // draw axis border
-                graphics.DrawLine(penForAxis, upperLeftAxisPoint, upperRightAxisPoint);
-                graphics.DrawLine(penForAxis, upperRightAxisPoint, lowerRightAxisPoint);
-                graphics.DrawLine(penForAxis, lowerRightAxisPoint, lowerLeftAxisPoint);
-                graphics.DrawLine(penForAxis, lowerLeftAxisPoint, upperLeftAxisPoint);
-
-                // draw axis name
-                graphics.DrawString(axisXCaption, textFont, Brushes.Black, upperRightAxisPoint.X + segementLength, upperRightAxisPoint.Y - heightOfCoordinate / 2);
-                graphics.DrawString(axisYCaption, textFont, Brushes.Black, lowerLeftAxisPoint.X - widthOfCoordinate / 2, lowerLeftAxisPoint.Y + segementLength);
-
-                // draw number in axis
-
-                float widthOfAxis = upperRightAxisPoint.X - upperLeftAxisPoint.X;
-                float heightOfAxis = lowerLeftAxisPoint.Y - upperLeftAxisPoint.Y;
-                StringFormat xAxisNumberFormat = new StringFormat();
-                xAxisNumberFormat.Alignment = StringAlignment.Center;
-
-                float coordinateX = upperLeftAxisPoint.X;
-                while (coordinateX <= upperRightAxisPoint.X)
-                {
-                    float coordinateXInReal = (coordinateX - spaceX) / zoomInAxisParameter;
-
-                    Rectangle rectangleForNumberInAxisX = new Rectangle((int)(coordinateX - widthOfCoordinate / 2), (int)(upperLeftAxisPoint.Y - segementLength * 3 / 2 - heightOfCoordinate), widthOfCoordinate, heightOfCoordinate);
-                    graphics.DrawLine(penForAxis, coordinateX, upperLeftAxisPoint.Y, coordinateX, upperLeftAxisPoint.Y - segementLength);
-                    graphics.DrawString(((int)coordinateXInReal).ToString(), textFont, Brushes.Black, rectangleForNumberInAxisX, xAxisNumberFormat);
-
-                    coordinateX = coordinateX + widthOfAxis / numberOfDataInAxisX;
-                }
-
-                StringFormat yAxisNumberFormat = new StringFormat();
-                yAxisNumberFormat.Alignment = StringAlignment.Far;
-
-                float coordinateY = upperLeftAxisPoint.Y;
-                while (coordinateY <= lowerLeftAxisPoint.Y)
-                {
-                    float coordinateYInReal = (coordinateY - spaceY) / zoomInAxisParameter;
-
-                    Rectangle rectangleForNumberInAxisY = new Rectangle((int)(upperLeftAxisPoint.X - segementLength * 3 / 2 - widthOfCoordinate), (int)(coordinateY - heightOfCoordinate / 2), widthOfCoordinate, heightOfCoordinate);
-                    graphics.DrawLine(penForAxis, upperLeftAxisPoint.X, coordinateY, upperLeftAxisPoint.X - segementLength, coordinateY);
-                    graphics.DrawString(((int)coordinateYInReal).ToString(), textFont, Brushes.Black, rectangleForNumberInAxisY, yAxisNumberFormat);
-
-                    coordinateY = coordinateY + heightOfAxis / numberOfDataInAxisY;
-                }
-            }
-
-            graphics.Dispose();
         }
+
 
     }
 }
