@@ -123,34 +123,34 @@
             this.saveAsToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)(((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.Shift) 
             | System.Windows.Forms.Keys.S)));
             this.saveAsToolStripMenuItem.Size = new System.Drawing.Size(221, 22);
-            this.saveAsToolStripMenuItem.Text = "&Save...";
+            this.saveAsToolStripMenuItem.Text = "&Save View...";
             // 
             // allViewsToolStripMenuItem
             // 
             this.allViewsToolStripMenuItem.Name = "allViewsToolStripMenuItem";
-            this.allViewsToolStripMenuItem.Size = new System.Drawing.Size(136, 22);
-            this.allViewsToolStripMenuItem.Text = "All Views";
+            this.allViewsToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.allViewsToolStripMenuItem.Text = "All";
             this.allViewsToolStripMenuItem.Click += new System.EventHandler(this.SaveViewOnTabPage);
             // 
             // mainViewToolStripMenuItem
             // 
             this.mainViewToolStripMenuItem.Name = "mainViewToolStripMenuItem";
-            this.mainViewToolStripMenuItem.Size = new System.Drawing.Size(136, 22);
-            this.mainViewToolStripMenuItem.Text = "Main View";
+            this.mainViewToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.mainViewToolStripMenuItem.Text = "Main";
             this.mainViewToolStripMenuItem.Click += new System.EventHandler(this.ViewToolStripMenuItem_Click);
             // 
             // leftViewToolStripMenuItem
             // 
             this.leftViewToolStripMenuItem.Name = "leftViewToolStripMenuItem";
-            this.leftViewToolStripMenuItem.Size = new System.Drawing.Size(136, 22);
-            this.leftViewToolStripMenuItem.Text = "Left View";
+            this.leftViewToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.leftViewToolStripMenuItem.Text = "Left";
             this.leftViewToolStripMenuItem.Click += new System.EventHandler(this.ViewToolStripMenuItem_Click);
             // 
             // topViewToolStripMenuItem
             // 
             this.topViewToolStripMenuItem.Name = "topViewToolStripMenuItem";
-            this.topViewToolStripMenuItem.Size = new System.Drawing.Size(136, 22);
-            this.topViewToolStripMenuItem.Text = "Top View";
+            this.topViewToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.topViewToolStripMenuItem.Text = "Top";
             this.topViewToolStripMenuItem.Click += new System.EventHandler(this.ViewToolStripMenuItem_Click);
             // 
             // exitToolStripMenuItem
