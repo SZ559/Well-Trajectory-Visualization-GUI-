@@ -66,7 +66,7 @@ namespace Well_Trajectory_Visualization
             get; set; 
         }
 
-        public PanelForProjection(Vector3 normalVector, Trajectory currentTrajectory, Single zoomXY, Single zoomZ)
+        public PanelForProjection(Vector3 normalVector, Trajectory currentTrajectory, Single zoomXY, Single zoomZ, bool addAnnotation)
         {
             //initialize panel property
             Dock = DockStyle.Fill;
@@ -80,7 +80,7 @@ namespace Well_Trajectory_Visualization
             this.zoomZ = zoomZ;
             minX = TrajectoryProjectionIn2D.Select(x => x.X).Min();
             minY = TrajectoryProjectionIn2D.Select(x => x.Y).Min();
-
+            AddAnnotation = addAnnotation;
             //Initialize drawing property
 
             numberOfDataInAxisX = 5;
@@ -200,8 +200,6 @@ namespace Well_Trajectory_Visualization
             PointF lowerLeftAxisPoint = new PointF(paddingX - marginAxis, this.Height - paddingY + marginAxis);
             PointF lowerRightAxisPoint = new PointF(this.Width - paddingX + marginAxis, this.Height - paddingY + marginAxis);
             Font textFont = this.Font;
-
-  
 
             using (Pen penForAxis = new Pen(Color.Black, 0.3F))
             {
