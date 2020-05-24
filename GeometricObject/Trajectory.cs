@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System;
 using System.Numerics;
+
 namespace GeometricObject
 {
     public class Trajectory
@@ -19,12 +20,15 @@ namespace GeometricObject
 
         public string WellName { get; set; }
 
-        public Trajectory(string source = "", string wellName = "", string trajectoryName = "")
+        public Enum Unit { get; set; }
+
+        public Trajectory(string source = "", string wellName = "", string trajectoryName = "", DistanceUnit distanceUnit = DistanceUnit.Meter)
         {
             PolyLineNodes = new List<Vector3>();
             SourceFile = source;
             WellName = wellName;
             TrajectoryName = trajectoryName;
+            Unit = distanceUnit;
         }
 
         public void AddNode(Vector3 point)

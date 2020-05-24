@@ -46,7 +46,7 @@ namespace Well_Trajectory_Visualization
 
         public PointF[] TrajectoryProjectionLocationOnPanel
         {
-            get; 
+            get;
         }
 
         /*
@@ -63,7 +63,7 @@ namespace Well_Trajectory_Visualization
 
         public bool AddAnnotation
         {
-            get; set; 
+            get; set;
         }
 
         public PanelForProjection(Vector3 normalVector, Trajectory currentTrajectory, Single zoomXY, Single zoomZ, bool addAnnotation)
@@ -72,7 +72,6 @@ namespace Well_Trajectory_Visualization
             Dock = DockStyle.Fill;
             BorderStyle = BorderStyle.None;
             Name = projection.GetProjectionView(normalVector);
-            SetAxisCaption();
             TrajectoryProjectionIn2D = projection.GetProjectionInPlane(currentTrajectory.PolyLineNodes, normalVector);
             CurrentTrajectory = currentTrajectory;
             TrajectoryProjectionLocationOnPanel = new PointF[TrajectoryProjectionIn2D.Count];
@@ -81,6 +80,7 @@ namespace Well_Trajectory_Visualization
             minX = TrajectoryProjectionIn2D.Select(x => x.X).Min();
             minY = TrajectoryProjectionIn2D.Select(x => x.Y).Min();
             AddAnnotation = addAnnotation;
+            SetAxisCaption();
 
             //Initialize drawing property
 
@@ -113,18 +113,34 @@ namespace Well_Trajectory_Visualization
             switch (Name)
             {
                 case "Main View":
-                    axisXCaption = "x";
-                    axisYCaption = "z";
+                    axisXCaption = "x/";
+                    axisYCaption = "z/";
                     break;
                 case "Left View":
-                    axisXCaption = "y";
-                    axisYCaption = "z";
+                    axisXCaption = "y/";
+                    axisYCaption = "z/";
                     break;
+                case "Top View":
                 default:
-                    axisXCaption = "x";
-                    axisYCaption = "y";
+                    axisXCaption = "x/";
+                    axisYCaption = "y/";
                     break;
             }
+
+            string unit;
+            switch (CurrentTrajectory.Unit)
+            {
+                case DistanceUnit.Meter:
+                    unit = "m";
+                    break;
+                case DistanceUnit.Feet:
+                default:
+                    unit = "f";
+                    break;
+            }
+
+            axisXCaption += unit;
+            axisYCaption += unit;
         }
 
         private void GetZoomInAxisParameter()
@@ -202,8 +218,6 @@ namespace Well_Trajectory_Visualization
             PointF lowerRightAxisPoint = new PointF(this.Width - paddingX + marginAxis, this.Height - paddingY + marginAxis);
             Font textFont = this.Font;
 
-  
-
             using (Pen penForAxis = new Pen(Color.Black, 0.3F))
             {
                 // draw axis border
@@ -213,11 +227,14 @@ namespace Well_Trajectory_Visualization
                 graphics.DrawLine(penForAxis, lowerLeftAxisPoint, upperLeftAxisPoint);
 
                 // draw axis name
-                graphics.DrawString(axisXCaption, textFont, Brushes.Black, upperRightAxisPoint.X + segementLength, upperRightAxisPoint.Y - heightOfCoordinate / 2);
-                graphics.DrawString(axisYCaption, textFont, Brushes.Black, lowerLeftAxisPoint.X - widthOfCoordinate / 2, lowerLeftAxisPoint.Y + segementLength);
+                Rectangle xAxisCaptionRect = new Rectangle((int)(upperRightAxisPoint.X + segementLength), (int)(upperRightAxisPoint.Y - heightOfCoordinate / 2), widthOfCoordinate, heightOfCoordinate);
+                Rectangle yAxisCaptionRect = new Rectangle((int)(lowerLeftAxisPoint.X - widthOfCoordinate / 2), (int)(lowerLeftAxisPoint.Y + segementLength), widthOfCoordinate, heightOfCoordinate);
+                StringFormat axisCaptionStringFormat = new StringFormat();
+                axisCaptionStringFormat.Alignment = StringAlignment.Center;
+                graphics.DrawString(axisXCaption, textFont, Brushes.Black, xAxisCaptionRect, axisCaptionStringFormat);
+                graphics.DrawString(axisYCaption, textFont, Brushes.Black, yAxisCaptionRect, axisCaptionStringFormat);
 
                 // draw number in axis
-
                 float widthOfAxis = upperRightAxisPoint.X - upperLeftAxisPoint.X;
                 float heightOfAxis = lowerLeftAxisPoint.Y - upperLeftAxisPoint.Y;
                 StringFormat xAxisNumberFormat = new StringFormat();

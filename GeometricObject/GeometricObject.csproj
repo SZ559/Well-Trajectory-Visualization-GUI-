@@ -42,6 +42,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DistanceUnit.cs" />
     <Compile Include="Projection.cs" />
     <Compile Include="PointIn2D.cs" />
     <Compile Include="PointIn3D.cs" />
