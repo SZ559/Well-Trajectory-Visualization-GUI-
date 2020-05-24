@@ -316,9 +316,9 @@ namespace Well_Trajectory_Visualization
             Single zoomXY = GetZoomXYForThreeViews((Trajectory)tableLayoutPanel.Tag);
             Single zoomZ = GetZoomZForThreeViews((Trajectory)tableLayoutPanel.Tag);
 
-            PanelForProjection mainViewPanel = new PanelForProjection(Vector3.UnitY, (Trajectory)tableLayoutPanel.Tag, zoomXY, zoomZ);
-            PanelForProjection leftViewPanel = new PanelForProjection(Vector3.UnitX, (Trajectory)tableLayoutPanel.Tag, zoomXY, zoomZ);
-            PanelForProjection topViewPanel = new PanelForProjection(Vector3.UnitZ, (Trajectory)tableLayoutPanel.Tag, zoomXY, zoomZ);
+            PanelForProjection mainViewPanel = new PanelForProjection(Vector3.UnitY, (Trajectory)tableLayoutPanel.Tag, zoomXY, zoomZ, annnotationToolStripMenuItem.Checked);
+            PanelForProjection leftViewPanel = new PanelForProjection(Vector3.UnitX, (Trajectory)tableLayoutPanel.Tag, zoomXY, zoomZ, annnotationToolStripMenuItem.Checked);
+            PanelForProjection topViewPanel = new PanelForProjection(Vector3.UnitZ, (Trajectory)tableLayoutPanel.Tag, zoomXY, zoomZ, annnotationToolStripMenuItem.Checked);
 
             tableLayoutPanel.SuspendLayout();
             tableLayoutPanel.Controls.Add(mainViewPanel, 0, 0);
