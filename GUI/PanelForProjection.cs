@@ -66,7 +66,9 @@ namespace Well_Trajectory_Visualization
             get; set; 
         }
 
+
         public PanelForProjection(Vector3 normalVector, Trajectory currentTrajectory, Single zoomXY, Single zoomZ, bool addAnnotation)
+
         {
             //initialize panel property
             Dock = DockStyle.Fill;
@@ -81,7 +83,6 @@ namespace Well_Trajectory_Visualization
             minX = TrajectoryProjectionIn2D.Select(x => x.X).Min();
             minY = TrajectoryProjectionIn2D.Select(x => x.Y).Min();
             AddAnnotation = addAnnotation;
-            //Initialize drawing property
 
             numberOfDataInAxisX = 5;
             numberOfDataInAxisY = 10;
