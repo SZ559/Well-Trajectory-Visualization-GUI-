@@ -49,7 +49,7 @@ namespace Well_Trajectory_Visualization
             get;
         }
 
-        public List<int> LargestInflectionPointProjectionIndex
+        public List<int> SharpestPointProjectionIndex
         {
             get; set;
         }
@@ -58,7 +58,7 @@ namespace Well_Trajectory_Visualization
         {
             get; set;
         }
-        public bool AddLargestInflectionPoint
+        public bool AddSharpestPoint
         {
             get; set;
         }
@@ -78,8 +78,6 @@ namespace Well_Trajectory_Visualization
             minX = TrajectoryProjectionIn2D.Select(x => x.X).Min();
             minY = TrajectoryProjectionIn2D.Select(x => x.Y).Min();
             AddAnnotation = addAnnotation;
-            //revise
-            AddLargestInflectionPoint = true;
             SetAxisCaption();
 
             //Initialize drawing property
@@ -212,13 +210,13 @@ namespace Well_Trajectory_Visualization
             }
           
             
-            if (AddLargestInflectionPoint)
+            if (AddSharpestPoint)
             {
                 using (SolidBrush brushForPoint = new SolidBrush(Color.Red))
                 {
-                    foreach (var index in LargestInflectionPointProjectionIndex)
+                    foreach (var index in SharpestPointProjectionIndex)
                     {
-                        graphics.FillRectangle(brushForPoint, TrajectoryProjectionLocationOnPanel[index].X - 2, TrajectoryProjectionLocationOnPanel[index].Y - 2, 4, 4);
+                        graphics.FillRectangle(brushForPoint, TrajectoryProjectionLocationOnPanel[index].X - 1, TrajectoryProjectionLocationOnPanel[index].Y - 1, 2, 2);
                     }
                 }
             }

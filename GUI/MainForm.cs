@@ -316,14 +316,18 @@ namespace Well_Trajectory_Visualization
         {
             Single zoomXY = GetZoomXYForThreeViews((Trajectory)tableLayoutPanel.Tag);
             Single zoomZ = GetZoomZForThreeViews((Trajectory)tableLayoutPanel.Tag);
-            List<int> largestInflectionPointIndex= GetLargestInflectionPointIndex(((Trajectory)tableLayoutPanel.Tag).PolyLineNodes);
+            List<int> sharpestPointIndex= GetSharpestPointIndex(((Trajectory)tableLayoutPanel.Tag).PolyLineNodes);
             PanelForProjection mainViewPanel = new PanelForProjection(Vector3.UnitY, (Trajectory)tableLayoutPanel.Tag, zoomXY, zoomZ, annnotationToolStripMenuItem.Checked);
             PanelForProjection leftViewPanel = new PanelForProjection(Vector3.UnitX, (Trajectory)tableLayoutPanel.Tag, zoomXY, zoomZ, annnotationToolStripMenuItem.Checked);
             PanelForProjection topViewPanel = new PanelForProjection(Vector3.UnitZ, (Trajectory)tableLayoutPanel.Tag, zoomXY, zoomZ, annnotationToolStripMenuItem.Checked);
 
-            mainViewPanel.LargestInflectionPointProjectionIndex = largestInflectionPointIndex;
-            leftViewPanel.LargestInflectionPointProjectionIndex = largestInflectionPointIndex;
-            topViewPanel.LargestInflectionPointProjectionIndex = largestInflectionPointIndex;
+            mainViewPanel.SharpestPointProjectionIndex = sharpestPointIndex;
+            leftViewPanel.SharpestPointProjectionIndex = sharpestPointIndex;
+            topViewPanel.SharpestPointProjectionIndex = sharpestPointIndex;
+            mainViewPanel.AddSharpestPoint = sharpestPointToolStripMenuItem.Checked;
+            leftViewPanel.AddSharpestPoint = sharpestPointToolStripMenuItem.Checked;
+            topViewPanel.AddSharpestPoint = sharpestPointToolStripMenuItem.Checked;
+
 
             tableLayoutPanel.SuspendLayout();
             tableLayoutPanel.Controls.Add(mainViewPanel, 0, 0);
@@ -355,17 +359,19 @@ namespace Well_Trajectory_Visualization
         }
         //public static List<Vector3> GetLargestInflectionPoint(List<Vector3> currentTrajectory)
 
-        public static List<int> GetLargestInflectionPointIndex(List<Vector3> currentTrajectory)
+        public static List<int> GetSharpestPointIndex(List<Vector3> currentTrajectory)
         {
-            float lengthOfVector1, lengthOfVector2, dotProduct;
+            double lengthOfVector1, lengthOfVector2, dotProduct;
             Vector3 vector1, vector2;
             double maxCurvature = Math.PI;
             double radian;
-            int indexPreventOverlaping = 0;
+            int indexPreventOverlaping_Vector1 = 0;
+
             List<int> maxCurvaturePointIndex = new List<int>();
             for (int i = 1; i < currentTrajectory.Count - 1; i = i + 1)
             {
-                vector1 = Vector3.Subtract(currentTrajectory[i - indexPreventOverlaping - 1], currentTrajectory[i]);
+
+                vector1 = Vector3.Subtract(currentTrajectory[i - indexPreventOverlaping_Vector1 - 1], currentTrajectory[i]);
                 vector2 = Vector3.Subtract(currentTrajectory[i + 1], currentTrajectory[i]);
 
                 lengthOfVector1 = vector1.Length();
@@ -373,7 +379,6 @@ namespace Well_Trajectory_Visualization
 
                 if (lengthOfVector1 == 0)
                 {
-                    indexPreventOverlaping = indexPreventOverlaping + 1;
                     continue;
                 }
 
@@ -397,7 +402,11 @@ namespace Well_Trajectory_Visualization
                     {
                         maxCurvaturePointIndex.Add(i);
                     }
-                    indexPreventOverlaping = 0;
+
+                }
+                else
+                {
+                    indexPreventOverlaping_Vector1 = indexPreventOverlaping_Vector1 + 1;
                 }
             }
             return maxCurvaturePointIndex;
@@ -519,6 +528,23 @@ namespace Well_Trajectory_Visualization
             }
 
             //AddAnnotation?.Invoke(annnotationToolStripMenuItem.Checked, FormClosedEventArgs.Empty);
+            if (tabControl.SelectedTab != null)
+            {
+                tabControl.SelectedTab.Refresh();
+            }
+        }
+
+        private void SharpestPointToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            foreach (TabPage tabPage in tabControl.Controls)
+            {
+                TableLayoutPanel tableLayoutPanel = (TableLayoutPanel)tabPage.Controls[0];
+                foreach (PanelForProjection panel in tableLayoutPanel.Controls)
+                {
+                    panel.AddSharpestPoint = sharpestPointToolStripMenuItem.Checked;
+                }
+            }
+
             if (tabControl.SelectedTab != null)
             {
                 tabControl.SelectedTab.Refresh();
