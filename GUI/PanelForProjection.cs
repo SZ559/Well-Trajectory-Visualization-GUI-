@@ -49,19 +49,16 @@ namespace Well_Trajectory_Visualization
             get;
         }
 
-        /*
-        public Single ZoomXY
+        public List<int> LargestInflectionPointProjectionIndex
         {
             get; set;
         }
-
-        public Single ZoomZ
-        {
-            get; set;
-        }
-        */
 
         public bool AddAnnotation
+        {
+            get; set;
+        }
+        public bool AddLargestInflectionPoint
         {
             get; set;
         }
@@ -73,13 +70,16 @@ namespace Well_Trajectory_Visualization
             BorderStyle = BorderStyle.None;
             Name = projection.GetProjectionView(normalVector);
             TrajectoryProjectionIn2D = projection.GetProjectionInPlane(currentTrajectory.PolyLineNodes, normalVector);
-            CurrentTrajectory = currentTrajectory;
             TrajectoryProjectionLocationOnPanel = new PointF[TrajectoryProjectionIn2D.Count];
+            CurrentTrajectory = currentTrajectory;
+            
             this.zoomXY = zoomXY;
             this.zoomZ = zoomZ;
             minX = TrajectoryProjectionIn2D.Select(x => x.X).Min();
             minY = TrajectoryProjectionIn2D.Select(x => x.Y).Min();
             AddAnnotation = addAnnotation;
+            //revise
+            AddLargestInflectionPoint = true;
             SetAxisCaption();
 
             //Initialize drawing property
@@ -169,14 +169,18 @@ namespace Well_Trajectory_Visualization
                 float yForPaint = TrajectoryProjectionIn2D[i].Y * zoomInAxisParameter + spaceY;
                 TrajectoryProjectionLocationOnPanel[i] = new PointF(xForPaint, yForPaint);
             }
-            GraphicsPath pathOfTrajectory = new GraphicsPath();
-            pathOfTrajectory.AddLines(TrajectoryProjectionLocationOnPanel);
+            //GraphicsPath pathOfTrajectory = new GraphicsPath();
+            //pathOfTrajectory.AddLines(TrajectoryProjectionLocationOnPanel);
 
             // points limit 8517?
             using (Pen penForLine = new Pen(Color.FromArgb(204, 234, 187), 3.0F))
             {
                 //graphics.DrawLines(penForLine, TrajectoryProjectionLocationOnPanel);
-                graphics.DrawPath(penForLine, pathOfTrajectory);
+                //graphics.DrawPath(penForLine, pathOfTrajectory);
+                for (int i = 0; i < TrajectoryProjectionLocationOnPanel.Length - 1; i = i + 1)
+                {
+                    graphics.DrawLine(penForLine, TrajectoryProjectionLocationOnPanel[i].X, TrajectoryProjectionLocationOnPanel[i].Y, TrajectoryProjectionLocationOnPanel[i + 1].X, TrajectoryProjectionLocationOnPanel[i + 1].Y);
+                }
             }
 
             // highlight data points
@@ -206,7 +210,20 @@ namespace Well_Trajectory_Visualization
             {
                 graphics = DrawAnnotation(graphics, TrajectoryProjectionIn2D, spaceX, spaceY);
             }
+          
+            
+            if (AddLargestInflectionPoint)
+            {
+                using (SolidBrush brushForPoint = new SolidBrush(Color.Red))
+                {
+                    foreach (var index in LargestInflectionPointProjectionIndex)
+                    {
+                        graphics.FillRectangle(brushForPoint, TrajectoryProjectionLocationOnPanel[index].X - 2, TrajectoryProjectionLocationOnPanel[index].Y - 2, 4, 4);
+                    }
+                }
+            }
             graphics.Dispose();
+
         }
 
         ////Draw Axis///
@@ -315,4 +332,27 @@ namespace Well_Trajectory_Visualization
         }
     }
 }
+
+
+
+
+//public List<Vector3> LargestInflectionPoint
+//{
+//    get; set;
+//}
+
+//public Single ZoomXY
+//{
+//    get; set;
+//}
+
+//public Single ZoomZ
+//{
+//    get; set;
+//}
+
+//private void AddAnnotationUpdate(object sender, EventArgs e)
+//{
+//    AddAnnotation = (bool) sender;
+//}
 

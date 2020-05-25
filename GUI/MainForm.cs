@@ -23,6 +23,7 @@ namespace Well_Trajectory_Visualization
         readonly int middleMargin;
         readonly int verticalPaddingForHeaderName;
         readonly int verticalPaddingForCloseIcon;
+        //internal event EventHandler AddAnnotation;
 
         int PreviewTabIndex
         {
@@ -315,10 +316,14 @@ namespace Well_Trajectory_Visualization
         {
             Single zoomXY = GetZoomXYForThreeViews((Trajectory)tableLayoutPanel.Tag);
             Single zoomZ = GetZoomZForThreeViews((Trajectory)tableLayoutPanel.Tag);
-
+            List<int> largestInflectionPointIndex= GetLargestInflectionPointIndex(((Trajectory)tableLayoutPanel.Tag).PolyLineNodes);
             PanelForProjection mainViewPanel = new PanelForProjection(Vector3.UnitY, (Trajectory)tableLayoutPanel.Tag, zoomXY, zoomZ, annnotationToolStripMenuItem.Checked);
             PanelForProjection leftViewPanel = new PanelForProjection(Vector3.UnitX, (Trajectory)tableLayoutPanel.Tag, zoomXY, zoomZ, annnotationToolStripMenuItem.Checked);
             PanelForProjection topViewPanel = new PanelForProjection(Vector3.UnitZ, (Trajectory)tableLayoutPanel.Tag, zoomXY, zoomZ, annnotationToolStripMenuItem.Checked);
+
+            mainViewPanel.LargestInflectionPointProjectionIndex = largestInflectionPointIndex;
+            leftViewPanel.LargestInflectionPointProjectionIndex = largestInflectionPointIndex;
+            topViewPanel.LargestInflectionPointProjectionIndex = largestInflectionPointIndex;
 
             tableLayoutPanel.SuspendLayout();
             tableLayoutPanel.Controls.Add(mainViewPanel, 0, 0);
@@ -347,6 +352,55 @@ namespace Well_Trajectory_Visualization
             Single minZ = trajectory.PolyLineNodes.Select(x => x.Z).Min();
             zoomZ = maxZ - minZ;
             return zoomZ > 0 ? zoomZ : 1;
+        }
+        //public static List<Vector3> GetLargestInflectionPoint(List<Vector3> currentTrajectory)
+
+        public static List<int> GetLargestInflectionPointIndex(List<Vector3> currentTrajectory)
+        {
+            float lengthOfVector1, lengthOfVector2, dotProduct;
+            Vector3 vector1, vector2;
+            double maxCurvature = Math.PI;
+            double radian;
+            int indexPreventOverlaping = 0;
+            List<int> maxCurvaturePointIndex = new List<int>();
+            for (int i = 1; i < currentTrajectory.Count - 1; i = i + 1)
+            {
+                vector1 = Vector3.Subtract(currentTrajectory[i - indexPreventOverlaping - 1], currentTrajectory[i]);
+                vector2 = Vector3.Subtract(currentTrajectory[i + 1], currentTrajectory[i]);
+
+                lengthOfVector1 = vector1.Length();
+                lengthOfVector2 = vector2.Length();
+
+                if (lengthOfVector1 == 0)
+                {
+                    indexPreventOverlaping = indexPreventOverlaping + 1;
+                    continue;
+                }
+
+                if (lengthOfVector2 != 0)
+                {
+                    dotProduct = Vector3.Dot(vector1, vector2);
+                    radian = Math.Acos(dotProduct / (lengthOfVector1 * lengthOfVector2));
+
+                    if (radian > Math.PI)
+                    {
+                        radian = 2 * Math.PI - radian;
+                    }
+
+                    if (radian < maxCurvature)
+                    {
+                        maxCurvature = radian;
+                        maxCurvaturePointIndex.Clear();
+                        maxCurvaturePointIndex.Add(i);
+                    }
+                    else if (maxCurvature == radian)
+                    {
+                        maxCurvaturePointIndex.Add(i);
+                    }
+                    indexPreventOverlaping = 0;
+                }
+            }
+            return maxCurvaturePointIndex;
         }
 
         /////////// Draw Tab Page Header //////////////////
@@ -463,13 +517,12 @@ namespace Well_Trajectory_Visualization
                     panel.AddAnnotation = annnotationToolStripMenuItem.Checked;
                 }
             }
-           
+
+            //AddAnnotation?.Invoke(annnotationToolStripMenuItem.Checked, FormClosedEventArgs.Empty);
             if (tabControl.SelectedTab != null)
             {
                 tabControl.SelectedTab.Refresh();
             }
         }
-
-
     }
 }
