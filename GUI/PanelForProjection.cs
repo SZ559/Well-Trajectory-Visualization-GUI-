@@ -23,30 +23,115 @@ namespace Well_Trajectory_Visualization
         readonly int marginAxis;
         readonly int widthOfCoordinate;
         readonly int heightOfCoordinate;
-        private string axisXCaption;
-        private string axisYCaption;
+
+        public string UnitForCaption
+        {
+            get
+            {
+                string unitForCaption;
+                switch (CurrentTrajectory.Unit)
+                {
+                    case DistanceUnit.Meter:
+                        unitForCaption = "m";
+                        break;
+                    case DistanceUnit.Feet:
+                    default:
+                        unitForCaption = "f";
+                        break;
+                }
+                return unitForCaption;
+            }
+        }
+
+        public string AxisXCaption
+        {
+            get
+            {
+                string caption;
+                switch (Name)
+                {
+                    case "Main":
+                        caption = "x/";
+                        break;
+                    case "Left":
+                        caption = "y/";
+                        break;
+                    case "Top":
+                    default:
+                        caption = "x/";
+                        break;
+                }
+
+                return caption + UnitForCaption;
+            }
+        }
+
+        public string AxisYCaption
+        {
+            get
+            {
+                string caption;
+                switch (Name)
+                {
+                    case "Main":
+                        caption = "z/";
+                        break;
+                    case "Left":
+                        caption = "z/";
+                        break;
+                    case "Top":
+                    default:
+                        caption = "y/";
+                        break;
+                }
+
+                return caption + UnitForCaption;
+            }
+        }
 
         private Single minX;
         private Single minY;
         private Single zoomXY;
         private Single zoomZ;
 
-        Single zoomInAxisParameter;
+        Single zoomInAxisParameter
+        {
+            get
+            {
+                float zoomInAxisParameter;
+                if (zoomZ * (Width - 2 * paddingX) > zoomXY * (Height - 2 * paddingY - spaceHeightForViewName))
+                {
+                    zoomInAxisParameter = (Height - 2 * paddingY - spaceHeightForViewName) / zoomZ;
+                }
+                else
+                {
+                    zoomInAxisParameter = (Width - 2 * paddingX) / zoomXY;
+                }
+                return zoomInAxisParameter;
+            }
+        }
+
         ToolTip toolTipForAnnotation;
+
+        public Vector3 NormalVector
+        {
+            get; set;
+        }
 
         public Trajectory CurrentTrajectory
         {
             get; set;
         }
 
+
         public List<PointIn2D> TrajectoryProjectionIn2D
         {
-            get;
+            get; set;
         }
 
         public PointF[] TrajectoryProjectionLocationOnPanel
         {
-            get;
+            get; set;
         }
 
         /*
@@ -66,21 +151,23 @@ namespace Well_Trajectory_Visualization
             get; set;
         }
 
-        public PanelForProjection(Vector3 normalVector, Trajectory currentTrajectory, Single zoomXY, Single zoomZ, bool addAnnotation)
+        public PanelForProjection(Vector3 normalVector, Trajectory currentTrajectory, bool addAnnotation)
         {
             //initialize panel property
             Dock = DockStyle.Fill;
             BorderStyle = BorderStyle.None;
-            Name = projection.GetProjectionView(normalVector);
-            TrajectoryProjectionIn2D = projection.GetProjectionInPlane(currentTrajectory.PolyLineNodes, normalVector);
+
             CurrentTrajectory = currentTrajectory;
+            NormalVector = normalVector;
+
+            Name = projection.GetProjectionView(NormalVector);
+            TrajectoryProjectionIn2D = projection.GetProjectionInPlane(CurrentTrajectory.PolyLineNodes, NormalVector);
             TrajectoryProjectionLocationOnPanel = new PointF[TrajectoryProjectionIn2D.Count];
-            this.zoomXY = zoomXY;
-            this.zoomZ = zoomZ;
+            zoomXY = GetZoomXYForThreeViews(CurrentTrajectory);
+            zoomZ = GetZoomZForThreeViews(CurrentTrajectory);
             minX = TrajectoryProjectionIn2D.Select(x => x.X).Min();
             minY = TrajectoryProjectionIn2D.Select(x => x.Y).Min();
             AddAnnotation = addAnnotation;
-            SetAxisCaption();
 
             //Initialize drawing property
 
@@ -107,59 +194,44 @@ namespace Well_Trajectory_Visualization
             this.MouseMove += new MouseEventHandler(Panel_MouseMove);
         }
 
-        ///////Helper Methods//////////
-        private void SetAxisCaption()
+        public void UpdateParameters()
         {
-            switch (Name)
-            {
-                case "Main View":
-                    axisXCaption = "x/";
-                    axisYCaption = "z/";
-                    break;
-                case "Left View":
-                    axisXCaption = "y/";
-                    axisYCaption = "z/";
-                    break;
-                case "Top View":
-                default:
-                    axisXCaption = "x/";
-                    axisYCaption = "y/";
-                    break;
-            }
-
-            string unit;
-            switch (CurrentTrajectory.Unit)
-            {
-                case DistanceUnit.Meter:
-                    unit = "m";
-                    break;
-                case DistanceUnit.Feet:
-                default:
-                    unit = "f";
-                    break;
-            }
-
-            axisXCaption += unit;
-            axisYCaption += unit;
+            TrajectoryProjectionIn2D = projection.GetProjectionInPlane(CurrentTrajectory.PolyLineNodes, NormalVector);
+            TrajectoryProjectionLocationOnPanel = new PointF[TrajectoryProjectionIn2D.Count];
+            zoomXY = GetZoomXYForThreeViews(CurrentTrajectory);
+            zoomZ = GetZoomZForThreeViews(CurrentTrajectory);
+            minX = TrajectoryProjectionIn2D.Select(x => x.X).Min();
+            minY = TrajectoryProjectionIn2D.Select(x => x.Y).Min();
         }
 
-        private void GetZoomInAxisParameter()
+
+        /////////////// Helper functions //////////////
+
+        private Single GetZoomXYForThreeViews(Trajectory trajectory)
         {
-            if (this.zoomZ * (this.Width - 2 * paddingX) > zoomXY * (this.Height - 2 * paddingY - spaceHeightForViewName))
-            {
-                zoomInAxisParameter = (this.Height - 2 * paddingY - spaceHeightForViewName) / zoomZ;
-            }
-            else
-            {
-                zoomInAxisParameter = (this.Width - 2 * paddingX) / zoomXY;
-            }
+            Single zoomXY;
+            Single maxX = trajectory.PolyLineNodes.Select(x => x.X).Max();
+            Single maxY = trajectory.PolyLineNodes.Select(x => x.Y).Max();
+            Single minX = trajectory.PolyLineNodes.Select(x => x.X).Min();
+            Single minY = trajectory.PolyLineNodes.Select(x => x.Y).Min();
+
+            zoomXY = Math.Max(maxX - minX, maxY - minY);
+            return zoomXY > 0 ? zoomXY : 1;
+        }
+
+        private Single GetZoomZForThreeViews(Trajectory trajectory)
+        {
+            Single zoomZ;
+            Single maxZ = trajectory.PolyLineNodes.Select(x => x.Z).Max();
+            Single minZ = trajectory.PolyLineNodes.Select(x => x.Z).Min();
+            zoomZ = maxZ - minZ;
+            return zoomZ > 0 ? zoomZ : 1;
         }
 
         /// Paint Panel///
         private void PaintPanel(object sender, PaintEventArgs e)
         {
             Graphics graphics = e.Graphics;
-            GetZoomInAxisParameter();
             int spaceX = (int)(paddingX - minX * zoomInAxisParameter);
             int spaceY = (int)(paddingY + spaceHeightForViewName - minY * zoomInAxisParameter);
 
@@ -231,8 +303,8 @@ namespace Well_Trajectory_Visualization
                 Rectangle yAxisCaptionRect = new Rectangle((int)(lowerLeftAxisPoint.X - widthOfCoordinate / 2), (int)(lowerLeftAxisPoint.Y + segementLength), widthOfCoordinate, heightOfCoordinate);
                 StringFormat axisCaptionStringFormat = new StringFormat();
                 axisCaptionStringFormat.Alignment = StringAlignment.Center;
-                graphics.DrawString(axisXCaption, textFont, Brushes.Black, xAxisCaptionRect, axisCaptionStringFormat);
-                graphics.DrawString(axisYCaption, textFont, Brushes.Black, yAxisCaptionRect, axisCaptionStringFormat);
+                graphics.DrawString(AxisXCaption, textFont, Brushes.Black, xAxisCaptionRect, axisCaptionStringFormat);
+                graphics.DrawString(AxisYCaption, textFont, Brushes.Black, yAxisCaptionRect, axisCaptionStringFormat);
 
                 // draw number in axis
                 float widthOfAxis = upperRightAxisPoint.X - upperLeftAxisPoint.X;
