@@ -30,7 +30,7 @@
         {
             this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
-            System.Windows.Forms.TreeNode treeNode3 = new System.Windows.Forms.TreeNode("Wells");
+            System.Windows.Forms.TreeNode treeNode1 = new System.Windows.Forms.TreeNode("Wells");
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.openFileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -43,7 +43,9 @@
             this.viewToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.displayToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.annnotationToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.sharpestPointToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.convertToToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.meterToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.feetToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.viewSourceToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
@@ -67,6 +69,7 @@
             this.tabControl = new System.Windows.Forms.TabControl();
             this.openFileDialog = new System.Windows.Forms.OpenFileDialog();
             this.saveFileDialog = new System.Windows.Forms.SaveFileDialog();
+            this.sharpestPointToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.toolStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
@@ -173,10 +176,11 @@
             this.displayToolStripMenuItem.CheckOnClick = true;
             this.displayToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.annnotationToolStripMenuItem,
-            this.sharpestPointToolStripMenuItem});
+            this.sharpestPointToolStripMenuItem,
+            this.convertToToolStripMenuItem});
             this.displayToolStripMenuItem.Name = "displayToolStripMenuItem";
             this.displayToolStripMenuItem.Size = new System.Drawing.Size(146, 48);
-            this.displayToolStripMenuItem.Text = "Display";
+            this.displayToolStripMenuItem.Text = "&Display";
             // 
             // annnotationToolStripMenuItem
             // 
@@ -184,17 +188,31 @@
             this.annnotationToolStripMenuItem.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
             this.annnotationToolStripMenuItem.Name = "annnotationToolStripMenuItem";
             this.annnotationToolStripMenuItem.Size = new System.Drawing.Size(448, 54);
-            this.annnotationToolStripMenuItem.Text = "Annnotation";
+            this.annnotationToolStripMenuItem.Text = "&Annnotation";
             this.annnotationToolStripMenuItem.Click += new System.EventHandler(this.AnnnotationToolStripMenuItem_Click);
             // 
-            // sharpestPointToolStripMenuItem
+            // convertToToolStripMenuItem
             // 
-            this.sharpestPointToolStripMenuItem.CheckOnClick = true;
-            this.sharpestPointToolStripMenuItem.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
-            this.sharpestPointToolStripMenuItem.Name = "sharpestPointToolStripMenuItem";
-            this.sharpestPointToolStripMenuItem.Size = new System.Drawing.Size(448, 54);
-            this.sharpestPointToolStripMenuItem.Text = "Sharpest Point";
-            this.sharpestPointToolStripMenuItem.Click += new System.EventHandler(this.SharpestPointToolStripMenuItem_Click);
+            this.convertToToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.meterToolStripMenuItem,
+            this.feetToolStripMenuItem});
+            this.convertToToolStripMenuItem.Name = "convertToToolStripMenuItem";
+            this.convertToToolStripMenuItem.Size = new System.Drawing.Size(448, 54);
+            this.convertToToolStripMenuItem.Text = "Convert To &Unit...";
+            // 
+            // meterToolStripMenuItem
+            // 
+            this.meterToolStripMenuItem.Name = "meterToolStripMenuItem";
+            this.meterToolStripMenuItem.Size = new System.Drawing.Size(267, 54);
+            this.meterToolStripMenuItem.Text = "&Meter";
+            this.meterToolStripMenuItem.Click += new System.EventHandler(this.meterToolStripMenuItem_Click);
+            // 
+            // feetToolStripMenuItem
+            // 
+            this.feetToolStripMenuItem.Name = "feetToolStripMenuItem";
+            this.feetToolStripMenuItem.Size = new System.Drawing.Size(267, 54);
+            this.feetToolStripMenuItem.Text = "&Feet";
+            this.feetToolStripMenuItem.Click += new System.EventHandler(this.feetToolStripMenuItem_Click);
             // 
             // helpToolStripMenuItem
             // 
@@ -286,10 +304,10 @@
             this.wellsTreeView.Location = new System.Drawing.Point(0, 0);
             this.wellsTreeView.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.wellsTreeView.Name = "wellsTreeView";
-            treeNode3.Name = "Root";
-            treeNode3.Text = "Wells";
+            treeNode1.Name = "Root";
+            treeNode1.Text = "Wells";
             this.wellsTreeView.Nodes.AddRange(new System.Windows.Forms.TreeNode[] {
-            treeNode3});
+            treeNode1});
             this.wellsTreeView.Size = new System.Drawing.Size(164, 571);
             this.wellsTreeView.TabIndex = 0;
             this.wellsTreeView.NodeMouseClick += new System.Windows.Forms.TreeNodeMouseClickEventHandler(this.WellsTreeView_NodeMouseClick);
@@ -476,6 +494,15 @@
             // 
             this.saveFileDialog.Filter = "Bitmap Files|*.bmp|JPEG Files|*.jpeg|PNG Files|*.png";
             // 
+            // sharpestPointToolStripMenuItem
+            // 
+            this.sharpestPointToolStripMenuItem.CheckOnClick = true;
+            this.sharpestPointToolStripMenuItem.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
+            this.sharpestPointToolStripMenuItem.Name = "sharpestPointToolStripMenuItem";
+            this.sharpestPointToolStripMenuItem.Size = new System.Drawing.Size(448, 54);
+            this.sharpestPointToolStripMenuItem.Text = "Sharpest Point";
+            this.sharpestPointToolStripMenuItem.Click += new System.EventHandler(this.sharpestPointToolStripMenuItem_Click_1);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(18F, 39F);
@@ -545,6 +572,9 @@
         private System.Windows.Forms.SaveFileDialog saveFileDialog;
         private System.Windows.Forms.ToolStripMenuItem displayToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem annnotationToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem convertToToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem meterToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem feetToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem sharpestPointToolStripMenuItem;
     }
 }

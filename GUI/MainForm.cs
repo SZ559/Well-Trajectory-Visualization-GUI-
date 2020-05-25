@@ -314,13 +314,12 @@ namespace Well_Trajectory_Visualization
 
         private void AddViewPanelForTableLayoutPanel(TableLayoutPanel tableLayoutPanel)
         {
-            Single zoomXY = GetZoomXYForThreeViews((Trajectory)tableLayoutPanel.Tag);
-            Single zoomZ = GetZoomZForThreeViews((Trajectory)tableLayoutPanel.Tag);
-            List<int> sharpestPointIndex= GetSharpestPointIndex(((Trajectory)tableLayoutPanel.Tag).PolyLineNodes);
-            PanelForProjection mainViewPanel = new PanelForProjection(Vector3.UnitY, (Trajectory)tableLayoutPanel.Tag, zoomXY, zoomZ, annnotationToolStripMenuItem.Checked);
-            PanelForProjection leftViewPanel = new PanelForProjection(Vector3.UnitX, (Trajectory)tableLayoutPanel.Tag, zoomXY, zoomZ, annnotationToolStripMenuItem.Checked);
-            PanelForProjection topViewPanel = new PanelForProjection(Vector3.UnitZ, (Trajectory)tableLayoutPanel.Tag, zoomXY, zoomZ, annnotationToolStripMenuItem.Checked);
 
+            PanelForProjection mainViewPanel = new PanelForProjection(Vector3.UnitY, (Trajectory)tableLayoutPanel.Tag, annnotationToolStripMenuItem.Checked);
+            PanelForProjection leftViewPanel = new PanelForProjection(Vector3.UnitX, (Trajectory)tableLayoutPanel.Tag, annnotationToolStripMenuItem.Checked);
+            PanelForProjection topViewPanel = new PanelForProjection(Vector3.UnitZ, (Trajectory)tableLayoutPanel.Tag, annnotationToolStripMenuItem.Checked);
+
+            List<int> sharpestPointIndex = GetSharpestPointIndex(((Trajectory)tableLayoutPanel.Tag).PolyLineNodes);
             mainViewPanel.SharpestPointProjectionIndex = sharpestPointIndex;
             leftViewPanel.SharpestPointProjectionIndex = sharpestPointIndex;
             topViewPanel.SharpestPointProjectionIndex = sharpestPointIndex;
@@ -337,26 +336,6 @@ namespace Well_Trajectory_Visualization
         }
 
         /////////////// Helper functions //////////////
-        private Single GetZoomXYForThreeViews(Trajectory trajectory)
-        {
-            Single zoomXY;
-            Single maxX = trajectory.PolyLineNodes.Select(x => x.X).Max();
-            Single maxY = trajectory.PolyLineNodes.Select(x => x.Y).Max();
-            Single minX = trajectory.PolyLineNodes.Select(x => x.X).Min();
-            Single minY = trajectory.PolyLineNodes.Select(x => x.Y).Min();
-         
-            zoomXY = Math.Max(maxX - minX, maxY - minY);
-            return zoomXY > 0 ? zoomXY : 1;
-        }
-
-        private Single GetZoomZForThreeViews(Trajectory trajectory)
-        {
-            Single zoomZ;
-            Single maxZ = trajectory.PolyLineNodes.Select(x => x.Z).Max();
-            Single minZ = trajectory.PolyLineNodes.Select(x => x.Z).Min();
-            zoomZ = maxZ - minZ;
-            return zoomZ > 0 ? zoomZ : 1;
-        }
         //public static List<Vector3> GetLargestInflectionPoint(List<Vector3> currentTrajectory)
 
         public static List<int> GetSharpestPointIndex(List<Vector3> currentTrajectory)
@@ -534,7 +513,40 @@ namespace Well_Trajectory_Visualization
             }
         }
 
-        private void SharpestPointToolStripMenuItem_Click(object sender, EventArgs e)
+
+        private void meterToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (tabControl.SelectedTab != null)
+            {
+                TableLayoutPanel tableLayoutPanel = (TableLayoutPanel)tabControl.SelectedTab.Controls[0];
+                tableLayoutPanel.Tag = ((Trajectory)tableLayoutPanel.Tag).ConvertTo(DistanceUnit.Meter);
+                foreach (PanelForProjection panel in tableLayoutPanel.Controls)
+                {
+                    panel.CurrentTrajectory = (Trajectory)tableLayoutPanel.Tag;
+                    panel.UpdateParameters();
+                }
+
+                tabControl.SelectedTab.Refresh();
+            }
+        }
+
+        private void feetToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (tabControl.SelectedTab != null)
+            {
+                TableLayoutPanel tableLayoutPanel = (TableLayoutPanel)tabControl.SelectedTab.Controls[0];
+                tableLayoutPanel.Tag = ((Trajectory)tableLayoutPanel.Tag).ConvertTo(DistanceUnit.Feet);
+                foreach (PanelForProjection panel in tableLayoutPanel.Controls)
+                {
+                    panel.CurrentTrajectory = (Trajectory)tableLayoutPanel.Tag;
+                    panel.UpdateParameters();
+                }
+
+                tabControl.SelectedTab.Refresh();
+            }
+        }
+
+        private void sharpestPointToolStripMenuItem_Click_1(object sender, EventArgs e)
         {
             foreach (TabPage tabPage in tabControl.Controls)
             {
