@@ -30,7 +30,7 @@
         {
             this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
-            System.Windows.Forms.TreeNode treeNode1 = new System.Windows.Forms.TreeNode("Wells");
+            System.Windows.Forms.TreeNode treeNode2 = new System.Windows.Forms.TreeNode("Wells");
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.openFileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -66,6 +66,9 @@
             this.tabControl = new System.Windows.Forms.TabControl();
             this.openFileDialog = new System.Windows.Forms.OpenFileDialog();
             this.saveFileDialog = new System.Windows.Forms.SaveFileDialog();
+            this.convertToToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.meterToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.feetToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.toolStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
@@ -128,28 +131,28 @@
             // allViewsToolStripMenuItem
             // 
             this.allViewsToolStripMenuItem.Name = "allViewsToolStripMenuItem";
-            this.allViewsToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.allViewsToolStripMenuItem.Size = new System.Drawing.Size(105, 22);
             this.allViewsToolStripMenuItem.Text = "All";
             this.allViewsToolStripMenuItem.Click += new System.EventHandler(this.SaveViewOnTabPage);
             // 
             // mainViewToolStripMenuItem
             // 
             this.mainViewToolStripMenuItem.Name = "mainViewToolStripMenuItem";
-            this.mainViewToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.mainViewToolStripMenuItem.Size = new System.Drawing.Size(105, 22);
             this.mainViewToolStripMenuItem.Text = "Main";
             this.mainViewToolStripMenuItem.Click += new System.EventHandler(this.ViewToolStripMenuItem_Click);
             // 
             // leftViewToolStripMenuItem
             // 
             this.leftViewToolStripMenuItem.Name = "leftViewToolStripMenuItem";
-            this.leftViewToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.leftViewToolStripMenuItem.Size = new System.Drawing.Size(105, 22);
             this.leftViewToolStripMenuItem.Text = "Left";
             this.leftViewToolStripMenuItem.Click += new System.EventHandler(this.ViewToolStripMenuItem_Click);
             // 
             // topViewToolStripMenuItem
             // 
             this.topViewToolStripMenuItem.Name = "topViewToolStripMenuItem";
-            this.topViewToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.topViewToolStripMenuItem.Size = new System.Drawing.Size(105, 22);
             this.topViewToolStripMenuItem.Text = "Top";
             this.topViewToolStripMenuItem.Click += new System.EventHandler(this.ViewToolStripMenuItem_Click);
             // 
@@ -169,10 +172,11 @@
             // displayToolStripMenuItem
             // 
             this.displayToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.annnotationToolStripMenuItem});
+            this.annnotationToolStripMenuItem,
+            this.convertToToolStripMenuItem});
             this.displayToolStripMenuItem.Name = "displayToolStripMenuItem";
             this.displayToolStripMenuItem.Size = new System.Drawing.Size(62, 22);
-            this.displayToolStripMenuItem.Text = "Display";
+            this.displayToolStripMenuItem.Text = "&Display";
             // 
             // annnotationToolStripMenuItem
             // 
@@ -180,7 +184,7 @@
             this.annnotationToolStripMenuItem.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
             this.annnotationToolStripMenuItem.Name = "annnotationToolStripMenuItem";
             this.annnotationToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
-            this.annnotationToolStripMenuItem.Text = "Annnotation";
+            this.annnotationToolStripMenuItem.Text = "&Annnotation";
             this.annnotationToolStripMenuItem.Click += new System.EventHandler(this.AnnnotationToolStripMenuItem_Click);
             // 
             // helpToolStripMenuItem
@@ -273,10 +277,10 @@
             this.wellsTreeView.Location = new System.Drawing.Point(0, 0);
             this.wellsTreeView.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.wellsTreeView.Name = "wellsTreeView";
-            treeNode1.Name = "Root";
-            treeNode1.Text = "Wells";
+            treeNode2.Name = "Root";
+            treeNode2.Text = "Wells";
             this.wellsTreeView.Nodes.AddRange(new System.Windows.Forms.TreeNode[] {
-            treeNode1});
+            treeNode2});
             this.wellsTreeView.Size = new System.Drawing.Size(164, 599);
             this.wellsTreeView.TabIndex = 0;
             this.wellsTreeView.NodeMouseClick += new System.Windows.Forms.TreeNodeMouseClickEventHandler(this.WellsTreeView_NodeMouseClick);
@@ -463,6 +467,29 @@
             // 
             this.saveFileDialog.Filter = "Bitmap Files|*.bmp|JPEG Files|*.jpeg|PNG Files|*.png";
             // 
+            // convertToToolStripMenuItem
+            // 
+            this.convertToToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.meterToolStripMenuItem,
+            this.feetToolStripMenuItem});
+            this.convertToToolStripMenuItem.Name = "convertToToolStripMenuItem";
+            this.convertToToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.convertToToolStripMenuItem.Text = "Convert To &Unit...";
+            // 
+            // meterToolStripMenuItem
+            // 
+            this.meterToolStripMenuItem.Name = "meterToolStripMenuItem";
+            this.meterToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.meterToolStripMenuItem.Text = "&Meter";
+            this.meterToolStripMenuItem.Click += new System.EventHandler(this.meterToolStripMenuItem_Click);
+            // 
+            // feetToolStripMenuItem
+            // 
+            this.feetToolStripMenuItem.Name = "feetToolStripMenuItem";
+            this.feetToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.feetToolStripMenuItem.Text = "&Feet";
+            this.feetToolStripMenuItem.Click += new System.EventHandler(this.feetToolStripMenuItem_Click);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 17F);
@@ -532,6 +559,9 @@
         private System.Windows.Forms.SaveFileDialog saveFileDialog;
         private System.Windows.Forms.ToolStripMenuItem displayToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem annnotationToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem convertToToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem meterToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem feetToolStripMenuItem;
     }
 }
 
