@@ -36,7 +36,7 @@ namespace Well_Trajectory_Visualization
                         break;
                     case DistanceUnit.Feet:
                     default:
-                        unitForCaption = "f";
+                        unitForCaption = "ft";
                         break;
                 }
                 return unitForCaption;
