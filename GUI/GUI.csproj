@@ -50,8 +50,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CurrentTrajectoryInformation.cs" />
-    <Compile Include="DisplayChoice.cs" />
     <Compile Include="PanelForProjection.cs">
       <SubType>Component</SubType>
     </Compile>
