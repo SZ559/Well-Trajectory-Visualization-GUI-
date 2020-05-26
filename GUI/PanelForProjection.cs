@@ -6,13 +6,14 @@ using System;
 using System.Data;
 using System.Linq;
 using System.Numerics;
-using System.Drawing.Drawing2D;
+using System.ComponentModel;
 
 namespace Well_Trajectory_Visualization
 {
     public class PanelForProjection : Panel
     {
         Projection projection = new Projection();
+        CurrentTrajectoryInformation currentTrajectoryInformation;
 
         readonly int numberOfDataInAxisX;
         readonly int numberOfDataInAxisY;
@@ -27,24 +28,7 @@ namespace Well_Trajectory_Visualization
         readonly int widthOfAxisName;
         readonly int heightOfAxisName;
 
-        public string UnitForCaption
-        {
-            get
-            {
-                string unitForCaption;
-                switch (CurrentTrajectory.Unit)
-                {
-                    case DistanceUnit.Meter:
-                        unitForCaption = "m";
-                        break;
-                    case DistanceUnit.Feet:
-                    default:
-                        unitForCaption = "ft";
-                        break;
-                }
-                return unitForCaption;
-            }
-        }
+        private Vector3 normalVector;
 
         public string AxisXCaption
         {
@@ -65,7 +49,7 @@ namespace Well_Trajectory_Visualization
                         break;
                 }
 
-                return caption + UnitForCaption;
+                return caption + currentTrajectoryInformation.UnitForCaption;
             }
         }
 
@@ -88,43 +72,32 @@ namespace Well_Trajectory_Visualization
                         break;
                 }
 
-                return caption + UnitForCaption;
+                return caption + currentTrajectoryInformation.UnitForCaption;
             }
         }
 
         private Single minX;
         private Single minY;
-        private Single zoomXY;
-        private Single zoomZ;
+        private List<PointIn2D> sharpestPointsProjectionIn2D; 
 
         Single zoomInAxisParameter
         {
             get
             {
                 float zoomInAxisParameter;
-                if (zoomZ * (Width - leftPaddingX - rightPaddingX) > zoomXY * (Height - 2 * paddingY - spaceHeightForViewName))
+                if (currentTrajectoryInformation.MaxZOfTrajectory * (Width - leftPaddingX - rightPaddingX) > currentTrajectoryInformation.MaxXYOfTrajectory * (Height - 2 * paddingY - spaceHeightForViewName))
                 {
-                    zoomInAxisParameter = (Height - 2 * paddingY - spaceHeightForViewName) / zoomZ;
+                    zoomInAxisParameter = (Height - 2 * paddingY - spaceHeightForViewName) / currentTrajectoryInformation.MaxZOfTrajectory;
                 }
                 else
                 {
-                    zoomInAxisParameter = (Width - leftPaddingX - rightPaddingX) / zoomXY;
+                    zoomInAxisParameter = (Width - leftPaddingX - rightPaddingX) / currentTrajectoryInformation.MaxXYOfTrajectory;
                 }
                 return zoomInAxisParameter;
             }
         }
 
         ToolTip toolTipForAnnotation;
-
-        public Vector3 NormalVector
-        {
-            get; set;
-        }
-
-        public Trajectory CurrentTrajectory
-        {
-            get; set;
-        }
 
 
         public List<PointIn2D> TrajectoryProjectionIn2D
@@ -137,37 +110,22 @@ namespace Well_Trajectory_Visualization
             get; set;
         }
 
-        public List<int> SharpestPointProjectionIndex
-        {
-            get; set;
-        }
-
-        public bool AddAnnotation
-        {
-            get; set;
-        }
-        public bool AddSharpestPoint
-        {
-            get; set;
-        }
-
-        public PanelForProjection(Vector3 normalVector, Trajectory currentTrajectory, bool addAnnotation)
+        public PanelForProjection(Vector3 normalVector, CurrentTrajectoryInformation currentTrajectoryInformation)
         {
             //initialize panel property
             Dock = DockStyle.Fill;
             BorderStyle = BorderStyle.None;
 
-            CurrentTrajectory = currentTrajectory;
-            NormalVector = normalVector;
+            this.currentTrajectoryInformation = currentTrajectoryInformation;
+            this.normalVector = normalVector;
+            TrajectoryProjectionIn2D = projection.GetProjectionInPlane(currentTrajectoryInformation.CurrentTrajectory.PolyLineNodes, normalVector);
+            sharpestPointsProjectionIn2D = projection.GetProjectionInPlane(currentTrajectoryInformation.SharpestPoint, normalVector);
+            currentTrajectoryInformation.PropertyChanged += MyEventSubscription;
 
-            Name = projection.GetProjectionView(NormalVector);
-            TrajectoryProjectionIn2D = projection.GetProjectionInPlane(CurrentTrajectory.PolyLineNodes, NormalVector);
+            Name = projection.GetProjectionView(normalVector);
             TrajectoryProjectionLocationOnPanel = new PointF[TrajectoryProjectionIn2D.Count];
-            zoomXY = GetZoomXYForThreeViews(CurrentTrajectory);
-            zoomZ = GetZoomZForThreeViews(CurrentTrajectory);
             minX = TrajectoryProjectionIn2D.Select(x => x.X).Min();
             minY = TrajectoryProjectionIn2D.Select(x => x.Y).Min();
-            AddAnnotation = addAnnotation;
 
             //Initialize drawing property
 
@@ -197,38 +155,18 @@ namespace Well_Trajectory_Visualization
             this.MouseMove += new MouseEventHandler(Panel_MouseMove);
         }
 
-        public void UpdateParameters()
+        private void MyEventSubscription(object sender, PropertyChangedEventArgs e)
         {
-            TrajectoryProjectionIn2D = projection.GetProjectionInPlane(CurrentTrajectory.PolyLineNodes, NormalVector);
+            UpdateParameters();
+        }
+
+        private void UpdateParameters()
+        {
+            TrajectoryProjectionIn2D = projection.GetProjectionInPlane(currentTrajectoryInformation.CurrentTrajectory.PolyLineNodes, normalVector);
             TrajectoryProjectionLocationOnPanel = new PointF[TrajectoryProjectionIn2D.Count];
-            zoomXY = GetZoomXYForThreeViews(CurrentTrajectory);
-            zoomZ = GetZoomZForThreeViews(CurrentTrajectory);
             minX = TrajectoryProjectionIn2D.Select(x => x.X).Min();
             minY = TrajectoryProjectionIn2D.Select(x => x.Y).Min();
-        }
-
-
-        /////////////// Helper functions //////////////
-
-        private Single GetZoomXYForThreeViews(Trajectory trajectory)
-        {
-            Single zoomXY;
-            Single maxX = trajectory.PolyLineNodes.Select(x => x.X).Max();
-            Single maxY = trajectory.PolyLineNodes.Select(x => x.Y).Max();
-            Single minX = trajectory.PolyLineNodes.Select(x => x.X).Min();
-            Single minY = trajectory.PolyLineNodes.Select(x => x.Y).Min();
-
-            zoomXY = Math.Max(maxX - minX, maxY - minY);
-            return zoomXY > 0 ? zoomXY : 1;
-        }
-
-        private Single GetZoomZForThreeViews(Trajectory trajectory)
-        {
-            Single zoomZ;
-            Single maxZ = trajectory.PolyLineNodes.Select(x => x.Z).Max();
-            Single minZ = trajectory.PolyLineNodes.Select(x => x.Z).Min();
-            zoomZ = maxZ - minZ;
-            return zoomZ > 0 ? zoomZ : 1;
+            sharpestPointsProjectionIn2D = projection.GetProjectionInPlane(currentTrajectoryInformation.SharpestPoint, normalVector);
         }
 
         /// Paint Panel///
@@ -244,14 +182,10 @@ namespace Well_Trajectory_Visualization
                 float yForPaint = TrajectoryProjectionIn2D[i].Y * zoomInAxisParameter + spaceY;
                 TrajectoryProjectionLocationOnPanel[i] = new PointF(xForPaint, yForPaint);
             }
-            //GraphicsPath pathOfTrajectory = new GraphicsPath();
-            //pathOfTrajectory.AddLines(TrajectoryProjectionLocationOnPanel);
 
             // points limit 8517?
             using (Pen penForLine = new Pen(Color.FromArgb(204, 234, 187), 3.0F))
             {
-                //graphics.DrawLines(penForLine, TrajectoryProjectionLocationOnPanel);
-                //graphics.DrawPath(penForLine, pathOfTrajectory);
                 for (int i = 0; i < TrajectoryProjectionLocationOnPanel.Length - 1; i = i + 1)
                 {
                     graphics.DrawLine(penForLine, TrajectoryProjectionLocationOnPanel[i].X, TrajectoryProjectionLocationOnPanel[i].Y, TrajectoryProjectionLocationOnPanel[i + 1].X, TrajectoryProjectionLocationOnPanel[i + 1].Y);
@@ -270,7 +204,7 @@ namespace Well_Trajectory_Visualization
             // draw caption
             using (Font fontForCaption = new Font("Microsoft YaHei", 11, FontStyle.Regular, GraphicsUnit.Point))
             {
-                Rectangle rect = new Rectangle(0, 0, this.Width, spaceHeightForViewName);
+                Rectangle rect = new Rectangle(leftPaddingX, 0, this.Width - leftPaddingX - rightPaddingX, spaceHeightForViewName);
 
                 StringFormat stringFormat = new StringFormat();
                 stringFormat.Alignment = StringAlignment.Center;
@@ -282,19 +216,21 @@ namespace Well_Trajectory_Visualization
             graphics = DrawAxis(graphics, spaceX, spaceY);
 
             //draw annotation
-            if (AddAnnotation)
+            if (currentTrajectoryInformation.DisplayChoice.AddAnnotation)
             {
                 graphics = DrawAnnotation(graphics, TrajectoryProjectionIn2D, spaceX, spaceY);
             }
-
-            // draw sharpest point
-            if (AddSharpestPoint)
+          
+            
+            if (currentTrajectoryInformation.DisplayChoice.AddSharpestPoint)
             {
                 using (SolidBrush brushForPoint = new SolidBrush(Color.Red))
                 {
-                    foreach (var index in SharpestPointProjectionIndex)
+                    foreach (var sharpestPoint in sharpestPointsProjectionIn2D)
                     {
-                        graphics.FillRectangle(brushForPoint, TrajectoryProjectionLocationOnPanel[index].X - 2, TrajectoryProjectionLocationOnPanel[index].Y - 2, 4, 4);
+                        float xForPaint = sharpestPoint.X * zoomInAxisParameter + spaceX;
+                        float yForPaint = sharpestPoint.Y * zoomInAxisParameter + spaceY;
+                        graphics.FillRectangle(brushForPoint, xForPaint - 1, yForPaint - 1, 2, 2);
                     }
                 }
             }
@@ -428,3 +364,4 @@ namespace Well_Trajectory_Visualization
         }
     }
 }
+
