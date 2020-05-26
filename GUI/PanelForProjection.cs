@@ -18,11 +18,14 @@ namespace Well_Trajectory_Visualization
         readonly int numberOfDataInAxisY;
         readonly int spaceHeightForViewName;
         readonly int segementLength;
-        readonly int paddingX;
+        readonly int leftPaddingX;
+        readonly int rightPaddingX;
         readonly int paddingY;
         readonly int marginAxis;
         readonly int widthOfCoordinate;
         readonly int heightOfCoordinate;
+        readonly int widthOfAxisName;
+        readonly int heightOfAxisName;
 
         public string UnitForCaption
         {
@@ -99,13 +102,13 @@ namespace Well_Trajectory_Visualization
             get
             {
                 float zoomInAxisParameter;
-                if (zoomZ * (Width - 2 * paddingX) > zoomXY * (Height - 2 * paddingY - spaceHeightForViewName))
+                if (zoomZ * (Width - leftPaddingX - rightPaddingX) > zoomXY * (Height - 2 * paddingY - spaceHeightForViewName))
                 {
                     zoomInAxisParameter = (Height - 2 * paddingY - spaceHeightForViewName) / zoomZ;
                 }
                 else
                 {
-                    zoomInAxisParameter = (Width - 2 * paddingX) / zoomXY;
+                    zoomInAxisParameter = (Width - leftPaddingX - rightPaddingX) / zoomXY;
                 }
                 return zoomInAxisParameter;
             }
@@ -173,10 +176,13 @@ namespace Well_Trajectory_Visualization
             spaceHeightForViewName = 25;
             segementLength = 5;
             marginAxis = 10;
-            widthOfCoordinate = 40;
+            widthOfCoordinate = 55;
             heightOfCoordinate = 18;
-            paddingX = segementLength * 3 / 2 + marginAxis + widthOfCoordinate + 5;
-            paddingY = segementLength * 3 / 2 + marginAxis + heightOfCoordinate + 5;
+            widthOfAxisName = 30;
+            heightOfAxisName = 18;
+            leftPaddingX = segementLength * 3 / 2 + marginAxis + widthOfCoordinate + 5;
+            rightPaddingX = segementLength / 2 + marginAxis + widthOfAxisName + 5;
+            paddingY = segementLength * 3 / 2 + marginAxis + Math.Max(heightOfAxisName, heightOfCoordinate) + 5;
 
             //tool tip
             toolTipForAnnotation = new ToolTip()
@@ -229,7 +235,7 @@ namespace Well_Trajectory_Visualization
         private void PaintPanel(object sender, PaintEventArgs e)
         {
             Graphics graphics = e.Graphics;
-            int spaceX = (int)(paddingX - minX * zoomInAxisParameter);
+            int spaceX = (int)(leftPaddingX - minX * zoomInAxisParameter);
             int spaceY = (int)(paddingY + spaceHeightForViewName - minY * zoomInAxisParameter);
 
             for (int i = 0; i < TrajectoryProjectionIn2D.Count; i = i + 1)
@@ -271,6 +277,7 @@ namespace Well_Trajectory_Visualization
                 stringFormat.LineAlignment = StringAlignment.Center;
                 graphics.DrawString(this.Name, fontForCaption, Brushes.Black, rect, stringFormat);
             }
+
             //draw axis
             graphics = DrawAxis(graphics, spaceX, spaceY);
 
@@ -279,15 +286,15 @@ namespace Well_Trajectory_Visualization
             {
                 graphics = DrawAnnotation(graphics, TrajectoryProjectionIn2D, spaceX, spaceY);
             }
-          
-            
+
+            // draw sharpest point
             if (AddSharpestPoint)
             {
                 using (SolidBrush brushForPoint = new SolidBrush(Color.Red))
                 {
                     foreach (var index in SharpestPointProjectionIndex)
                     {
-                        graphics.FillRectangle(brushForPoint, TrajectoryProjectionLocationOnPanel[index].X - 1, TrajectoryProjectionLocationOnPanel[index].Y - 1, 2, 2);
+                        graphics.FillRectangle(brushForPoint, TrajectoryProjectionLocationOnPanel[index].X - 2, TrajectoryProjectionLocationOnPanel[index].Y - 2, 4, 4);
                     }
                 }
             }
@@ -298,10 +305,10 @@ namespace Well_Trajectory_Visualization
         ////Draw Axis///
         private Graphics DrawAxis(Graphics graphics, int spaceX, int spaceY)
         {
-            PointF upperLeftAxisPoint = new PointF(paddingX - marginAxis, spaceHeightForViewName + paddingY - marginAxis);
-            PointF upperRightAxisPoint = new PointF(this.Width - paddingX + marginAxis, spaceHeightForViewName + paddingY - marginAxis);
-            PointF lowerLeftAxisPoint = new PointF(paddingX - marginAxis, this.Height - paddingY + marginAxis);
-            PointF lowerRightAxisPoint = new PointF(this.Width - paddingX + marginAxis, this.Height - paddingY + marginAxis);
+            PointF upperLeftAxisPoint = new PointF(leftPaddingX - marginAxis, spaceHeightForViewName + paddingY - marginAxis);
+            PointF upperRightAxisPoint = new PointF(this.Width - rightPaddingX + marginAxis, spaceHeightForViewName + paddingY - marginAxis);
+            PointF lowerLeftAxisPoint = new PointF(leftPaddingX - marginAxis, this.Height - paddingY + marginAxis);
+            PointF lowerRightAxisPoint = new PointF(this.Width - rightPaddingX + marginAxis, this.Height - paddingY + marginAxis);
             Font textFont = this.Font;
 
             using (Pen penForAxis = new Pen(Color.Black, 0.3F))
@@ -313,8 +320,8 @@ namespace Well_Trajectory_Visualization
                 graphics.DrawLine(penForAxis, lowerLeftAxisPoint, upperLeftAxisPoint);
 
                 // draw axis name
-                Rectangle xAxisCaptionRect = new Rectangle((int)(upperRightAxisPoint.X + segementLength), (int)(upperRightAxisPoint.Y - heightOfCoordinate / 2), widthOfCoordinate, heightOfCoordinate);
-                Rectangle yAxisCaptionRect = new Rectangle((int)(lowerLeftAxisPoint.X - widthOfCoordinate / 2), (int)(lowerLeftAxisPoint.Y + segementLength), widthOfCoordinate, heightOfCoordinate);
+                Rectangle xAxisCaptionRect = new Rectangle((int)(upperRightAxisPoint.X + segementLength), (int)(upperRightAxisPoint.Y - heightOfAxisName / 2), widthOfAxisName, heightOfAxisName);
+                Rectangle yAxisCaptionRect = new Rectangle((int)(lowerLeftAxisPoint.X - widthOfAxisName / 2), (int)(lowerLeftAxisPoint.Y + segementLength), widthOfAxisName, heightOfAxisName);
                 StringFormat axisCaptionStringFormat = new StringFormat();
                 axisCaptionStringFormat.Alignment = StringAlignment.Center;
                 graphics.DrawString(AxisXCaption, textFont, Brushes.Black, xAxisCaptionRect, axisCaptionStringFormat);
@@ -323,8 +330,18 @@ namespace Well_Trajectory_Visualization
                 // draw number in axis
                 float widthOfAxis = upperRightAxisPoint.X - upperLeftAxisPoint.X;
                 float heightOfAxis = lowerLeftAxisPoint.Y - upperLeftAxisPoint.Y;
+
+                // x-axis
                 StringFormat xAxisNumberFormat = new StringFormat();
                 xAxisNumberFormat.Alignment = StringAlignment.Center;
+
+                int powerOfScientificNotionForXAxis = Math.Round(Math.Max(Math.Abs((upperLeftAxisPoint.X - spaceX) / zoomInAxisParameter), Math.Abs((upperRightAxisPoint.X - spaceX) / zoomInAxisParameter))).ToString().Length - 1;
+                double divisorX = powerOfScientificNotionForXAxis >= 4 ? Math.Pow(10, powerOfScientificNotionForXAxis) : 1;
+                string notionForXAxis = "";
+                if (divisorX != 1)
+                {
+                    notionForXAxis += "E+" + powerOfScientificNotionForXAxis.ToString();
+                }
 
                 float coordinateX = upperLeftAxisPoint.X;
                 while (coordinateX <= upperRightAxisPoint.X)
@@ -333,13 +350,22 @@ namespace Well_Trajectory_Visualization
 
                     Rectangle rectangleForNumberInAxisX = new Rectangle((int)(coordinateX - widthOfCoordinate / 2), (int)(upperLeftAxisPoint.Y - segementLength * 3 / 2 - heightOfCoordinate), widthOfCoordinate, heightOfCoordinate);
                     graphics.DrawLine(penForAxis, coordinateX, upperLeftAxisPoint.Y, coordinateX, upperLeftAxisPoint.Y - segementLength);
-                    graphics.DrawString(((int)coordinateXInReal).ToString(), textFont, Brushes.Black, rectangleForNumberInAxisX, xAxisNumberFormat);
+                    graphics.DrawString((Math.Round(coordinateXInReal / divisorX, 1)).ToString() + notionForXAxis, textFont, Brushes.Black, rectangleForNumberInAxisX, xAxisNumberFormat);
 
                     coordinateX = coordinateX + widthOfAxis / numberOfDataInAxisX;
                 }
 
+                // y-axis
                 StringFormat yAxisNumberFormat = new StringFormat();
                 yAxisNumberFormat.Alignment = StringAlignment.Far;
+
+                int powerOfScientificNotionForYAxis = Math.Round(Math.Max(Math.Abs((upperLeftAxisPoint.Y - spaceY) / zoomInAxisParameter), Math.Abs((lowerLeftAxisPoint.Y - spaceY) / zoomInAxisParameter))).ToString().Length - 1;
+                double divisorY = powerOfScientificNotionForYAxis >= 4 ? Math.Pow(10, powerOfScientificNotionForYAxis) : 1;
+                string notionForYAxis = "";
+                if (divisorY != 1)
+                {
+                    notionForYAxis += "E+" + powerOfScientificNotionForYAxis.ToString();
+                }
 
                 float coordinateY = upperLeftAxisPoint.Y;
                 while (coordinateY <= lowerLeftAxisPoint.Y)
@@ -348,10 +374,11 @@ namespace Well_Trajectory_Visualization
 
                     Rectangle rectangleForNumberInAxisY = new Rectangle((int)(upperLeftAxisPoint.X - segementLength * 3 / 2 - widthOfCoordinate), (int)(coordinateY - heightOfCoordinate / 2), widthOfCoordinate, heightOfCoordinate);
                     graphics.DrawLine(penForAxis, upperLeftAxisPoint.X, coordinateY, upperLeftAxisPoint.X - segementLength, coordinateY);
-                    graphics.DrawString(((int)coordinateYInReal).ToString(), textFont, Brushes.Black, rectangleForNumberInAxisY, yAxisNumberFormat);
+                    graphics.DrawString((Math.Round(coordinateYInReal / divisorY, 1)).ToString() + notionForYAxis, textFont, Brushes.Black, rectangleForNumberInAxisY, yAxisNumberFormat);
 
                     coordinateY = coordinateY + heightOfAxis / numberOfDataInAxisY;
                 }
+
             }
             return graphics;
         }
@@ -401,27 +428,3 @@ namespace Well_Trajectory_Visualization
         }
     }
 }
-
-
-
-
-//public List<Vector3> LargestInflectionPoint
-//{
-//    get; set;
-//}
-
-//public Single ZoomXY
-//{
-//    get; set;
-//}
-
-//public Single ZoomZ
-//{
-//    get; set;
-//}
-
-//private void AddAnnotationUpdate(object sender, EventArgs e)
-//{
-//    AddAnnotation = (bool) sender;
-//}
-
