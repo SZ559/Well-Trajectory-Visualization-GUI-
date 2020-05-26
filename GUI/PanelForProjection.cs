@@ -204,7 +204,7 @@ namespace Well_Trajectory_Visualization
             // draw caption
             using (Font fontForCaption = new Font("Microsoft YaHei", 11, FontStyle.Regular, GraphicsUnit.Point))
             {
-                Rectangle rect = new Rectangle(0, 0, this.Width, spaceHeightForViewName);
+                Rectangle rect = new Rectangle(leftPaddingX, 0, this.Width - leftPaddingX - rightPaddingX, spaceHeightForViewName);
 
                 StringFormat stringFormat = new StringFormat();
                 stringFormat.Alignment = StringAlignment.Center;
