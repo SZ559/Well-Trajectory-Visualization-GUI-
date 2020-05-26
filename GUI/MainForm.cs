@@ -326,7 +326,6 @@ namespace Well_Trajectory_Visualization
             tableLayoutPanel.ResumeLayout();
         }
 
-
         /////////// Draw Tab Page Header //////////////////
 
         private string GetHeaderTextForTabPage(string wellName, string trajectoryName)
