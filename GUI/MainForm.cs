@@ -355,9 +355,9 @@ namespace Well_Trajectory_Visualization
 
                 lengthOfVector1 = vector1.Length();
                 lengthOfVector2 = vector2.Length();
-                MessageBox.Show(currentTrajectory[i - indexPreventOverlaping_Vector1 - 1].ToString());
-                MessageBox.Show(currentTrajectory[i].ToString());
-                MessageBox.Show(currentTrajectory[i + 1].ToString());
+                //MessageBox.Show(currentTrajectory[i - indexPreventOverlaping_Vector1 - 1].ToString());
+                //MessageBox.Show(currentTrajectory[i].ToString());
+                //MessageBox.Show(currentTrajectory[i + 1].ToString());
 
                 if (lengthOfVector1 == 0)
                 {
