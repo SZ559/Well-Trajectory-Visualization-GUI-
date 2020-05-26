@@ -205,14 +205,14 @@
             this.meterToolStripMenuItem.Name = "meterToolStripMenuItem";
             this.meterToolStripMenuItem.Size = new System.Drawing.Size(267, 54);
             this.meterToolStripMenuItem.Text = "&Meter";
-            this.meterToolStripMenuItem.Click += new System.EventHandler(this.meterToolStripMenuItem_Click);
+            this.meterToolStripMenuItem.Click += new System.EventHandler(this.MeterToolStripMenuItem_Click);
             // 
             // feetToolStripMenuItem
             // 
             this.feetToolStripMenuItem.Name = "feetToolStripMenuItem";
             this.feetToolStripMenuItem.Size = new System.Drawing.Size(267, 54);
             this.feetToolStripMenuItem.Text = "&Feet";
-            this.feetToolStripMenuItem.Click += new System.EventHandler(this.feetToolStripMenuItem_Click);
+            this.feetToolStripMenuItem.Click += new System.EventHandler(this.FeetToolStripMenuItem_Click);
             // 
             // helpToolStripMenuItem
             // 
@@ -501,7 +501,7 @@
             this.sharpestPointToolStripMenuItem.Name = "sharpestPointToolStripMenuItem";
             this.sharpestPointToolStripMenuItem.Size = new System.Drawing.Size(448, 54);
             this.sharpestPointToolStripMenuItem.Text = "Sharpest Point";
-            this.sharpestPointToolStripMenuItem.Click += new System.EventHandler(this.sharpestPointToolStripMenuItem_Click_1);
+            this.sharpestPointToolStripMenuItem.Click += new System.EventHandler(this.SharpestPointToolStripMenuItem_Click);
             // 
             // MainForm
             // 
