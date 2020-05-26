@@ -15,7 +15,7 @@ namespace Well_Trajectory_Visualization
 
         TrajectoryDataReader trajectoryDataReader;
         WellViewSaver wellViewSaver;
-        DisplayChoice displayChoice;
+
         List<Well> wells;
 
         readonly int leftPadding;
@@ -23,6 +23,7 @@ namespace Well_Trajectory_Visualization
         readonly int middleMargin;
         readonly int verticalPaddingForHeaderName;
         readonly int verticalPaddingForCloseIcon;
+        //internal event EventHandler AddAnnotation;
 
         int PreviewTabIndex
         {
@@ -53,8 +54,6 @@ namespace Well_Trajectory_Visualization
 
             trajectoryDataReader = new TrajectoryDataReader();
             wellViewSaver = new WellViewSaver();
-            displayChoice = new DisplayChoice();
-
             tabControl.Padding = new Point(18, 5);
             wells = new List<Well>();
             isDoubleClick = false;
@@ -251,6 +250,7 @@ namespace Well_Trajectory_Visualization
 
 
         /////////////// Tab Page ////////////////////
+
         private bool HasSameTabPage(string tabPageName)
         {
             foreach (TabPage tabpage in tabControl.TabPages)
@@ -301,7 +301,7 @@ namespace Well_Trajectory_Visualization
                 ColumnCount = 3,
                 AutoScroll = true,
                 Dock = DockStyle.Fill,
-                Tag = new CurrentTrajectoryInformation(trajectory, displayChoice),
+                Tag = trajectory,
             };
             tableLayoutPanel.SuspendLayout();
             tableLayoutPanel.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 33));
@@ -315,9 +315,18 @@ namespace Well_Trajectory_Visualization
         private void AddViewPanelForTableLayoutPanel(TableLayoutPanel tableLayoutPanel)
         {
 
-            PanelForProjection mainViewPanel = new PanelForProjection(Vector3.UnitY, (CurrentTrajectoryInformation)tableLayoutPanel.Tag);
-            PanelForProjection leftViewPanel = new PanelForProjection(Vector3.UnitX, (CurrentTrajectoryInformation)tableLayoutPanel.Tag);
-            PanelForProjection topViewPanel = new PanelForProjection(Vector3.UnitZ, (CurrentTrajectoryInformation)tableLayoutPanel.Tag);
+            PanelForProjection mainViewPanel = new PanelForProjection(Vector3.UnitY, (Trajectory)tableLayoutPanel.Tag, annnotationToolStripMenuItem.Checked);
+            PanelForProjection leftViewPanel = new PanelForProjection(Vector3.UnitX, (Trajectory)tableLayoutPanel.Tag, annnotationToolStripMenuItem.Checked);
+            PanelForProjection topViewPanel = new PanelForProjection(Vector3.UnitZ, (Trajectory)tableLayoutPanel.Tag, annnotationToolStripMenuItem.Checked);
+
+            List<int> sharpestPointIndex = GetSharpestPointIndex(((Trajectory)tableLayoutPanel.Tag).PolyLineNodes);
+            mainViewPanel.SharpestPointProjectionIndex = sharpestPointIndex;
+            leftViewPanel.SharpestPointProjectionIndex = sharpestPointIndex;
+            topViewPanel.SharpestPointProjectionIndex = sharpestPointIndex;
+            mainViewPanel.AddSharpestPoint = sharpestPointToolStripMenuItem.Checked;
+            leftViewPanel.AddSharpestPoint = sharpestPointToolStripMenuItem.Checked;
+            topViewPanel.AddSharpestPoint = sharpestPointToolStripMenuItem.Checked;
+
 
             tableLayoutPanel.SuspendLayout();
             tableLayoutPanel.Controls.Add(mainViewPanel, 0, 0);
@@ -326,6 +335,64 @@ namespace Well_Trajectory_Visualization
             tableLayoutPanel.ResumeLayout();
         }
 
+        /////////////// Helper functions //////////////
+        //public static List<Vector3> GetLargestInflectionPoint(List<Vector3> currentTrajectory)
+
+        public static List<int> GetSharpestPointIndex(List<Vector3> currentTrajectory)
+        {
+            double lengthOfVector1, lengthOfVector2, dotProduct;
+            Vector3 vector1, vector2;
+            double maxCurvature = Math.PI;
+            double radian;
+            int indexPreventOverlaping_Vector1 = 0;
+
+            List<int> maxCurvaturePointIndex = new List<int>();
+            for (int i = 1; i < currentTrajectory.Count - 1; i = i + 1)
+            {
+
+                vector1 = Vector3.Subtract(currentTrajectory[i - indexPreventOverlaping_Vector1 - 1], currentTrajectory[i]);
+                vector2 = Vector3.Subtract(currentTrajectory[i + 1], currentTrajectory[i]);
+
+                lengthOfVector1 = vector1.Length();
+                lengthOfVector2 = vector2.Length();
+                //MessageBox.Show(currentTrajectory[i - indexPreventOverlaping_Vector1 - 1].ToString());
+                //MessageBox.Show(currentTrajectory[i].ToString());
+                //MessageBox.Show(currentTrajectory[i + 1].ToString());
+
+                if (lengthOfVector1 == 0)
+                {
+                    continue;
+                }
+
+                if (lengthOfVector2 != 0)
+                {
+                    dotProduct = Vector3.Dot(vector1, vector2);
+                    radian = Math.Acos(dotProduct / (lengthOfVector1 * lengthOfVector2));
+
+                    if (radian > Math.PI)
+                    {
+                        radian = 2 * Math.PI - radian;
+                    }
+
+                    if (radian < maxCurvature)
+                    {
+                        maxCurvature = radian;
+                        maxCurvaturePointIndex.Clear();
+                        maxCurvaturePointIndex.Add(i);
+                    }
+                    else if (maxCurvature == radian)
+                    {
+                        maxCurvaturePointIndex.Add(i);
+                    }
+                    indexPreventOverlaping_Vector1 = 0;
+                }
+                else
+                {
+                    indexPreventOverlaping_Vector1 = indexPreventOverlaping_Vector1 + 1;
+                }
+            }
+            return maxCurvaturePointIndex;
+        }
 
         /////////// Draw Tab Page Header //////////////////
 
@@ -433,37 +500,66 @@ namespace Well_Trajectory_Visualization
 
         private void AnnnotationToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            displayChoice.AddAnnotation = annnotationToolStripMenuItem.Checked;
+            foreach (TabPage tabPage in tabControl.Controls)
+            {
+                TableLayoutPanel tableLayoutPanel = (TableLayoutPanel) tabPage.Controls[0];
+                foreach (PanelForProjection panel in tableLayoutPanel.Controls)
+                {
+                    panel.AddAnnotation = annnotationToolStripMenuItem.Checked;
+                }
+            }
+
+            //AddAnnotation?.Invoke(annnotationToolStripMenuItem.Checked, FormClosedEventArgs.Empty);
             if (tabControl.SelectedTab != null)
             {
                 tabControl.SelectedTab.Refresh();
             }
         }
 
-        private void MeterToolStripMenuItem_Click(object sender, EventArgs e)
+
+        private void meterToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if (tabControl.SelectedTab != null)
             {
                 TableLayoutPanel tableLayoutPanel = (TableLayoutPanel)tabControl.SelectedTab.Controls[0];
-                ((CurrentTrajectoryInformation)tableLayoutPanel.Tag).Unit = DistanceUnit.Meter;
+                tableLayoutPanel.Tag = ((Trajectory)tableLayoutPanel.Tag).ConvertTo(DistanceUnit.Meter);
+                foreach (PanelForProjection panel in tableLayoutPanel.Controls)
+                {
+                    panel.CurrentTrajectory = (Trajectory)tableLayoutPanel.Tag;
+                    panel.UpdateParameters();
+                }
+
                 tabControl.SelectedTab.Refresh();
             }
         }
 
-        private void FeetToolStripMenuItem_Click(object sender, EventArgs e)
+        private void feetToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if (tabControl.SelectedTab != null)
             {
                 TableLayoutPanel tableLayoutPanel = (TableLayoutPanel)tabControl.SelectedTab.Controls[0];
-                ((CurrentTrajectoryInformation)tableLayoutPanel.Tag).Unit = DistanceUnit.Feet;
+                tableLayoutPanel.Tag = ((Trajectory)tableLayoutPanel.Tag).ConvertTo(DistanceUnit.Feet);
+                foreach (PanelForProjection panel in tableLayoutPanel.Controls)
+                {
+                    panel.CurrentTrajectory = (Trajectory)tableLayoutPanel.Tag;
+                    panel.UpdateParameters();
+                }
 
                 tabControl.SelectedTab.Refresh();
             }
         }
 
-        private void SharpestPointToolStripMenuItem_Click(object sender, EventArgs e)
+        private void sharpestPointToolStripMenuItem_Click_1(object sender, EventArgs e)
         {
-            displayChoice.AddSharpestPoint = sharpestPointToolStripMenuItem.Checked;
+            foreach (TabPage tabPage in tabControl.Controls)
+            {
+                TableLayoutPanel tableLayoutPanel = (TableLayoutPanel)tabPage.Controls[0];
+                foreach (PanelForProjection panel in tableLayoutPanel.Controls)
+                {
+                    panel.AddSharpestPoint = sharpestPointToolStripMenuItem.Checked;
+                }
+            }
+
             if (tabControl.SelectedTab != null)
             {
                 tabControl.SelectedTab.Refresh();
