@@ -78,25 +78,25 @@ namespace Well_Trajectory_Visualization
 
         private Single minX;
         private Single minY;
-        private List<PointIn2D> sharpestPointsProjectionIn2D; 
+        private List<PointIn2D> sharpestPointsProjectionIn2D;
 
-        Single zoomInAxisParameter
+        private SizeF inflateSize;
+        private float offsetX;
+        private float offsetY;
+        public Rectangle graphicDrawingArea
         {
-            get
+            get 
             {
-                float zoomInAxisParameter;
-                if (currentTrajectoryInformation.MaxZOfTrajectory * (Width - leftPaddingX - rightPaddingX) > currentTrajectoryInformation.MaxXYOfTrajectory * (Height - 2 * paddingY - spaceHeightForViewName))
-                {
-                    zoomInAxisParameter = (Height - 2 * paddingY - spaceHeightForViewName) / currentTrajectoryInformation.MaxZOfTrajectory;
-                }
-                else
-                {
-                    zoomInAxisParameter = (Width - leftPaddingX - rightPaddingX) / currentTrajectoryInformation.MaxXYOfTrajectory;
-                }
-                return zoomInAxisParameter;
-            }
+                return new Rectangle(leftPaddingX, paddingY + spaceHeightForViewName, this.Width - leftPaddingX - rightPaddingX, this.Height - paddingY * 2 - spaceHeightForViewName);
+            }       
         }
+        bool MouseIsDown = false;
+        Rectangle MouseRect = Rectangle.Empty;
+        bool zoomIsOn;
 
+        float zoomInXAxisParameter;
+        float zoomInYAxisParameter;
+        
         ToolTip toolTipForAnnotation;
 
 
@@ -126,7 +126,6 @@ namespace Well_Trajectory_Visualization
             TrajectoryProjectionLocationOnPanel = new PointF[TrajectoryProjectionIn2D.Count];
             minX = TrajectoryProjectionIn2D.Select(x => x.X).Min();
             minY = TrajectoryProjectionIn2D.Select(x => x.Y).Min();
-
             //Initialize drawing property
 
             numberOfDataInAxisX = 5;
@@ -142,17 +141,45 @@ namespace Well_Trajectory_Visualization
             rightPaddingX = segementLength / 2 + marginAxis + widthOfAxisName + 5;
             paddingY = segementLength * 3 / 2 + marginAxis + Math.Max(heightOfAxisName, heightOfCoordinate) + 5;
 
+            //zooms
+            offsetX = 0;
+            offsetY = 0;
+            zoomIsOn = false;
+            inflateSize = new SizeF(1, 1);
+
             //tool tip
             toolTipForAnnotation = new ToolTip()
             {
-                AutoPopDelay = 5000,
+                AutoPopDelay = 50000,
                 InitialDelay = 500,
                 ReshowDelay = 100,
                 ShowAlways = true,
             };
+            Paint += new PaintEventHandler(PaintPanel);
+            MouseMove += new MouseEventHandler(Panel_MouseMove);
+            MouseDown += new MouseEventHandler(Panel_MouseDown);
+            MouseUp += new MouseEventHandler(Panel_MouseUp);
+            //MouseHover += new EventHandler(Panel_MouseHover);
+        }
+        private void SetZoomInAixsPrameter()
+        {
+            if (currentTrajectoryInformation.MaxZOfTrajectory * (Width - leftPaddingX - rightPaddingX) > currentTrajectoryInformation.MaxXYOfTrajectory * (Height - 2 * paddingY - spaceHeightForViewName))
+            {
+                zoomInXAxisParameter = (Height - 2 * paddingY - spaceHeightForViewName) / currentTrajectoryInformation.MaxZOfTrajectory;
+                zoomInYAxisParameter = zoomInXAxisParameter;
 
-            this.Paint += new PaintEventHandler(PaintPanel);
-            this.MouseMove += new MouseEventHandler(Panel_MouseMove);
+            }
+            else
+            {
+                zoomInXAxisParameter = (Width - leftPaddingX - rightPaddingX) / currentTrajectoryInformation.MaxXYOfTrajectory;
+                zoomInYAxisParameter = zoomInXAxisParameter;
+            }
+
+            if (zoomIsOn)
+            {
+                zoomInXAxisParameter = zoomInXAxisParameter * inflateSize.Width;
+                zoomInYAxisParameter = zoomInYAxisParameter * inflateSize.Height;
+            }
         }
 
         private void MyEventSubscription(object sender, PropertyChangedEventArgs e)
@@ -173,14 +200,21 @@ namespace Well_Trajectory_Visualization
         private void PaintPanel(object sender, PaintEventArgs e)
         {
             Graphics graphics = e.Graphics;
-            int spaceX = (int)(leftPaddingX - minX * zoomInAxisParameter);
-            int spaceY = (int)(paddingY + spaceHeightForViewName - minY * zoomInAxisParameter);
+            SetZoomInAixsPrameter();
+            int spaceX = (int)(leftPaddingX - minX * zoomInXAxisParameter);
+            int spaceY = (int)(paddingY + spaceHeightForViewName - minY * zoomInYAxisParameter);
+
+            //Rectangle graphicDrawingArea = new Rectangle(leftPaddingX, paddingY + spaceHeightForViewName, this.Width - leftPaddingX - rightPaddingX, this.Height - paddingY * 2 - spaceHeightForViewName);
+            //Rectangle trajectoryDrawingArea = new Rectangle(leftPaddingX, paddingY + spaceHeightForViewName, this.Width - leftPaddingX - rightPaddingX, this.Height - paddingY * 2 - spaceHeightForViewName);
+            //trajectoryDrawingArea.Inflate(inflateSize);
+            //trajectoryDrawingArea.Offset(offsetAmount);
 
             for (int i = 0; i < TrajectoryProjectionIn2D.Count; i = i + 1)
             {
-                float xForPaint = TrajectoryProjectionIn2D[i].X * zoomInAxisParameter + spaceX;
-                float yForPaint = TrajectoryProjectionIn2D[i].Y * zoomInAxisParameter + spaceY;
+                float xForPaint = TrajectoryProjectionIn2D[i].X * zoomInXAxisParameter + spaceX - offsetX;
+                float yForPaint = TrajectoryProjectionIn2D[i].Y * zoomInYAxisParameter + spaceY - offsetY;
                 TrajectoryProjectionLocationOnPanel[i] = new PointF(xForPaint, yForPaint);
+
             }
 
             // points limit 8517?
@@ -218,7 +252,7 @@ namespace Well_Trajectory_Visualization
             //draw annotation
             if (currentTrajectoryInformation.DisplayChoice.AddAnnotation)
             {
-                graphics = DrawAnnotation(graphics, TrajectoryProjectionIn2D, spaceX, spaceY);
+                graphics = DrawAnnotation(graphics);
             }
           
             
@@ -228,14 +262,13 @@ namespace Well_Trajectory_Visualization
                 {
                     foreach (var sharpestPoint in sharpestPointsProjectionIn2D)
                     {
-                        float xForPaint = sharpestPoint.X * zoomInAxisParameter + spaceX;
-                        float yForPaint = sharpestPoint.Y * zoomInAxisParameter + spaceY;
+                        float xForPaint = sharpestPoint.X * zoomInXAxisParameter + spaceX - offsetX;
+                        float yForPaint = sharpestPoint.Y * zoomInYAxisParameter + spaceY - offsetY;
                         graphics.FillRectangle(brushForPoint, xForPaint - 1, yForPaint - 1, 2, 2);
                     }
                 }
             }
             graphics.Dispose();
-
         }
 
         ////Draw Axis///
@@ -282,7 +315,7 @@ namespace Well_Trajectory_Visualization
                 float coordinateX = upperLeftAxisPoint.X;
                 while (coordinateX <= upperRightAxisPoint.X)
                 {
-                    float coordinateXInReal = (coordinateX - spaceX) / zoomInAxisParameter;
+                    float coordinateXInReal = (coordinateX - spaceX + offsetX) / zoomInXAxisParameter;
 
                     Rectangle rectangleForNumberInAxisX = new Rectangle((int)(coordinateX - widthOfCoordinate / 2), (int)(upperLeftAxisPoint.Y - segementLength * 3 / 2 - heightOfCoordinate), widthOfCoordinate, heightOfCoordinate);
                     graphics.DrawLine(penForAxis, coordinateX, upperLeftAxisPoint.Y, coordinateX, upperLeftAxisPoint.Y - segementLength);
@@ -307,7 +340,7 @@ namespace Well_Trajectory_Visualization
                 float coordinateY = upperLeftAxisPoint.Y;
                 while (coordinateY <= lowerLeftAxisPoint.Y)
                 {
-                    float coordinateYInReal = (coordinateY - spaceY) / zoomInAxisParameter;
+                    float coordinateYInReal = (coordinateY - spaceY + offsetY) / zoomInYAxisParameter;
 
                     Rectangle rectangleForNumberInAxisY = new Rectangle((int)(upperLeftAxisPoint.X - segementLength * 3 / 2 - widthOfCoordinate), (int)(coordinateY - heightOfCoordinate / 2), widthOfCoordinate, heightOfCoordinate);
                     graphics.DrawLine(penForAxis, upperLeftAxisPoint.X, coordinateY, upperLeftAxisPoint.X - segementLength, coordinateY);
@@ -322,20 +355,17 @@ namespace Well_Trajectory_Visualization
         }
 
         /// Draw Annotation////
-        private Graphics DrawAnnotation(Graphics graphics, List<PointIn2D> projectionPointIn2D, int spaceX, int spaceY)
+        private Graphics DrawAnnotation(Graphics graphics)
         {
             using (Font textFont = new Font("Microsoft YaHei", 6, FontStyle.Regular, GraphicsUnit.Point))
             {
                 Dictionary<String, int> pointAnnotationDictionary = new Dictionary<String, int>();
-                foreach (var point in projectionPointIn2D)
+                for (int i = 0; i < TrajectoryProjectionIn2D.Count; i = i + 1)
                 {
-                    float xForPaint = point.X * zoomInAxisParameter + spaceX;
-                    float yForPaint = point.Y * zoomInAxisParameter + spaceY;
-                    PointF locationOfPoint = new PointF(xForPaint + 4, yForPaint - 4);
-                    String pointAnnotation = $"({Math.Round(point.X, 1)}, {Math.Round(point.Y, 1)})";
+                    String pointAnnotation = $"({Math.Round(TrajectoryProjectionIn2D[i].X, 1)}, {Math.Round(TrajectoryProjectionIn2D[i].Y, 1)})";
                     if (!pointAnnotationDictionary.ContainsKey(pointAnnotation))
                     {
-                        graphics.DrawString(pointAnnotation, textFont, Brushes.Black, locationOfPoint);
+                        graphics.DrawString(pointAnnotation, textFont, Brushes.Black, TrajectoryProjectionLocationOnPanel[i]);
                         pointAnnotationDictionary.Add(pointAnnotation, 1);
                     }
                 }
@@ -343,27 +373,107 @@ namespace Well_Trajectory_Visualization
             return graphics;
         }
 
+        private void ResizeToRectangle(Point p)
+        {
+            DrawRectangle();    //先执行再次绘制之前的同一框架实现擦除
+            MouseRect.Width = p.X - MouseRect.Left;
+            MouseRect.Height = p.Y - MouseRect.Top;
+            DrawRectangle();    //改变大小后重新绘制 
+        }
+
+        private void DrawRectangle()
+        {
+            Rectangle rect = this.RectangleToScreen(MouseRect);
+            ControlPaint.DrawReversibleFrame(rect, Color.Green, FrameStyle.Dashed);//再次绘制同一框架会逆转该方法的结果。也就是执行两次对同一矩形的绘制会抹除第一次的绘制(经试验)
+        }
+
+        private void DrawStart(Point StartPoint)
+        {
+            Capture = true;
+            //这是设置鼠标筐选时鼠标的移动区域 和控件对鼠标的捕获
+            //Cursor.Clip = this.RectangleToScreen(new Rectangle(0, 0, ClientSize.Width, ClientSize.Height));
+            Cursor.Clip = this.RectangleToScreen(this.ClientRectangle);
+            MouseRect = new Rectangle(StartPoint.X, StartPoint.Y, 0, 0);
+        }
+
+        private void Panel_MouseDown(object sender, MouseEventArgs e)
+        {
+            MouseIsDown = true;
+            DrawRectangle();    //第一次执行时绘制Rectangle.Empty，第二次之后的执行是先绘制上一次的同一框架实现先擦除    
+            DrawStart(e.Location);
+        }
+
         private void Panel_MouseMove(object sender, MouseEventArgs e)
         {
-            PanelForProjection panel = (PanelForProjection)sender;
-            string tip = "";
-            int radius = 4;
-            int index = 0;
-            foreach (var location in TrajectoryProjectionLocationOnPanel)
+            if (MouseIsDown)
             {
-                if ((Math.Abs(e.X - location.X) < radius) &&
-                    (Math.Abs(e.Y - location.Y) < radius))
+                ResizeToRectangle(e.Location);
+
+            }
+            else
+            {
+                string tip = "";
+                int radius = 4;
+                int index = 0;
+                foreach (var location in TrajectoryProjectionLocationOnPanel)
                 {
-                    tip = $"({Math.Round(panel.TrajectoryProjectionIn2D[index].X, 1)}, {Math.Round(panel.TrajectoryProjectionIn2D[index].Y, 1)})";
-                    break;
+                    if ((Math.Abs(e.X - location.X) < radius) &&
+                        (Math.Abs(e.Y - location.Y) < radius))
+                    {
+                        tip = $"({Math.Round(TrajectoryProjectionIn2D[index].X, 1)}, {Math.Round(TrajectoryProjectionIn2D[index].Y, 1)})";
+                        break;
+                    }
+                    index = index + 1;
                 }
-                index = index + 1;
+                if (toolTipForAnnotation.GetToolTip(this) != tip)
+                {
+                    toolTipForAnnotation.SetToolTip(this, tip);
+                }
             }
-            if (toolTipForAnnotation.GetToolTip(panel) != tip)
+        }
+
+        private void Panel_MouseUp(object sender, MouseEventArgs e)
+        {
+            DrawRectangle();
+            if (MouseRect.Width != 0 && MouseRect.Height != 0)
             {
-                toolTipForAnnotation.SetToolTip(panel, tip);
+                zoomIsOn = true;
+                float inflateX = (graphicDrawingArea.Width / (MouseRect.Width));
+                float inflateY = (graphicDrawingArea.Height / (MouseRect.Height));
+                offsetX = (MouseRect.X - graphicDrawingArea.X + offsetX) * inflateX;
+                offsetY = (MouseRect.Y - graphicDrawingArea.Y + offsetY) * inflateY;
+                inflateSize.Width = inflateSize.Width * inflateX;
+                inflateSize.Height = inflateSize.Height * inflateY;
+
+                Refresh();
             }
+            Capture = false;
+            Cursor.Clip = Rectangle.Empty;
+            MouseIsDown = false;
+            MouseRect = Rectangle.Empty;
+
         }
     }
 }
 
+//private void Panel_MouseHover(object sender, EventArgs e)
+//{
+//    string tip = "";
+//    int radius = ;
+//    int index = 0;
+//    PointF position = PointToClient(Cursor.Position);
+//    foreach (var location in TrajectoryProjectionLocationOnPanel)
+//    {
+//        if ((Math.Abs(position.X - location.X) < radius) &&
+//            (Math.Abs(position.Y - location.Y) < radius))
+//        {
+//            tip = $"({Math.Round(TrajectoryProjectionIn2D[index].X, 1)}, {Math.Round(TrajectoryProjectionIn2D[index].Y, 1)})";
+//            break;
+//        }
+//        index = index + 1;
+//    }
+//    if (toolTipForAnnotation.GetToolTip(this) != tip)
+//    {
+//        toolTipForAnnotation.SetToolTip(this, tip);
+//    }
+//}
