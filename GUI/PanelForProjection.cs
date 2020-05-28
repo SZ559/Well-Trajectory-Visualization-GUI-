@@ -38,18 +38,18 @@ namespace Well_Trajectory_Visualization
                 switch (Name)
                 {
                     case "Main":
-                        caption = "x(";
+                        caption = "x";
                         break;
                     case "Left":
-                        caption = "y(";
+                        caption = "y";
                         break;
                     case "Top":
                     default:
-                        caption = "x(";
+                        caption = "x";
                         break;
                 }
 
-                return caption + currentTrajectoryInformation.UnitForCaption + ")";
+                return caption + "(" + currentTrajectoryInformation.UnitForCaption + ")";
             }
         }
 
@@ -61,18 +61,18 @@ namespace Well_Trajectory_Visualization
                 switch (Name)
                 {
                     case "Main":
-                        caption = "z(";
+                        caption = "z";
                         break;
                     case "Left":
-                        caption = "z(";
+                        caption = "z";
                         break;
                     case "Top":
                     default:
-                        caption = "y(";
+                        caption = "y";
                         break;
                 }
 
-                return caption + currentTrajectoryInformation.UnitForCaption + ")";
+                return caption + "(" + currentTrajectoryInformation.UnitForCaption + ")";
             }
         }
 
