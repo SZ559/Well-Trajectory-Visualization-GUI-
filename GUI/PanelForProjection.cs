@@ -102,9 +102,13 @@ namespace Well_Trajectory_Visualization
         bool MouseIsDown = false;
         Rectangle MouseRectangle = Rectangle.Empty;
         bool zoomIsOn;
-
         float zoomInXAxisParameter;
         float zoomInYAxisParameter;
+
+        //Zoom through wheel
+        bool isDrag;
+        Point beginDragLocation;
+
         Single ZoomInAxisParameter
         {
             get
@@ -121,15 +125,6 @@ namespace Well_Trajectory_Visualization
                 return zoomInAxisParameter;
             }
         }
-
-        //Zoom through wheel
-
-        Single zoomOfWheel;
-        int spaceXMouse;
-        int spaceYMouse;
-        bool isDrag;
-        Point beginDragLocation;
-
 
         ToolTip toolTipForAnnotation;
 
@@ -152,14 +147,15 @@ namespace Well_Trajectory_Visualization
 
             this.currentTrajectoryInformation = currentTrajectoryInformation;
             this.normalVector = normalVector;
-            TrajectoryProjectionIn2D = projection.GetProjectionInPlane(currentTrajectoryInformation.CurrentTrajectory.PolyLineNodes, normalVector);
-            sharpestPointsProjectionIn2D = projection.GetProjectionInPlane(currentTrajectoryInformation.SharpestPoint, normalVector);
-            currentTrajectoryInformation.PropertyChanged += MyEventSubscription;
+            TrajectoryProjectionIn2D = projection.GetProjectionInPlane(this.currentTrajectoryInformation.CurrentTrajectory.PolyLineNodes, this.normalVector);
+            sharpestPointsProjectionIn2D = projection.GetProjectionInPlane(this.currentTrajectoryInformation.SharpestPoint, this.normalVector);
+            this.currentTrajectoryInformation.PropertyChanged += UpdateParameters;
 
-            Name = projection.GetProjectionView(normalVector);
+            Name = projection.GetProjectionView(this.normalVector);
             TrajectoryProjectionLocationOnPanel = new PointF[TrajectoryProjectionIn2D.Count];
             minX = TrajectoryProjectionIn2D.Select(x => x.X).Min();
             minY = TrajectoryProjectionIn2D.Select(x => x.Y).Min();
+
             //Initialize drawing property
 
             numberOfDataInAxisX = 5;
@@ -181,13 +177,8 @@ namespace Well_Trajectory_Visualization
             zoomIsOn = false;
             inflateSize = new SizeF(1, 1);
 
-            zoomOfWheel = 0;
-            spaceXMouse = 0;
-            spaceYMouse = 0;
-
             //drag
             isDrag = false;
-
 
             //tool tip
             toolTipForAnnotation = new ToolTip()
@@ -217,12 +208,7 @@ namespace Well_Trajectory_Visualization
             }
         }
 
-        private void MyEventSubscription(object sender, PropertyChangedEventArgs e)
-        {
-            UpdateParameters();
-        }
-
-        private void UpdateParameters()
+        private void UpdateParameters(object sender, PropertyChangedEventArgs e)
         {
             TrajectoryProjectionIn2D = projection.GetProjectionInPlane(currentTrajectoryInformation.CurrentTrajectory.PolyLineNodes, normalVector);
             TrajectoryProjectionLocationOnPanel = new PointF[TrajectoryProjectionIn2D.Count];
@@ -231,10 +217,11 @@ namespace Well_Trajectory_Visualization
             sharpestPointsProjectionIn2D = projection.GetProjectionInPlane(currentTrajectoryInformation.SharpestPoint, normalVector);
         }
 
-        /// Paint Panel///
+        /// Paint Panel ///
         private void PaintPanel(object sender, PaintEventArgs e)
         {
             Graphics graphics = e.Graphics;
+
             SetZoomInAixsPrameter();
             int spaceX = (int)(leftPaddingX - minX * zoomInXAxisParameter);
             int spaceY = (int)(paddingY + spaceHeightForViewName - minY * zoomInYAxisParameter);
@@ -251,14 +238,11 @@ namespace Well_Trajectory_Visualization
             DrawPoints(graphics, TrajectoryProjectionLocationOnPanel);
 
             HighlightPoints(graphics);
-            if (currentTrajectoryInformation.DisplayChoice.AddAnnotation)
-            {
-                DrawAnnotation(graphics);
-            }
-            if (currentTrajectoryInformation.DisplayChoice.AddSharpestPoint)
-            {
-                DrawSharpestPoint(graphics, spaceX, spaceY);
-            }
+
+            DrawAnnotation(graphics);
+
+            DrawSharpestPoint(graphics, spaceX, spaceY);
+
             graphics.ResetClip();
 
             DrawCaption(graphics);
@@ -289,8 +273,7 @@ namespace Well_Trajectory_Visualization
             }
         }
 
-        ////Draw Axis///
-        private Graphics DrawAxis(Graphics graphics, int spaceX, int spaceY)
+        private void DrawAxis(Graphics graphics, int spaceX, int spaceY)
         {
             PointF upperLeftAxisPoint = new PointF(leftPaddingX - marginAxis, spaceHeightForViewName + paddingY - marginAxis);
             PointF upperRightAxisPoint = new PointF(this.Width - rightPaddingX + marginAxis, spaceHeightForViewName + paddingY - marginAxis);
@@ -369,26 +352,29 @@ namespace Well_Trajectory_Visualization
                 }
 
             }
-            return graphics;
+
         }
 
+
         /// Draw Annotation////
-        private Graphics DrawAnnotation(Graphics graphics)
+        private void DrawAnnotation(Graphics graphics)
         {
-            using (Font textFont = new Font("Microsoft YaHei", 6, FontStyle.Regular, GraphicsUnit.Point))
+            if (currentTrajectoryInformation.DisplayChoice.AddAnnotation)
             {
-                Dictionary<String, int> pointAnnotationDictionary = new Dictionary<String, int>();
-                for (int i = 0; i < TrajectoryProjectionIn2D.Count; i = i + 1)
+                using (Font textFont = new Font("Microsoft YaHei", 6, FontStyle.Regular, GraphicsUnit.Point))
                 {
-                    String pointAnnotation = $"({Math.Round(TrajectoryProjectionIn2D[i].X, 1)}, {Math.Round(TrajectoryProjectionIn2D[i].Y, 1)})";
-                    if (!pointAnnotationDictionary.ContainsKey(pointAnnotation))
+                    Dictionary<String, int> pointAnnotationDictionary = new Dictionary<String, int>();
+                    for (int i = 0; i < TrajectoryProjectionIn2D.Count; i = i + 1)
                     {
-                        graphics.DrawString(pointAnnotation, textFont, Brushes.Black, TrajectoryProjectionLocationOnPanel[i]);
-                        pointAnnotationDictionary.Add(pointAnnotation, 1);
+                        String pointAnnotation = $"({Math.Round(TrajectoryProjectionIn2D[i].X, 1)}, {Math.Round(TrajectoryProjectionIn2D[i].Y, 1)})";
+                        if (!pointAnnotationDictionary.ContainsKey(pointAnnotation))
+                        {
+                            graphics.DrawString(pointAnnotation, textFont, Brushes.Black, TrajectoryProjectionLocationOnPanel[i]);
+                            pointAnnotationDictionary.Add(pointAnnotation, 1);
+                        }
                     }
                 }
             }
-            return graphics;
         }
 
         private void DrawSharpestPoint(Graphics graphics, int spaceX, int spaceY)
@@ -427,8 +413,8 @@ namespace Well_Trajectory_Visualization
             offsetY = 0;
             zoomIsOn = false;
             inflateSize = new SizeF(1, 1);
-            zoomOfWheel = 0;
         }
+
         private void ResizeToRectangle(Point p)
         {
             DrawRectangle();    
@@ -581,7 +567,6 @@ namespace Well_Trajectory_Visualization
                     Invalidate();
                 }
             }
-
         }
     }
 }
