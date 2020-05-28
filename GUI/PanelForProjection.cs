@@ -79,8 +79,8 @@ namespace Well_Trajectory_Visualization
 
         private Single minX;
         private Single minY;
-        private Single maxX;
-        private Single maxY;
+        //private Single maxX;
+        //private Single maxY;
         private List<PointIn2D> sharpestPointsProjectionIn2D;
 
         private SizeF inflateSize;
@@ -156,8 +156,8 @@ namespace Well_Trajectory_Visualization
             TrajectoryProjectionLocationOnPanel = new PointF[TrajectoryProjectionIn2D.Count];
             minX = TrajectoryProjectionIn2D.Select(x => x.X).Min();
             minY = TrajectoryProjectionIn2D.Select(x => x.Y).Min();
-            maxX = TrajectoryProjectionIn2D.Select(x => x.X).Max();
-            maxY = TrajectoryProjectionIn2D.Select(x => x.Y).Max();
+            //maxX = TrajectoryProjectionIn2D.Select(x => x.X).Max();
+            //maxY = TrajectoryProjectionIn2D.Select(x => x.Y).Max();
 
             //Initialize drawing property
             numberOfDataInAxisX = 5;
@@ -188,11 +188,6 @@ namespace Well_Trajectory_Visualization
                 ReshowDelay = 100,
                 ShowAlways = true,
             };
-            Paint += new PaintEventHandler(PaintPanel);
-            MouseMove += new MouseEventHandler(Panel_MouseMove);
-            MouseDown += new MouseEventHandler(Panel_MouseDown);
-            MouseUp += new MouseEventHandler(Panel_MouseUp);
-            MouseWheel += new MouseEventHandler(Panel_MouseWheel);
 
             Paint += new PaintEventHandler(PaintPanel);
             MouseMove += new MouseEventHandler(Panel_MouseMove);
@@ -220,8 +215,8 @@ namespace Well_Trajectory_Visualization
             TrajectoryProjectionLocationOnPanel = new PointF[TrajectoryProjectionIn2D.Count];
             minX = TrajectoryProjectionIn2D.Select(x => x.X).Min();
             minY = TrajectoryProjectionIn2D.Select(x => x.Y).Min();
-            maxX = TrajectoryProjectionIn2D.Select(x => x.X).Max();
-            maxY = TrajectoryProjectionIn2D.Select(x => x.Y).Max();
+            //maxX = TrajectoryProjectionIn2D.Select(x => x.X).Max();
+            //maxY = TrajectoryProjectionIn2D.Select(x => x.Y).Max();
             sharpestPointsProjectionIn2D = projection.GetProjectionInPlane(currentTrajectoryInformation.SharpestPoint, normalVector);
         }
 
