@@ -127,9 +127,8 @@ namespace Well_Trajectory_Visualization
         Single zoomOfWheel;
         int spaceXMouse;
         int spaceYMouse;
-        bool IfDrag;
+        bool isDrag;
         Point beginDragLocation;
-
 
 
         ToolTip toolTipForAnnotation;
@@ -185,6 +184,10 @@ namespace Well_Trajectory_Visualization
             zoomOfWheel = 0;
             spaceXMouse = 0;
             spaceYMouse = 0;
+
+            //drag
+            isDrag = false;
+
 
             //tool tip
             toolTipForAnnotation = new ToolTip()
@@ -454,17 +457,37 @@ namespace Well_Trajectory_Visualization
 
         private void Panel_MouseDown(object sender, MouseEventArgs e)
         {
-            if (MouseRectangleArea.Contains(e.Location))
+
+            if (currentTrajectoryInformation.DisplayChoice.ChooseRegion)
             {
-                MouseIsDown = true;
-                DrawRectangle();
-                DrawStart(e.Location);
+                if (MouseRectangleArea.Contains(e.Location))
+                {
+                    MouseIsDown = true;
+                    DrawRectangle();
+                    DrawStart(e.Location);
+                }
+            }
+            else
+            {
+                beginDragLocation = e.Location;
+                isDrag = true;
             }
         }
 
+
         private void Panel_MouseMove(object sender, MouseEventArgs e)
         {
-            if (MouseIsDown)
+            if (isDrag)
+            {
+                offsetX = offsetX + (beginDragLocation.X - e.X);
+                offsetY = offsetY + (beginDragLocation.Y - e.Y);
+
+                beginDragLocation.X = e.X;
+                beginDragLocation.Y = e.Y;
+
+                this.Invalidate();
+            }
+            else if (MouseIsDown)
             {
                 ResizeToRectangle(e.Location);
             }
@@ -492,51 +515,73 @@ namespace Well_Trajectory_Visualization
 
         private void Panel_MouseUp(object sender, MouseEventArgs e)
         {
-            DrawRectangle();
-            if (MouseRectangle.Width != 0 && MouseRectangle.Height != 0)
+            if (isDrag)
             {
-                int radius = 8;
-                if (Math.Abs(MouseRectangleArea.Width - MouseRectangle.Width) < radius && Math.Abs(MouseRectangleArea.Height - MouseRectangle.Height) < radius)
-                {
-                    ResetZoom();
-                }
-                else
-                {
-                    zoomIsOn = true;
-                    float inflateX = ((float)graphicDrawingArea.Width / ((float)MouseRectangle.Width));
-                    float inflateY = ((float)graphicDrawingArea.Height / ((float)MouseRectangle.Height));
-                    offsetX = (MouseRectangle.X - graphicDrawingArea.X + offsetX) * inflateX;
-                    offsetY = (MouseRectangle.Y - graphicDrawingArea.Y + offsetY) * inflateY;
-
-                    inflateSize.Width = inflateSize.Width * inflateX;
-                    inflateSize.Height = inflateSize.Height * inflateY;
-                }
-                Refresh();
+                isDrag = false;
             }
-            Capture = false;
-            Cursor.Clip = Rectangle.Empty;
-            MouseIsDown = false;
-            MouseRectangle = Rectangle.Empty;
+            else
+            {
+                DrawRectangle();
+                if (MouseRectangle.Width != 0 && MouseRectangle.Height != 0)
+                {
+                    int radius = 8;
+                    if (Math.Abs(MouseRectangleArea.Width - MouseRectangle.Width) < radius && Math.Abs(MouseRectangleArea.Height - MouseRectangle.Height) < radius)
+                    {
+                        ResetZoom();
+                        Refresh();
+                    }
+                    else
+                    {
+                        zoomIsOn = true;
+                        float inflateX = ((float)graphicDrawingArea.Width / ((float)MouseRectangle.Width));
+                        float inflateY = ((float)graphicDrawingArea.Height / ((float)MouseRectangle.Height));
 
+                        if (ValidateInflateWidth(inflateX) && ValidateInflateHeight(inflateY))
+                        {
+                            inflateSize.Width = inflateSize.Width * inflateX;
+                            offsetX = (MouseRectangle.X - graphicDrawingArea.X + offsetX) * inflateX;
+                            inflateSize.Height = inflateSize.Height * inflateY;
+                            offsetY = (MouseRectangle.Y - graphicDrawingArea.Y + offsetY) * inflateY;
+                            Refresh();
+                        }
+                    }
+                }
+                Capture = false;
+                Cursor.Clip = Rectangle.Empty;
+                MouseIsDown = false;
+                MouseRectangle = Rectangle.Empty;
+            }
+        }
+
+        private bool ValidateInflateWidth(float inflateX)
+        {
+            return inflateSize.Width * inflateX >= 1;
+        }
+
+        private bool ValidateInflateHeight(float inflateY)
+        {
+            return inflateSize.Height * inflateY >= 1;
         }
 
         private void Panel_MouseWheel(object sender, MouseEventArgs e)
         {
-            float zoomDeltaOfWheel = (float)(e.Delta / 120 * 0.05);
+            float zoomDeltaOfWheel = (float)(e.Delta / 120 * 0.01);
 
             if (zoomDeltaOfWheel + zoomInXAxisParameter >= 0 && zoomDeltaOfWheel + zoomInYAxisParameter >= 0)
             {
                 zoomIsOn = true;
                 float inflateX = zoomDeltaOfWheel + 1;
                 float inflateY = zoomDeltaOfWheel + 1;
-                offsetX = zoomDeltaOfWheel * (float) (e.X - graphicDrawingArea.X) + offsetX;
-                offsetY = zoomDeltaOfWheel * (float) (e.Y - graphicDrawingArea.Y) + offsetY;
-
-                inflateSize.Width = inflateSize.Width * inflateX;
-                inflateSize.Height = inflateSize.Height * inflateY;
+                if (ValidateInflateWidth(inflateX) && ValidateInflateHeight(inflateY))
+                {
+                    offsetX = zoomDeltaOfWheel * (float)(e.X - graphicDrawingArea.X) + offsetX;
+                    inflateSize.Width = inflateSize.Width * inflateX;
+                    offsetY = zoomDeltaOfWheel * (float)(e.Y - graphicDrawingArea.Y) + offsetY;
+                    inflateSize.Height = inflateSize.Height * inflateY;
+                    Invalidate();
+                }
             }
 
-            this.Invalidate();
         }
     }
 }

@@ -12,6 +12,11 @@ namespace Well_Trajectory_Visualization
         {
             get; set;
         }
+        
+        public bool ChooseRegion
+        {
+            get; set;
+        }
 
         public DisplayChoice()
         {

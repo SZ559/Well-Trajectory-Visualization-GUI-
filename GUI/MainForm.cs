@@ -59,6 +59,9 @@ namespace Well_Trajectory_Visualization
             wells = new List<Well>();
             isDoubleClick = false;
 
+            KeyPreview = true;
+            KeyDown += Panel_KeyDown;
+            KeyUp += Panel_KeyUp;
         }
 
         ///////////// Menu Bar /////////////////
@@ -471,6 +474,17 @@ namespace Well_Trajectory_Visualization
             {
                 tabControl.SelectedTab.Refresh();
             }
+        }
+
+        private void Panel_KeyDown(object sender, KeyEventArgs e)
+        {
+            displayChoice.ChooseRegion = e.KeyCode == Keys.ControlKey;
+
+        }
+
+        private void Panel_KeyUp(object sender, KeyEventArgs e)
+        {
+            displayChoice.ChooseRegion = false;
         }
     }
 }
