@@ -7,6 +7,7 @@ using System.Data;
 using System.Linq;
 using System.Numerics;
 using System.ComponentModel;
+using System.Drawing.Drawing2D;
 
 namespace Well_Trajectory_Visualization
 {
@@ -85,13 +86,21 @@ namespace Well_Trajectory_Visualization
         private float offsetY;
         public Rectangle graphicDrawingArea
         {
-            get 
+            get
             {
-                return new Rectangle(leftPaddingX, paddingY + spaceHeightForViewName, this.Width - leftPaddingX - rightPaddingX, this.Height - paddingY * 2 - spaceHeightForViewName);
-            }       
+                return new Rectangle(leftPaddingX, paddingY + spaceHeightForViewName, Width - leftPaddingX - rightPaddingX, Height - paddingY * 2 - spaceHeightForViewName);
+            }
+        }
+
+        public Rectangle MouseRectangleArea
+        {
+            get
+            {
+                return Rectangle.Inflate(graphicDrawingArea, 8, 8);
+            }
         }
         bool MouseIsDown = false;
-        Rectangle MouseRect = Rectangle.Empty;
+        Rectangle MouseRectangle = Rectangle.Empty;
         bool zoomIsOn;
 
         float zoomInXAxisParameter;
@@ -146,7 +155,7 @@ namespace Well_Trajectory_Visualization
             offsetY = 0;
             zoomIsOn = false;
             inflateSize = new SizeF(1, 1);
-
+           
             //tool tip
             toolTipForAnnotation = new ToolTip()
             {
@@ -216,6 +225,7 @@ namespace Well_Trajectory_Visualization
                 TrajectoryProjectionLocationOnPanel[i] = new PointF(xForPaint, yForPaint);
 
             }
+            graphics.SetClip(graphicDrawingArea, CombineMode.Replace);
 
             // points limit 8517?
             using (Pen penForLine = new Pen(Color.FromArgb(204, 234, 187), 3.0F))
@@ -225,6 +235,7 @@ namespace Well_Trajectory_Visualization
                     graphics.DrawLine(penForLine, TrajectoryProjectionLocationOnPanel[i].X, TrajectoryProjectionLocationOnPanel[i].Y, TrajectoryProjectionLocationOnPanel[i + 1].X, TrajectoryProjectionLocationOnPanel[i + 1].Y);
                 }
             }
+           
 
             // highlight data points
             using (SolidBrush brushForPoint = new SolidBrush(Color.FromArgb(63, 63, 68)))
@@ -234,7 +245,7 @@ namespace Well_Trajectory_Visualization
                     graphics.FillRectangle(brushForPoint, location.X - 1, location.Y - 1, 2, 2);
                 }
             }
-
+            graphics.ResetClip();
             // draw caption
             using (Font fontForCaption = new Font("Microsoft YaHei", 11, FontStyle.Regular, GraphicsUnit.Point))
             {
@@ -373,34 +384,48 @@ namespace Well_Trajectory_Visualization
             return graphics;
         }
 
+        //Zoom//
+        private void ResetZoom()
+        {
+            offsetX = 0;
+            offsetY = 0;
+            zoomIsOn = false;
+            inflateSize = new SizeF(1, 1);
+        }
         private void ResizeToRectangle(Point p)
         {
-            DrawRectangle();    //先执行再次绘制之前的同一框架实现擦除
-            MouseRect.Width = p.X - MouseRect.Left;
-            MouseRect.Height = p.Y - MouseRect.Top;
-            DrawRectangle();    //改变大小后重新绘制 
+            DrawRectangle();    
+            MouseRectangle.Width = p.X - MouseRectangle.Left;
+            MouseRectangle.Height = p.Y - MouseRectangle.Top;
+            DrawRectangle();
         }
 
         private void DrawRectangle()
         {
-            Rectangle rect = this.RectangleToScreen(MouseRect);
-            ControlPaint.DrawReversibleFrame(rect, Color.Green, FrameStyle.Dashed);//再次绘制同一框架会逆转该方法的结果。也就是执行两次对同一矩形的绘制会抹除第一次的绘制(经试验)
+            Rectangle rect = this.RectangleToScreen(MouseRectangle);
+            Color color = Color.Green;
+            if (MouseRectangle.Width != 0 && Math.Round(((float) MouseRectangle.Height / (float) MouseRectangle.Width), 1) == Math.Round(((float) graphicDrawingArea.Height / (float) graphicDrawingArea.Width), 1))
+            {
+                color = Color.Brown;
+            }
+            ControlPaint.DrawReversibleFrame(rect, color, FrameStyle.Thick);
         }
 
         private void DrawStart(Point StartPoint)
         {
             Capture = true;
-            //这是设置鼠标筐选时鼠标的移动区域 和控件对鼠标的捕获
-            //Cursor.Clip = this.RectangleToScreen(new Rectangle(0, 0, ClientSize.Width, ClientSize.Height));
-            Cursor.Clip = this.RectangleToScreen(this.ClientRectangle);
-            MouseRect = new Rectangle(StartPoint.X, StartPoint.Y, 0, 0);
+            Cursor.Clip = RectangleToScreen(MouseRectangleArea);
+            MouseRectangle = new Rectangle(StartPoint.X, StartPoint.Y, 0, 0);
         }
 
         private void Panel_MouseDown(object sender, MouseEventArgs e)
         {
-            MouseIsDown = true;
-            DrawRectangle();    //第一次执行时绘制Rectangle.Empty，第二次之后的执行是先绘制上一次的同一框架实现先擦除    
-            DrawStart(e.Location);
+            if (MouseRectangleArea.Contains(e.Location))
+            {
+                MouseIsDown = true;
+                DrawRectangle();
+                DrawStart(e.Location);
+            }
         }
 
         private void Panel_MouseMove(object sender, MouseEventArgs e)
@@ -408,7 +433,6 @@ namespace Well_Trajectory_Visualization
             if (MouseIsDown)
             {
                 ResizeToRectangle(e.Location);
-
             }
             else
             {
@@ -435,22 +459,31 @@ namespace Well_Trajectory_Visualization
         private void Panel_MouseUp(object sender, MouseEventArgs e)
         {
             DrawRectangle();
-            if (MouseRect.Width != 0 && MouseRect.Height != 0)
+            if (MouseRectangle.Width != 0 && MouseRectangle.Height != 0)
             {
-                zoomIsOn = true;
-                float inflateX = (graphicDrawingArea.Width / (MouseRect.Width));
-                float inflateY = (graphicDrawingArea.Height / (MouseRect.Height));
-                offsetX = (MouseRect.X - graphicDrawingArea.X + offsetX) * inflateX;
-                offsetY = (MouseRect.Y - graphicDrawingArea.Y + offsetY) * inflateY;
-                inflateSize.Width = inflateSize.Width * inflateX;
-                inflateSize.Height = inflateSize.Height * inflateY;
+                int radius = 8;
+                if (Math.Abs(MouseRectangleArea.Width - MouseRectangle.Width) < radius && Math.Abs(MouseRectangleArea.Height - MouseRectangle.Height) < radius)
+                {
+                    MessageBox.Show("I am here");
+                    ResetZoom();
+                }
+                else
+                {
+                    zoomIsOn = true;
+                    float inflateX = ((float)graphicDrawingArea.Width / ((float)MouseRectangle.Width));
+                    float inflateY = ((float)graphicDrawingArea.Height / ((float)MouseRectangle.Height));
+                    offsetX = (MouseRectangle.X - graphicDrawingArea.X + offsetX) * inflateX;
+                    offsetY = (MouseRectangle.Y - graphicDrawingArea.Y + offsetY) * inflateY;
 
+                    inflateSize.Width = inflateSize.Width * inflateX;
+                    inflateSize.Height = inflateSize.Height * inflateY;
+                }
                 Refresh();
             }
             Capture = false;
             Cursor.Clip = Rectangle.Empty;
             MouseIsDown = false;
-            MouseRect = Rectangle.Empty;
+            MouseRectangle = Rectangle.Empty;
 
         }
     }
