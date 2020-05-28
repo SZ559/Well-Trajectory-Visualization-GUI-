@@ -8,6 +8,7 @@ using System.Linq;
 using System.Numerics;
 using System.Windows.Forms;
 
+
 namespace Well_Trajectory_Visualization
 {
     public class PanelForProjection : Panel
@@ -187,6 +188,11 @@ namespace Well_Trajectory_Visualization
                 ReshowDelay = 100,
                 ShowAlways = true,
             };
+            Paint += new PaintEventHandler(PaintPanel);
+            MouseMove += new MouseEventHandler(Panel_MouseMove);
+            MouseDown += new MouseEventHandler(Panel_MouseDown);
+            MouseUp += new MouseEventHandler(Panel_MouseUp);
+            MouseWheel += new MouseEventHandler(Panel_MouseWheel);
 
             Paint += new PaintEventHandler(PaintPanel);
             MouseMove += new MouseEventHandler(Panel_MouseMove);
@@ -233,6 +239,7 @@ namespace Well_Trajectory_Visualization
                 float xForPaint = TrajectoryProjectionIn2D[i].X * zoomInXAxisParameter + spaceX - offsetX;
                 float yForPaint = TrajectoryProjectionIn2D[i].Y * zoomInYAxisParameter + spaceY - offsetY;
                 TrajectoryProjectionLocationOnPanel[i] = new PointF(xForPaint, yForPaint);
+
             }
             graphics.SetClip(GraphicDrawingArea);
 
@@ -541,6 +548,7 @@ namespace Well_Trajectory_Visualization
             }
             if (MouseRectangle.Height < 0)
             {
+
                 realMouseRectangleUpperLeftCornerY = MouseRectangle.Y + MouseRectangle.Height;
             }
             inflateSize.Width = Math.Abs(inflateSize.Width) * inflateX;
@@ -560,6 +568,7 @@ namespace Well_Trajectory_Visualization
         {
             return inflateSize.Height * inflateY >= 1;
         }
+
 
         private void Panel_MouseWheel(object sender, MouseEventArgs e)
         {
@@ -628,3 +637,4 @@ namespace Well_Trajectory_Visualization
 //offsetY = ((float)(inflateSize.Height + zoomDeltaOfWheel) / (float) (inflateSize.Height)) * ((float)(offsetY));
 //inflateSize.Height = inflateSize.Height + zoomDeltaOfWheel;
 //Invalidate();
+
