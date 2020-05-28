@@ -105,7 +105,33 @@ namespace Well_Trajectory_Visualization
 
         float zoomInXAxisParameter;
         float zoomInYAxisParameter;
-        
+        Single ZoomInAxisParameter
+        {
+            get
+            {
+                float zoomInAxisParameter;
+                if (currentTrajectoryInformation.MaxZOfTrajectory * (Width - leftPaddingX - rightPaddingX) > currentTrajectoryInformation.MaxXYOfTrajectory * (Height - 2 * paddingY - spaceHeightForViewName))
+                {
+                    zoomInAxisParameter = (Height - 2 * paddingY - spaceHeightForViewName) / currentTrajectoryInformation.MaxZOfTrajectory;
+                }
+                else
+                {
+                    zoomInAxisParameter = (Width - leftPaddingX - rightPaddingX) / currentTrajectoryInformation.MaxXYOfTrajectory;
+                }
+                return zoomInAxisParameter;
+            }
+        }
+
+        //Zoom through wheel
+
+        Single zoomOfWheel;
+        int spaceXMouse;
+        int spaceYMouse;
+        bool IfDrag;
+        Point beginDragLocation;
+
+
+
         ToolTip toolTipForAnnotation;
 
 
@@ -155,7 +181,11 @@ namespace Well_Trajectory_Visualization
             offsetY = 0;
             zoomIsOn = false;
             inflateSize = new SizeF(1, 1);
-           
+
+            zoomOfWheel = 0;
+            spaceXMouse = 0;
+            spaceYMouse = 0;
+
             //tool tip
             toolTipForAnnotation = new ToolTip()
             {
@@ -168,26 +198,19 @@ namespace Well_Trajectory_Visualization
             MouseMove += new MouseEventHandler(Panel_MouseMove);
             MouseDown += new MouseEventHandler(Panel_MouseDown);
             MouseUp += new MouseEventHandler(Panel_MouseUp);
+            MouseWheel += new MouseEventHandler(Panel_MouseWheel);
+
             //MouseHover += new EventHandler(Panel_MouseHover);
         }
+
         private void SetZoomInAixsPrameter()
         {
-            if (currentTrajectoryInformation.MaxZOfTrajectory * (Width - leftPaddingX - rightPaddingX) > currentTrajectoryInformation.MaxXYOfTrajectory * (Height - 2 * paddingY - spaceHeightForViewName))
-            {
-                zoomInXAxisParameter = (Height - 2 * paddingY - spaceHeightForViewName) / currentTrajectoryInformation.MaxZOfTrajectory;
-                zoomInYAxisParameter = zoomInXAxisParameter;
-
-            }
-            else
-            {
-                zoomInXAxisParameter = (Width - leftPaddingX - rightPaddingX) / currentTrajectoryInformation.MaxXYOfTrajectory;
-                zoomInYAxisParameter = zoomInXAxisParameter;
-            }
-
+            zoomInXAxisParameter = ZoomInAxisParameter;
+            zoomInYAxisParameter = ZoomInAxisParameter;
             if (zoomIsOn)
             {
-                zoomInXAxisParameter = zoomInXAxisParameter * inflateSize.Width;
-                zoomInYAxisParameter = zoomInYAxisParameter * inflateSize.Height;
+                zoomInXAxisParameter = ZoomInAxisParameter * inflateSize.Width + zoomOfWheel;
+                zoomInYAxisParameter = ZoomInAxisParameter * inflateSize.Height + zoomOfWheel;
             }
         }
 
@@ -213,11 +236,6 @@ namespace Well_Trajectory_Visualization
             int spaceX = (int)(leftPaddingX - minX * zoomInXAxisParameter);
             int spaceY = (int)(paddingY + spaceHeightForViewName - minY * zoomInYAxisParameter);
 
-            //Rectangle graphicDrawingArea = new Rectangle(leftPaddingX, paddingY + spaceHeightForViewName, this.Width - leftPaddingX - rightPaddingX, this.Height - paddingY * 2 - spaceHeightForViewName);
-            //Rectangle trajectoryDrawingArea = new Rectangle(leftPaddingX, paddingY + spaceHeightForViewName, this.Width - leftPaddingX - rightPaddingX, this.Height - paddingY * 2 - spaceHeightForViewName);
-            //trajectoryDrawingArea.Inflate(inflateSize);
-            //trajectoryDrawingArea.Offset(offsetAmount);
-
             for (int i = 0; i < TrajectoryProjectionIn2D.Count; i = i + 1)
             {
                 float xForPaint = TrajectoryProjectionIn2D[i].X * zoomInXAxisParameter + spaceX - offsetX;
@@ -225,19 +243,40 @@ namespace Well_Trajectory_Visualization
                 TrajectoryProjectionLocationOnPanel[i] = new PointF(xForPaint, yForPaint);
 
             }
-            graphics.SetClip(graphicDrawingArea, CombineMode.Replace);
+            graphics.SetClip(graphicDrawingArea);
 
-            // points limit 8517?
+            DrawPoints(graphics, TrajectoryProjectionLocationOnPanel);
+
+            HighlightPoints(graphics);
+            if (currentTrajectoryInformation.DisplayChoice.AddAnnotation)
+            {
+                DrawAnnotation(graphics);
+            }
+            if (currentTrajectoryInformation.DisplayChoice.AddSharpestPoint)
+            {
+                DrawSharpestPoint(graphics, spaceX, spaceY);
+            }
+            graphics.ResetClip();
+
+            DrawCaption(graphics);
+
+            DrawAxis(graphics, spaceX, spaceY);
+
+            graphics.Dispose();
+        }
+
+        private void DrawPoints(Graphics graphics, PointF[] points)
+        {
             using (Pen penForLine = new Pen(Color.FromArgb(204, 234, 187), 3.0F))
             {
-                for (int i = 0; i < TrajectoryProjectionLocationOnPanel.Length - 1; i = i + 1)
+                for (int i = 0; i < points.Length - 1; i = i + 1)
                 {
-                    graphics.DrawLine(penForLine, TrajectoryProjectionLocationOnPanel[i].X, TrajectoryProjectionLocationOnPanel[i].Y, TrajectoryProjectionLocationOnPanel[i + 1].X, TrajectoryProjectionLocationOnPanel[i + 1].Y);
+                    graphics.DrawLine(penForLine, points[i].X, points[i].Y, points[i + 1].X, points[i + 1].Y);
                 }
             }
-           
-
-            // highlight data points
+        }
+        private void HighlightPoints(Graphics graphics)
+        {
             using (SolidBrush brushForPoint = new SolidBrush(Color.FromArgb(63, 63, 68)))
             {
                 foreach (var location in TrajectoryProjectionLocationOnPanel)
@@ -245,41 +284,6 @@ namespace Well_Trajectory_Visualization
                     graphics.FillRectangle(brushForPoint, location.X - 1, location.Y - 1, 2, 2);
                 }
             }
-            graphics.ResetClip();
-            // draw caption
-            using (Font fontForCaption = new Font("Microsoft YaHei", 11, FontStyle.Regular, GraphicsUnit.Point))
-            {
-                Rectangle rect = new Rectangle(leftPaddingX, 0, this.Width - leftPaddingX - rightPaddingX, spaceHeightForViewName);
-
-                StringFormat stringFormat = new StringFormat();
-                stringFormat.Alignment = StringAlignment.Center;
-                stringFormat.LineAlignment = StringAlignment.Center;
-                graphics.DrawString(this.Name, fontForCaption, Brushes.Black, rect, stringFormat);
-            }
-
-            //draw axis
-            graphics = DrawAxis(graphics, spaceX, spaceY);
-
-            //draw annotation
-            if (currentTrajectoryInformation.DisplayChoice.AddAnnotation)
-            {
-                graphics = DrawAnnotation(graphics);
-            }
-          
-            
-            if (currentTrajectoryInformation.DisplayChoice.AddSharpestPoint)
-            {
-                using (SolidBrush brushForPoint = new SolidBrush(Color.Red))
-                {
-                    foreach (var sharpestPoint in sharpestPointsProjectionIn2D)
-                    {
-                        float xForPaint = sharpestPoint.X * zoomInXAxisParameter + spaceX - offsetX;
-                        float yForPaint = sharpestPoint.Y * zoomInYAxisParameter + spaceY - offsetY;
-                        graphics.FillRectangle(brushForPoint, xForPaint - 1, yForPaint - 1, 2, 2);
-                    }
-                }
-            }
-            graphics.Dispose();
         }
 
         ////Draw Axis///
@@ -384,6 +388,35 @@ namespace Well_Trajectory_Visualization
             return graphics;
         }
 
+        private void DrawSharpestPoint(Graphics graphics, int spaceX, int spaceY)
+        {
+            if (currentTrajectoryInformation.DisplayChoice.AddSharpestPoint)
+            {
+                using (SolidBrush brushForPoint = new SolidBrush(Color.Red))
+                {
+                    foreach (var sharpestPoint in sharpestPointsProjectionIn2D)
+                    {
+                        float xForPaint = sharpestPoint.X * zoomInXAxisParameter + spaceX - offsetX;
+                        float yForPaint = sharpestPoint.Y * zoomInYAxisParameter + spaceY - offsetY;
+                        graphics.FillRectangle(brushForPoint, xForPaint - 1, yForPaint - 1, 2, 2);
+                    }
+                }
+            }
+        }
+
+        private void DrawCaption(Graphics graphics)
+        {
+            using (Font fontForCaption = new Font("Microsoft YaHei", 11, FontStyle.Regular, GraphicsUnit.Point))
+            {
+                Rectangle rect = new Rectangle(leftPaddingX, 0, Width - leftPaddingX - rightPaddingX, spaceHeightForViewName);
+
+                StringFormat stringFormat = new StringFormat();
+                stringFormat.Alignment = StringAlignment.Center;
+                stringFormat.LineAlignment = StringAlignment.Center;
+                graphics.DrawString(Name, fontForCaption, Brushes.Black, rect, stringFormat);
+            }
+        }
+
         //Zoom//
         private void ResetZoom()
         {
@@ -391,6 +424,7 @@ namespace Well_Trajectory_Visualization
             offsetY = 0;
             zoomIsOn = false;
             inflateSize = new SizeF(1, 1);
+            zoomOfWheel = 0;
         }
         private void ResizeToRectangle(Point p)
         {
@@ -464,7 +498,6 @@ namespace Well_Trajectory_Visualization
                 int radius = 8;
                 if (Math.Abs(MouseRectangleArea.Width - MouseRectangle.Width) < radius && Math.Abs(MouseRectangleArea.Height - MouseRectangle.Height) < radius)
                 {
-                    MessageBox.Show("I am here");
                     ResetZoom();
                 }
                 else
@@ -485,6 +518,18 @@ namespace Well_Trajectory_Visualization
             MouseIsDown = false;
             MouseRectangle = Rectangle.Empty;
 
+        }
+
+        private void Panel_MouseWheel(object sender, MouseEventArgs e)
+        {
+            float zoomDeltaOfWheel = (float)(e.Delta / 120 * 0.01);
+
+            if (zoomOfWheel + zoomInXAxisParameter >= 0 && zoomOfWheel + zoomInYAxisParameter >= 0)
+            {
+                zoomOfWheel = zoomOfWheel + zoomDeltaOfWheel;
+            }
+
+            this.Invalidate();
         }
     }
 }
