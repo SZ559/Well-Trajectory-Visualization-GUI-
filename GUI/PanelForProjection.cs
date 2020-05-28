@@ -209,8 +209,8 @@ namespace Well_Trajectory_Visualization
             zoomInYAxisParameter = ZoomInAxisParameter;
             if (zoomIsOn)
             {
-                zoomInXAxisParameter = ZoomInAxisParameter * inflateSize.Width + zoomOfWheel;
-                zoomInYAxisParameter = ZoomInAxisParameter * inflateSize.Height + zoomOfWheel;
+                zoomInXAxisParameter = ZoomInAxisParameter * inflateSize.Width;
+                zoomInYAxisParameter = ZoomInAxisParameter * inflateSize.Height;
             }
         }
 
@@ -522,11 +522,18 @@ namespace Well_Trajectory_Visualization
 
         private void Panel_MouseWheel(object sender, MouseEventArgs e)
         {
-            float zoomDeltaOfWheel = (float)(e.Delta / 120 * 0.01);
+            float zoomDeltaOfWheel = (float)(e.Delta / 120 * 0.05);
 
-            if (zoomOfWheel + zoomInXAxisParameter >= 0 && zoomOfWheel + zoomInYAxisParameter >= 0)
+            if (zoomDeltaOfWheel + zoomInXAxisParameter >= 0 && zoomDeltaOfWheel + zoomInYAxisParameter >= 0)
             {
-                zoomOfWheel = zoomOfWheel + zoomDeltaOfWheel;
+                zoomIsOn = true;
+                float inflateX = zoomDeltaOfWheel + 1;
+                float inflateY = zoomDeltaOfWheel + 1;
+                offsetX = zoomDeltaOfWheel * (float) (e.X - graphicDrawingArea.X) + offsetX;
+                offsetY = zoomDeltaOfWheel * (float) (e.Y - graphicDrawingArea.Y) + offsetY;
+
+                inflateSize.Width = inflateSize.Width * inflateX;
+                inflateSize.Height = inflateSize.Height * inflateY;
             }
 
             this.Invalidate();
