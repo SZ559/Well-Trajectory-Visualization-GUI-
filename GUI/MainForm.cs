@@ -59,6 +59,9 @@ namespace Well_Trajectory_Visualization
             wells = new List<Well>();
             isDoubleClick = false;
 
+            KeyPreview = true;
+            KeyDown += Panel_KeyDown;
+            KeyUp += Panel_KeyUp;
         }
 
         ///////////// Menu Bar /////////////////
@@ -268,7 +271,9 @@ namespace Well_Trajectory_Visualization
             int previewTabIndex = PreviewTabIndex;
             if (previewTabIndex != -1)
             {
+                TabPage tabPage = tabControl.TabPages[previewTabIndex];
                 tabControl.TabPages.RemoveAt(previewTabIndex);
+                tabPage.Dispose();
             }
         }
 
@@ -419,8 +424,10 @@ namespace Well_Trajectory_Visualization
             int selectedTabIndex = tabControl.SelectedIndex;
             if (selectedTabIndex != -1)
             {
+                TabPage tabPage = tabControl.TabPages[selectedTabIndex];
                 tabControl.TabPages.RemoveAt(selectedTabIndex);
                 tabControl.SelectedIndex = (selectedTabIndex - 1 == -1) ? (tabControl.TabCount - 1) : (selectedTabIndex - 1);
+                tabPage.Dispose();
             }
             SwitchDefaultPage();
         }
@@ -467,6 +474,17 @@ namespace Well_Trajectory_Visualization
             {
                 tabControl.SelectedTab.Refresh();
             }
+        }
+
+        private void Panel_KeyDown(object sender, KeyEventArgs e)
+        {
+            displayChoice.ChooseRegion = e.KeyCode == Keys.ControlKey;
+
+        }
+
+        private void Panel_KeyUp(object sender, KeyEventArgs e)
+        {
+            displayChoice.ChooseRegion = false;
         }
     }
 }
