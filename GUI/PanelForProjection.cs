@@ -1,13 +1,13 @@
 ﻿using GeometricObject;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Windows.Forms;
 using System;
+using System.Collections.Generic;
+using System.ComponentModel;
 using System.Data;
+using System.Drawing;
 using System.Linq;
 using System.Numerics;
-using System.ComponentModel;
-using System.Drawing.Drawing2D;
+using System.Windows.Forms;
+
 
 namespace Well_Trajectory_Visualization
 {
@@ -84,7 +84,7 @@ namespace Well_Trajectory_Visualization
         private SizeF inflateSize;
         private float offsetX;
         private float offsetY;
-        public Rectangle graphicDrawingArea
+        public Rectangle GraphicDrawingArea
         {
             get
             {
@@ -96,16 +96,15 @@ namespace Well_Trajectory_Visualization
         {
             get
             {
-                return Rectangle.Inflate(graphicDrawingArea, 8, 8);
+                return Rectangle.Inflate(GraphicDrawingArea, 8, 8);
             }
         }
-        bool MouseIsDown = false;
+
+        bool isChoosingRegion = false;
         Rectangle MouseRectangle = Rectangle.Empty;
         bool zoomIsOn;
         float zoomInXAxisParameter;
         float zoomInYAxisParameter;
-
-        //Zoom through wheel
         bool isDrag;
         Point beginDragLocation;
 
@@ -157,7 +156,6 @@ namespace Well_Trajectory_Visualization
             minY = TrajectoryProjectionIn2D.Select(x => x.Y).Min();
 
             //Initialize drawing property
-
             numberOfDataInAxisX = 5;
             numberOfDataInAxisY = 10;
             spaceHeightForViewName = 25;
@@ -171,13 +169,11 @@ namespace Well_Trajectory_Visualization
             rightPaddingX = segementLength / 2 + marginAxis + widthOfAxisName + 5;
             paddingY = segementLength * 3 / 2 + marginAxis + Math.Max(heightOfAxisName, heightOfCoordinate) + 5;
 
-            //zooms
+            //zoom and drag
             offsetX = 0;
             offsetY = 0;
             zoomIsOn = false;
             inflateSize = new SizeF(1, 1);
-
-            //drag
             isDrag = false;
 
             //tool tip
@@ -188,13 +184,12 @@ namespace Well_Trajectory_Visualization
                 ReshowDelay = 100,
                 ShowAlways = true,
             };
+
             Paint += new PaintEventHandler(PaintPanel);
             MouseMove += new MouseEventHandler(Panel_MouseMove);
             MouseDown += new MouseEventHandler(Panel_MouseDown);
             MouseUp += new MouseEventHandler(Panel_MouseUp);
             MouseWheel += new MouseEventHandler(Panel_MouseWheel);
-
-            //MouseHover += new EventHandler(Panel_MouseHover);
         }
 
         private void SetZoomInAixsPrameter()
@@ -233,7 +228,7 @@ namespace Well_Trajectory_Visualization
                 TrajectoryProjectionLocationOnPanel[i] = new PointF(xForPaint, yForPaint);
 
             }
-            graphics.SetClip(graphicDrawingArea);
+            graphics.SetClip(GraphicDrawingArea);
 
             DrawPoints(graphics, TrajectoryProjectionLocationOnPanel);
 
@@ -355,7 +350,6 @@ namespace Well_Trajectory_Visualization
 
         }
 
-
         /// Draw Annotation////
         private void DrawAnnotation(Graphics graphics)
         {
@@ -407,7 +401,7 @@ namespace Well_Trajectory_Visualization
         }
 
         //Zoom//
-        private void ResetZoom()
+        private void Reset()
         {
             offsetX = 0;
             offsetY = 0;
@@ -417,7 +411,7 @@ namespace Well_Trajectory_Visualization
 
         private void ResizeToRectangle(Point p)
         {
-            DrawRectangle();    
+            DrawRectangle();
             MouseRectangle.Width = p.X - MouseRectangle.Left;
             MouseRectangle.Height = p.Y - MouseRectangle.Top;
             DrawRectangle();
@@ -427,7 +421,9 @@ namespace Well_Trajectory_Visualization
         {
             Rectangle rect = this.RectangleToScreen(MouseRectangle);
             Color color = Color.Green;
-            if (MouseRectangle.Width != 0 && Math.Round(((float) MouseRectangle.Height / (float) MouseRectangle.Width), 1) == Math.Round(((float) graphicDrawingArea.Height / (float) graphicDrawingArea.Width), 1))
+            double aspectRatioOfMouseRectangle = Math.Abs(Math.Round(((float)MouseRectangle.Height / (float)MouseRectangle.Width), 1));
+            double aspectRatioOfGraphicDrawingArea = Math.Round(((float)GraphicDrawingArea.Height / (float)GraphicDrawingArea.Width), 1);
+            if (MouseRectangle.Width != 0 && aspectRatioOfMouseRectangle == aspectRatioOfGraphicDrawingArea)
             {
                 color = Color.Brown;
             }
@@ -448,7 +444,7 @@ namespace Well_Trajectory_Visualization
             {
                 if (MouseRectangleArea.Contains(e.Location))
                 {
-                    MouseIsDown = true;
+                    isChoosingRegion = true;
                     DrawRectangle();
                     DrawStart(e.Location);
                 }
@@ -460,28 +456,24 @@ namespace Well_Trajectory_Visualization
             }
         }
 
-
         private void Panel_MouseMove(object sender, MouseEventArgs e)
         {
             if (isDrag)
             {
                 offsetX = offsetX + (beginDragLocation.X - e.X);
                 offsetY = offsetY + (beginDragLocation.Y - e.Y);
-
                 beginDragLocation.X = e.X;
                 beginDragLocation.Y = e.Y;
-
-                this.Invalidate();
+                Invalidate();
             }
-            else if (MouseIsDown)
+            else if (isChoosingRegion)
             {
                 ResizeToRectangle(e.Location);
             }
             else
             {
                 string tip = "";
-                int radius = 4;
-                int index = 0;
+                int radius = 4, index = 0;
                 foreach (var location in TrajectoryProjectionLocationOnPanel)
                 {
                     if ((Math.Abs(e.X - location.X) < radius) &&
@@ -499,70 +491,85 @@ namespace Well_Trajectory_Visualization
             }
         }
 
+
         private void Panel_MouseUp(object sender, MouseEventArgs e)
         {
             if (isDrag)
             {
                 isDrag = false;
             }
-            else
+            else if (isChoosingRegion)
             {
-                DrawRectangle();
                 if (MouseRectangle.Width != 0 && MouseRectangle.Height != 0)
                 {
+                    DrawRectangle();
                     int radius = 8;
-                    if (Math.Abs(MouseRectangleArea.Width - MouseRectangle.Width) < radius && Math.Abs(MouseRectangleArea.Height - MouseRectangle.Height) < radius)
+                    if (Math.Abs(MouseRectangleArea.Width - Math.Abs(MouseRectangle.Width)) < radius && Math.Abs(MouseRectangleArea.Height - Math.Abs(MouseRectangle.Height)) < radius)
                     {
-                        ResetZoom();
+                        Reset();
                         Refresh();
                     }
                     else
                     {
-                        zoomIsOn = true;
-                        float inflateX = ((float)graphicDrawingArea.Width / ((float)MouseRectangle.Width));
-                        float inflateY = ((float)graphicDrawingArea.Height / ((float)MouseRectangle.Height));
-
-                        if (ValidateInflateWidth(inflateX) && ValidateInflateHeight(inflateY))
-                        {
-                            inflateSize.Width = inflateSize.Width * inflateX;
-                            offsetX = (MouseRectangle.X - graphicDrawingArea.X + offsetX) * inflateX;
-                            inflateSize.Height = inflateSize.Height * inflateY;
-                            offsetY = (MouseRectangle.Y - graphicDrawingArea.Y + offsetY) * inflateY;
-                            Refresh();
-                        }
+                        UpdateOffsetAndInflateAfterChoosingZoomRegion();
                     }
                 }
                 Capture = false;
                 Cursor.Clip = Rectangle.Empty;
-                MouseIsDown = false;
+                isChoosingRegion = false;
                 MouseRectangle = Rectangle.Empty;
             }
         }
 
-        private bool ValidateInflateWidth(float inflateX)
+        private void UpdateOffsetAndInflateAfterChoosingZoomRegion()
+        {
+            zoomIsOn = true;
+            float inflateX = ((float)GraphicDrawingArea.Width / ((float)Math.Abs(MouseRectangle.Width)));
+            float inflateY = ((float)GraphicDrawingArea.Height / ((float)Math.Abs(MouseRectangle.Height)));
+            float realMouseRectangleUpperLeftCornerX = MouseRectangle.X;
+            float realMouseRectangleUpperLeftCornerY = MouseRectangle.Y;
+
+            if (MouseRectangle.Width < 0)
+            {
+                realMouseRectangleUpperLeftCornerX = MouseRectangle.X + MouseRectangle.Width;
+            }
+            if (MouseRectangle.Height < 0)
+            {
+
+                realMouseRectangleUpperLeftCornerY = MouseRectangle.Y + MouseRectangle.Height;
+            }
+            inflateSize.Width = Math.Abs(inflateSize.Width) * inflateX;
+            offsetX = (realMouseRectangleUpperLeftCornerX - GraphicDrawingArea.X + offsetX) * inflateX;
+            inflateSize.Height = Math.Abs(inflateSize.Height) * inflateY;
+            offsetY = (realMouseRectangleUpperLeftCornerY - GraphicDrawingArea.Y + offsetY) * inflateY;
+            Invalidate();
+        }
+
+        //need to improve
+        private bool ValidInflateWidth(float inflateX)
         {
             return inflateSize.Width * inflateX >= 1;
         }
-
-        private bool ValidateInflateHeight(float inflateY)
+        //need to improve
+        private bool ValidInflateHeight(float inflateY)
         {
             return inflateSize.Height * inflateY >= 1;
         }
 
+
         private void Panel_MouseWheel(object sender, MouseEventArgs e)
         {
             float zoomDeltaOfWheel = (float)(e.Delta / 120 * 0.01);
-
-            if (zoomDeltaOfWheel + zoomInXAxisParameter >= 0 && zoomDeltaOfWheel + zoomInYAxisParameter >= 0)
+            float inflateX = zoomDeltaOfWheel + 1;
+            float inflateY = zoomDeltaOfWheel + 1;
+            if (inflateX * inflateSize.Width >= 0 && inflateY * inflateSize.Height >= 0)
             {
-                zoomIsOn = true;
-                float inflateX = zoomDeltaOfWheel + 1;
-                float inflateY = zoomDeltaOfWheel + 1;
-                if (ValidateInflateWidth(inflateX) && ValidateInflateHeight(inflateY))
+                if (ValidInflateWidth(inflateX) || ValidInflateHeight(inflateY))
                 {
-                    offsetX = zoomDeltaOfWheel * (float)(e.X - graphicDrawingArea.X) + offsetX;
+                    zoomIsOn = true;
+                    offsetX = inflateX * (e.X + offsetX - leftPaddingX) + leftPaddingX - e.X;
                     inflateSize.Width = inflateSize.Width * inflateX;
-                    offsetY = zoomDeltaOfWheel * (float)(e.Y - graphicDrawingArea.Y) + offsetY;
+                    offsetY = inflateY * (e.Y + offsetY - (paddingY + spaceHeightForViewName)) + (paddingY + spaceHeightForViewName) - e.Y;
                     inflateSize.Height = inflateSize.Height * inflateY;
                     Invalidate();
                 }
@@ -592,3 +599,23 @@ namespace Well_Trajectory_Visualization
 //        toolTipForAnnotation.SetToolTip(this, tip);
 //    }
 //}
+//private bool DisplayAllDataPoints()
+//{
+//    int spaceX = (int)(leftPaddingX - minX * zoomInXAxisParameter);
+//    int spaceY = (int)(paddingY + spaceHeightForViewName - minY * zoomInYAxisParameter);
+//    int minXLocation = (int)(minX * zoomInXAxisParameter + spaceX - offsetX);
+//    int minYLocation = (int)(minY * zoomInYAxisParameter + spaceY - offsetY);
+//    int maxXLocation = (int)(maxX * zoomInXAxisParameter + spaceX - offsetX);
+//    int maxYLocation = (int)(maxY * zoomInYAxisParameter + spaceY - offsetY);
+//    Point upperLeftCornerPoint = new Point(minXLocation, minYLocation);
+//    Point lowerRightCornerPoint = new Point(maxXLocation, maxYLocation);
+
+//    return GraphicDrawingArea.Contains(upperLeftCornerPoint) && GraphicDrawingArea.Contains(lowerRightCornerPoint);
+//}
+//zoomIsOn = true;
+//offsetX = ((float)(inflateSize.Width + zoomDeltaOfWheel) / (float) (inflateSize.Width)) * ((float)(offsetX));
+//inflateSize.Width = inflateSize.Width + zoomDeltaOfWheel;
+//offsetY = ((float)(inflateSize.Height + zoomDeltaOfWheel) / (float) (inflateSize.Height)) * ((float)(offsetY));
+//inflateSize.Height = inflateSize.Height + zoomDeltaOfWheel;
+//Invalidate();
+
