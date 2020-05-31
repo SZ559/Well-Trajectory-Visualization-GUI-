@@ -36,7 +36,7 @@ namespace Well_Trajectory_Visualization
         {
             get
             {
-                return CurrentTrajectory.Unit;
+                return CurrentTrajectory.UnitInUse;
             }
             set
             {
@@ -64,7 +64,7 @@ namespace Well_Trajectory_Visualization
             get
             {
                 string unitForCaption;
-                switch (CurrentTrajectory.Unit)
+                switch (CurrentTrajectory.UnitInUse)
                 {
                     case DistanceUnit.Meter:
                         unitForCaption = "m";
@@ -82,20 +82,20 @@ namespace Well_Trajectory_Visualization
         {
             this.currentTrajectory = currentTrajectory;
             DisplayChoice = displayChoice;
-            SharpestPoint = GetSharpestPointIndex(currentTrajectory.PolyLineNodes);
+            SharpestPoint = GetSharpestPointIndex(CurrentTrajectory);
             MaxXYOfTrajectory = GetMaxXYOfTrajectory();
             MaxZOfTrajectory = GetMaxZOfTrajectory();
         }
 
         private void OnPropertyChanged()
         {
-            SharpestPoint = GetSharpestPointIndex(currentTrajectory.PolyLineNodes);
+            SharpestPoint = GetSharpestPointIndex(CurrentTrajectory);
             MaxXYOfTrajectory = GetMaxXYOfTrajectory();
             MaxZOfTrajectory = GetMaxZOfTrajectory();
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(""));
         }
 
-        private List<Vector3> GetSharpestPointIndex(List<Vector3> currentTrajectory)
+        private List<Vector3> GetSharpestPointIndex(Trajectory currentTrajectory)
         {
             double lengthOfVector1, lengthOfVector2, dotProduct;
             Vector3 vector1, vector2;
@@ -104,7 +104,7 @@ namespace Well_Trajectory_Visualization
             int indexPreventOverlaping_Vector1 = 0;
 
             List<Vector3> maxCurvaturePointIndex = new List<Vector3>();
-            for (int i = 1; i < currentTrajectory.Count - 1; i = i + 1)
+            for (int i = 1; i < currentTrajectory.PolyLineNodes.Count - 1; i = i + 1)
             {
 
                 vector1 = Vector3.Subtract(currentTrajectory[i - indexPreventOverlaping_Vector1 - 1], currentTrajectory[i]);

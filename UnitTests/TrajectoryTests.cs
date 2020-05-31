@@ -15,8 +15,8 @@ namespace TrajectoryTest
             var expected = new List<Vector3>();
             var expectectedPoint = new Vector3(1, 1, 1);
             expected.Add(expectectedPoint);
-            trajectory.PolyLineNodes.Add(expectectedPoint);
-            var actual = trajectory.PolyLineNodes;
+            trajectory.polyLineNodes.Add(expectectedPoint);
+            var actual = trajectory.polyLineNodes;
             Assert.Equal(expected, actual);
         }
 
@@ -27,8 +27,8 @@ namespace TrajectoryTest
             var expected = new List<Vector3>();
             var expectectedPolyLineNode = new Vector3(1, 1, 1);
             expected.Add(expectectedPolyLineNode);
-            trajectory.PolyLineNodes = expected;
-            var actual = trajectory.PolyLineNodes;
+            trajectory.polyLineNodes = expected;
+            var actual = trajectory.polyLineNodes;
             Assert.Equal(expected, actual);
         }
     }
@@ -131,7 +131,7 @@ namespace TrajectoryTest
         public void InitializeEmptyPolyLineNodes()
         {
             var expected = new List<Vector3>();
-            var actual = trajectory.PolyLineNodes;
+            var actual = trajectory.polyLineNodes;
             Assert.Equal(expected, actual);
         }
     }
@@ -146,7 +146,7 @@ namespace TrajectoryTest
             var expectedPolyLineNode = new Vector3(1, 1, 1);
             expectedPolyLineNodes.Add(expectedPolyLineNode);
             trajectory.AddNode(expectedPolyLineNode);
-            var actualPolyLineNodes = trajectory.PolyLineNodes;
+            var actualPolyLineNodes = trajectory.polyLineNodes;
 
             Assert.Equal(expectedPolyLineNodes, actualPolyLineNodes);
         }
@@ -158,7 +158,7 @@ namespace TrajectoryTest
             var expectedPolyLineNode = new Vector3(1, 1, 1);
             expectedPolyLineNodes.Add(expectedPolyLineNode);
             trajectory.AddNode(expectedPolyLineNode.X, expectedPolyLineNode.Y, expectedPolyLineNode.Z);
-            var actualPolyLineNodes = trajectory.PolyLineNodes;
+            var actualPolyLineNodes = trajectory.polyLineNodes;
             Assert.Equal(expectedPolyLineNodes, actualPolyLineNodes);
         }
     }
