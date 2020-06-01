@@ -303,7 +303,6 @@ namespace Well_Trajectory_Visualization
                 // draw number in axis
                 float widthOfAxis = upperRightAxisPoint.X - upperLeftAxisPoint.X;
                 float heightOfAxis = lowerLeftAxisPoint.Y - upperLeftAxisPoint.Y;
-
                 // x-axis
                 StringFormat xAxisNumberFormat = new StringFormat();
                 xAxisNumberFormat.Alignment = StringAlignment.Center;
@@ -311,14 +310,13 @@ namespace Well_Trajectory_Visualization
                 float MinCoordinateXInReal = (int)((upperLeftAxisPoint.X - spaceX + offsetX) / zoomInXAxisParameter) + 1.0F;
                 float MaxCoordinateXInReal = (upperRightAxisPoint.X - spaceX + offsetX) / zoomInXAxisParameter;
                 int deltaCoordinateX = (int)((MaxCoordinateXInReal - MinCoordinateXInReal) / numberOfDataInAxisX);
-                for (var coordinateXInReal = MinCoordinateXInReal; coordinateXInReal <= MaxCoordinateXInReal; coordinateXInReal += deltaCoordinateX)
+                for (var coordinateXInReal = MinCoordinateXInReal; coordinateXInReal <= MaxCoordinateXInReal; coordinateXInReal += deltaCoordinateX + 1)
                 {
                     float coordinateX = coordinateXInReal * zoomInXAxisParameter + spaceX - offsetX;
                     Rectangle rectangleForNumberInAxisX = new Rectangle((int)(coordinateX - widthOfCoordinate / 2), (int)(upperLeftAxisPoint.Y - segementLength * 3 / 2 - heightOfCoordinate), widthOfCoordinate, heightOfCoordinate);
                     graphics.DrawLine(penForAxis, coordinateX, upperLeftAxisPoint.Y, coordinateX, upperLeftAxisPoint.Y - segementLength);
                     graphics.DrawString(coordinateXInReal.ToString(), textFont, Brushes.Black, rectangleForNumberInAxisX, xAxisNumberFormat);
                 }
-
                 // y-axis
                 StringFormat yAxisNumberFormat = new StringFormat();
                 yAxisNumberFormat.Alignment = StringAlignment.Far;
@@ -326,7 +324,7 @@ namespace Well_Trajectory_Visualization
                 float MinCoordinateYInReal = (int)((upperLeftAxisPoint.Y - spaceY + offsetY) / zoomInYAxisParameter) + 1.0F;
                 float MaxCoordinateYInReal = (lowerLeftAxisPoint.Y - spaceY + offsetY) / zoomInYAxisParameter;
                 int deltaCoordinateY = (int)((MaxCoordinateYInReal - MinCoordinateYInReal) / numberOfDataInAxisY);
-                for( var coordinateYInReal = MinCoordinateYInReal; coordinateYInReal <= MaxCoordinateYInReal; coordinateYInReal += deltaCoordinateY)
+                for( var coordinateYInReal = MinCoordinateYInReal; coordinateYInReal <= MaxCoordinateYInReal; coordinateYInReal += deltaCoordinateY + 1)
                 {
                     float coordinateY = coordinateYInReal * zoomInYAxisParameter + spaceY - offsetY;
                     Rectangle rectangleForNumberInAxisY = new Rectangle((int)(upperLeftAxisPoint.X - segementLength * 3 / 2 - widthOfCoordinate), (int)(coordinateY - heightOfCoordinate / 2), widthOfCoordinate, heightOfCoordinate);
