@@ -8,17 +8,24 @@ using System.ComponentModel;
 
 namespace Well_Trajectory_Visualization
 {
-    public class CurrentTrajectoryInformation
+    public class TrajectoryInformation
     {
         private Trajectory currentTrajectory;
 
         public event PropertyChangedEventHandler PropertyChanged;
 
+        /*
         public DisplayChoice DisplayChoice
         {
             get; set;
         }
-
+        */
+        /*
+        public ZoomInformationOfView ZoomInformation
+        {
+            get; set;
+        }
+        */
         public Trajectory CurrentTrajectory
         {
             get
@@ -44,17 +51,21 @@ namespace Well_Trajectory_Visualization
             }
         }
 
-        public List<Vector3> SharpestPoint 
+        public List<int> SharpestPointIndex
         { 
             get; private set; 
         }
 
-        public float MaxXYOfTrajectory 
+        public float DifferenceInXOfTrajectory 
         { 
             get; private set; 
         }
+        public float DifferenceInYOfTrajectory
+        {
+            get; private set;
+        }
 
-        public float MaxZOfTrajectory 
+        public float DifferenceInZOfTrajectory 
         { 
             get; private set; 
         }
@@ -78,24 +89,26 @@ namespace Well_Trajectory_Visualization
             }
         }
 
-        public CurrentTrajectoryInformation(Trajectory currentTrajectory, DisplayChoice displayChoice)
+        public TrajectoryInformation(Trajectory currentTrajectory)
         {
             this.currentTrajectory = currentTrajectory;
-            DisplayChoice = displayChoice;
-            SharpestPoint = GetSharpestPointIndex(CurrentTrajectory);
-            MaxXYOfTrajectory = GetMaxXYOfTrajectory();
-            MaxZOfTrajectory = GetMaxZOfTrajectory();
+            SharpestPointIndex = GetSharpestPointIndex(CurrentTrajectory);
+            DifferenceInXOfTrajectory = GetDifferenceInXOfTrajectory();
+            DifferenceInYOfTrajectory = GetDifferenceInYOfTrajectory();
+            DifferenceInZOfTrajectory = GetDifferenceInZOfTrajectory();
+            //ZoomInformation = new ZoomInformationOfView();
         }
 
         private void OnPropertyChanged()
         {
-            SharpestPoint = GetSharpestPointIndex(CurrentTrajectory);
-            MaxXYOfTrajectory = GetMaxXYOfTrajectory();
-            MaxZOfTrajectory = GetMaxZOfTrajectory();
+            SharpestPointIndex = GetSharpestPointIndex(CurrentTrajectory);
+            DifferenceInXOfTrajectory = GetDifferenceInXOfTrajectory();
+            DifferenceInYOfTrajectory = GetDifferenceInYOfTrajectory();
+            DifferenceInZOfTrajectory = GetDifferenceInZOfTrajectory();
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(""));
         }
 
-        private List<Vector3> GetSharpestPointIndex(Trajectory currentTrajectory)
+        private List<int> GetSharpestPointIndex(Trajectory currentTrajectory)
         {
             double lengthOfVector1, lengthOfVector2, dotProduct;
             Vector3 vector1, vector2;
@@ -103,7 +116,7 @@ namespace Well_Trajectory_Visualization
             double radian;
             int indexPreventOverlaping_Vector1 = 0;
 
-            List<Vector3> maxCurvaturePointIndex = new List<Vector3>();
+            List<int> maxCurvaturePointIndex = new List<int>();
             for (int i = 1; i < currentTrajectory.PolyLineNodes.Count - 1; i = i + 1)
             {
 
@@ -132,11 +145,11 @@ namespace Well_Trajectory_Visualization
                     {
                         maxCurvature = radian;
                         maxCurvaturePointIndex.Clear();
-                        maxCurvaturePointIndex.Add(currentTrajectory[i]);
+                        maxCurvaturePointIndex.Add(i);
                     }
                     else if (maxCurvature == radian)
                     {
-                        maxCurvaturePointIndex.Add(currentTrajectory[i]);
+                        maxCurvaturePointIndex.Add(i);
                     }
                     indexPreventOverlaping_Vector1 = 0;
                 }
@@ -148,19 +161,25 @@ namespace Well_Trajectory_Visualization
             return maxCurvaturePointIndex;
         }
 
-        private Single GetMaxXYOfTrajectory()
+        private Single GetDifferenceInXOfTrajectory()
         {
-            Single zoomXY;
+            Single zoomX;
             Single maxX = CurrentTrajectory.PolyLineNodes.Select(x => x.X).Max();
-            Single maxY = CurrentTrajectory.PolyLineNodes.Select(x => x.Y).Max();
             Single minX = CurrentTrajectory.PolyLineNodes.Select(x => x.X).Min();
-            Single minY = CurrentTrajectory.PolyLineNodes.Select(x => x.Y).Min();
-
-            zoomXY = Math.Max(maxX - minX, maxY - minY);
-            return zoomXY > 0 ? zoomXY : 1;
+            zoomX = maxX - minX;
+            return zoomX > 0 ? zoomX : 1;
         }
 
-        private Single GetMaxZOfTrajectory()
+        private Single GetDifferenceInYOfTrajectory()
+        {
+            Single zoomY;
+            Single maxY = CurrentTrajectory.PolyLineNodes.Select(x => x.Y).Max();
+            Single minY = CurrentTrajectory.PolyLineNodes.Select(x => x.Y).Min();
+            zoomY = maxY - minY;
+            return zoomY > 0 ? zoomY : 1;
+        }
+
+        private Single GetDifferenceInZOfTrajectory()
         {
             Single zoomZ;
             Single maxZ = CurrentTrajectory.PolyLineNodes.Select(x => x.Z).Max();
