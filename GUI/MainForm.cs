@@ -288,14 +288,16 @@ namespace Well_Trajectory_Visualization
                 Tag = isDoubleClick // opened or preview : true means opened
             };
 
-            TableLayoutPanel tableLayoutPanel = InitializeTableLayoutPanelForTabPage(trajectory);
+            //TableLayoutPanel tableLayoutPanel = InitializeTableLayoutPanelForTabPage(trajectory);
+            TableLayoutPanelForProjection tableLayoutPanel = new TableLayoutPanelForProjection(new TrajectoryInformation(trajectory), displayChoice);
+            tableLayoutPanel.AddThreeViewPanelForProjectionOnly();
             tabPage.Controls.Add(tableLayoutPanel);
             tabControl.TabPages.Add(tabPage);
             tabControl.SelectedTab = tabPage;
         }
 
         ///////////// Panels inside Tab Page //////////////////
-
+        /*
         private TableLayoutPanel InitializeTableLayoutPanelForTabPage(Trajectory trajectory)
         {
             TableLayoutPanel tableLayoutPanel = new TableLayoutPanel
@@ -306,7 +308,7 @@ namespace Well_Trajectory_Visualization
                 ColumnCount = 3,
                 AutoScroll = true,
                 Dock = DockStyle.Fill,
-                Tag = new CurrentTrajectoryInformation(trajectory, displayChoice),
+                Tag = new TrajectoryInformation(trajectory, displayChoice),
             };
             tableLayoutPanel.SuspendLayout();
             tableLayoutPanel.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 33));
@@ -320,9 +322,9 @@ namespace Well_Trajectory_Visualization
         private void AddViewPanelForTableLayoutPanel(TableLayoutPanel tableLayoutPanel)
         {
 
-            PanelForProjection mainViewPanel = new PanelForProjection(Vector3.UnitY, (CurrentTrajectoryInformation)tableLayoutPanel.Tag);
-            PanelForProjection leftViewPanel = new PanelForProjection(Vector3.UnitX, (CurrentTrajectoryInformation)tableLayoutPanel.Tag);
-            PanelForProjection topViewPanel = new PanelForProjection(Vector3.UnitZ, (CurrentTrajectoryInformation)tableLayoutPanel.Tag);
+            PanelForProjection mainViewPanel = new PanelForProjection(Vector3.UnitY, (TrajectoryInformation)tableLayoutPanel.Tag);
+            PanelForProjection leftViewPanel = new PanelForProjection(Vector3.UnitX, (TrajectoryInformation)tableLayoutPanel.Tag);
+            PanelForProjection topViewPanel = new PanelForProjection(Vector3.UnitZ, (TrajectoryInformation)tableLayoutPanel.Tag);
 
             tableLayoutPanel.SuspendLayout();
             tableLayoutPanel.Controls.Add(mainViewPanel, 0, 0);
@@ -330,7 +332,7 @@ namespace Well_Trajectory_Visualization
             tableLayoutPanel.Controls.Add(topViewPanel, 2, 0);
             tableLayoutPanel.ResumeLayout();
         }
-
+        */
         /////////// Draw Tab Page Header //////////////////
 
         private string GetHeaderTextForTabPage(string wellName, string trajectoryName)
@@ -450,8 +452,8 @@ namespace Well_Trajectory_Visualization
         {
             if (tabControl.SelectedTab != null)
             {
-                TableLayoutPanel tableLayoutPanel = (TableLayoutPanel)tabControl.SelectedTab.Controls[0];
-                ((CurrentTrajectoryInformation)tableLayoutPanel.Tag).Unit = DistanceUnit.Meter;
+                TableLayoutPanelForProjection tableLayoutPanel = (TableLayoutPanelForProjection)tabControl.SelectedTab.Controls[0];
+                tableLayoutPanel.CurrentTrajectoryInformation.Unit = DistanceUnit.Meter;
                 tabControl.SelectedTab.Refresh();
             }
         }
@@ -460,9 +462,8 @@ namespace Well_Trajectory_Visualization
         {
             if (tabControl.SelectedTab != null)
             {
-                TableLayoutPanel tableLayoutPanel = (TableLayoutPanel)tabControl.SelectedTab.Controls[0];
-                ((CurrentTrajectoryInformation)tableLayoutPanel.Tag).Unit = DistanceUnit.Feet;
-
+                TableLayoutPanelForProjection tableLayoutPanel = (TableLayoutPanelForProjection)tabControl.SelectedTab.Controls[0];
+                tableLayoutPanel.CurrentTrajectoryInformation.Unit = DistanceUnit.Feet;
                 tabControl.SelectedTab.Refresh();
             }
         }
@@ -485,6 +486,15 @@ namespace Well_Trajectory_Visualization
         private void Panel_KeyUp(object sender, KeyEventArgs e)
         {
             displayChoice.ChooseRegion = false;
+        }
+
+        private void ResetToolStripButton_Click(object sender, EventArgs e)
+        {
+            if (tabControl.SelectedTab != null)
+            {
+                ((TableLayoutPanelForProjection)tabControl.SelectedTab.Controls[0]).ResetZoom();
+                tabControl.SelectedTab.Refresh();
+            }
         }
     }
 }
