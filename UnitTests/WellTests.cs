@@ -144,7 +144,7 @@ namespace WellTest
         {
             var expectedTrajectories = new List<Trajectory>();
             Trajectory trajectory1 = new Trajectory("source", "wellName", "trajectoryName");
-            trajectory1.PolyLineNodes.Add(new Vector3(1, 1, 1));
+            trajectory1.polyLineNodes.Add(new Vector3(1, 1, 1));
             expectedTrajectories.Add(trajectory1);
             well.AddTrajectory(trajectory1);
             var actualTrajectories = well.Trajectories;
