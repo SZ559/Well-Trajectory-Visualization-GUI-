@@ -52,6 +52,7 @@
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
             this.toolStripButton1 = new System.Windows.Forms.ToolStripButton();
             this.saveToolStripButton = new System.Windows.Forms.ToolStripButton();
+            this.resetToolStripButton = new System.Windows.Forms.ToolStripButton();
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
             this.wellsTreeView = new System.Windows.Forms.TreeView();
@@ -70,7 +71,6 @@
             this.tabControl = new System.Windows.Forms.TabControl();
             this.openFileDialog = new System.Windows.Forms.OpenFileDialog();
             this.saveFileDialog = new System.Windows.Forms.SaveFileDialog();
-            this.resetToolStripButton = new System.Windows.Forms.ToolStripButton();
             this.menuStrip1.SuspendLayout();
             this.toolStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
@@ -273,6 +273,17 @@
             this.saveToolStripButton.Size = new System.Drawing.Size(23, 22);
             this.saveToolStripButton.Text = "toolStripButton2";
             this.saveToolStripButton.Click += new System.EventHandler(this.SaveViewOnTabPage);
+            // 
+            // resetToolStripButton
+            // 
+            this.resetToolStripButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.resetToolStripButton.Image = ((System.Drawing.Image)(resources.GetObject("resetToolStripButton.Image")));
+            this.resetToolStripButton.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
+            this.resetToolStripButton.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.resetToolStripButton.Name = "resetToolStripButton";
+            this.resetToolStripButton.Size = new System.Drawing.Size(23, 22);
+            this.resetToolStripButton.Text = "toolStripButton2";
+            this.resetToolStripButton.Click += new System.EventHandler(this.ResetToolStripButton_Click);
             // 
             // statusStrip1
             // 
@@ -503,17 +514,6 @@
             // saveFileDialog
             // 
             this.saveFileDialog.Filter = "Bitmap Files|*.bmp|JPEG Files|*.jpeg|PNG Files|*.png";
-            // 
-            // resetToolStripButton
-            // 
-            this.resetToolStripButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.resetToolStripButton.Image = ((System.Drawing.Image)(resources.GetObject("resetToolStripButton.Image")));
-            this.resetToolStripButton.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
-            this.resetToolStripButton.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.resetToolStripButton.Name = "resetToolStripButton";
-            this.resetToolStripButton.Size = new System.Drawing.Size(23, 22);
-            this.resetToolStripButton.Text = "toolStripButton2";
-            this.resetToolStripButton.Click += new System.EventHandler(this.ResetToolStripButton_Click);
             // 
             // MainForm
             // 
