@@ -319,7 +319,6 @@ namespace Well_Trajectory_Visualization
                     graphics.DrawString(coordinateXInReal.ToString(), textFont, Brushes.Black, rectangleForNumberInAxisX, xAxisNumberFormat);
                 }
 
-
                 // y-axis
                 StringFormat yAxisNumberFormat = new StringFormat();
                 yAxisNumberFormat.Alignment = StringAlignment.Far;
@@ -335,7 +334,6 @@ namespace Well_Trajectory_Visualization
                     graphics.DrawString((Math.Round(coordinateYInReal, 0)).ToString(), textFont, Brushes.Black, rectangleForNumberInAxisY, yAxisNumberFormat);
                 }
             }
-
         }
 
 
@@ -431,13 +429,9 @@ namespace Well_Trajectory_Visualization
         {
             Rectangle rect = this.RectangleToScreen(MouseRectangle);
             Color color = Color.Green;
-<<<<<<< HEAD
             double aspectRatioOfMouseRectangle = Math.Abs(Math.Round(((float)MouseRectangle.Height / (float)MouseRectangle.Width), 2));
             double aspectRatioOfGraphicDrawingArea = Math.Round(((float)GraphicDrawingArea.Height / (float)GraphicDrawingArea.Width), 2);
             if (MouseRectangle.Width != 0 && aspectRatioOfMouseRectangle == aspectRatioOfGraphicDrawingArea)
-=======
-            if (MouseRectangle.Width != 0 && Math.Round(((float)MouseRectangle.Height / (float)MouseRectangle.Width), 1) == Math.Round(((float)graphicDrawingArea.Height / (float)graphicDrawingArea.Width), 1))
->>>>>>> e67f449a592f3b96a4882e467cb40a8cda765893
             {
                 color = Color.Brown;
             }
