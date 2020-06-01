@@ -308,52 +308,32 @@ namespace Well_Trajectory_Visualization
                 StringFormat xAxisNumberFormat = new StringFormat();
                 xAxisNumberFormat.Alignment = StringAlignment.Center;
 
-                //int powerOfScientificNotionForXAxis = Math.Round(Math.Max(Math.Abs((upperLeftAxisPoint.X - spaceX) / zoomInAxisParameter), Math.Abs((upperRightAxisPoint.X - spaceX) / zoomInAxisParameter))).ToString().Length - 1;
-                //double divisorX = powerOfScientificNotionForXAxis >= 4 ? Math.Pow(10, powerOfScientificNotionForXAxis) : 1;
-                //string notionForXAxis = "";
-                //if (divisorX != 1)
-                //{
-                //    notionForXAxis += "E+" + powerOfScientificNotionForXAxis.ToString();
-                //}
-
-                float coordinateX = upperLeftAxisPoint.X;
-                while (coordinateX <= upperRightAxisPoint.X)
+                float MinCoordinateXInReal = (int)((upperLeftAxisPoint.X - spaceX + offsetX) / zoomInXAxisParameter) + 1.0F;
+                float MaxCoordinateXInReal = (upperRightAxisPoint.X - spaceX + offsetX) / zoomInXAxisParameter;
+                int deltaCoordinateX = (int)((MaxCoordinateXInReal - MinCoordinateXInReal) / numberOfDataInAxisX);
+                for (var coordinateXInReal = MinCoordinateXInReal; coordinateXInReal <= MaxCoordinateXInReal; coordinateXInReal += deltaCoordinateX)
                 {
-                    float coordinateXInReal = (coordinateX - spaceX + offsetX) / zoomInXAxisParameter;
-
+                    float coordinateX = coordinateXInReal * zoomInXAxisParameter + spaceX - offsetX;
                     Rectangle rectangleForNumberInAxisX = new Rectangle((int)(coordinateX - widthOfCoordinate / 2), (int)(upperLeftAxisPoint.Y - segementLength * 3 / 2 - heightOfCoordinate), widthOfCoordinate, heightOfCoordinate);
                     graphics.DrawLine(penForAxis, coordinateX, upperLeftAxisPoint.Y, coordinateX, upperLeftAxisPoint.Y - segementLength);
-                    //graphics.DrawString((Math.Round(coordinateXInReal / divisorX, 1)).ToString() + notionForXAxis, textFont, Brushes.Black, rectangleForNumberInAxisX, xAxisNumberFormat);
-                    graphics.DrawString((Math.Round(coordinateXInReal, 0)).ToString(), textFont, Brushes.Black, rectangleForNumberInAxisX, xAxisNumberFormat);
-
-                    coordinateX = coordinateX + widthOfAxis / numberOfDataInAxisX;
+                    graphics.DrawString(coordinateXInReal.ToString(), textFont, Brushes.Black, rectangleForNumberInAxisX, xAxisNumberFormat);
                 }
+
 
                 // y-axis
                 StringFormat yAxisNumberFormat = new StringFormat();
                 yAxisNumberFormat.Alignment = StringAlignment.Far;
 
-                //int powerOfScientificNotionForYAxis = Math.Round(Math.Max(Math.Abs((upperLeftAxisPoint.Y - spaceY) / zoomInAxisParameter), Math.Abs((lowerLeftAxisPoint.Y - spaceY) / zoomInAxisParameter))).ToString().Length - 1;
-                //double divisorY = powerOfScientificNotionForYAxis >= 4 ? Math.Pow(10, powerOfScientificNotionForYAxis) : 1;
-                //string notionForYAxis = "";
-                //if (divisorY != 1)
-                //{
-                //    notionForYAxis += "E+" + powerOfScientificNotionForYAxis.ToString();
-                //}
-
-                float coordinateY = upperLeftAxisPoint.Y;
-                while (coordinateY <= lowerLeftAxisPoint.Y)
+                float MinCoordinateYInReal = (int)((upperLeftAxisPoint.Y - spaceY + offsetY) / zoomInYAxisParameter) + 1.0F;
+                float MaxCoordinateYInReal = (lowerLeftAxisPoint.Y - spaceY + offsetY) / zoomInYAxisParameter;
+                int deltaCoordinateY = (int)((MaxCoordinateYInReal - MinCoordinateYInReal) / numberOfDataInAxisY);
+                for( var coordinateYInReal = MinCoordinateYInReal; coordinateYInReal <= MaxCoordinateYInReal; coordinateYInReal += deltaCoordinateY)
                 {
-                    float coordinateYInReal = (coordinateY - spaceY + offsetY) / zoomInYAxisParameter;
-
+                    float coordinateY = coordinateYInReal * zoomInYAxisParameter + spaceY - offsetY;
                     Rectangle rectangleForNumberInAxisY = new Rectangle((int)(upperLeftAxisPoint.X - segementLength * 3 / 2 - widthOfCoordinate), (int)(coordinateY - heightOfCoordinate / 2), widthOfCoordinate, heightOfCoordinate);
                     graphics.DrawLine(penForAxis, upperLeftAxisPoint.X, coordinateY, upperLeftAxisPoint.X - segementLength, coordinateY);
-                    //graphics.DrawString((Math.Round(coordinateYInReal / divisorY, 1)).ToString() + notionForYAxis, textFont, Brushes.Black, rectangleForNumberInAxisY, yAxisNumberFormat);
                     graphics.DrawString((Math.Round(coordinateYInReal, 0)).ToString(), textFont, Brushes.Black, rectangleForNumberInAxisY, yAxisNumberFormat);
-
-                    coordinateY = coordinateY + heightOfAxis / numberOfDataInAxisY;
                 }
-
             }
 
         }
@@ -441,7 +421,7 @@ namespace Well_Trajectory_Visualization
 
         private void ResizeToRectangle(Point p)
         {
-            DrawRectangle();    
+            DrawRectangle();
             MouseRectangle.Width = p.X - MouseRectangle.Left;
             MouseRectangle.Height = p.Y - MouseRectangle.Top;
             DrawRectangle();
@@ -451,9 +431,13 @@ namespace Well_Trajectory_Visualization
         {
             Rectangle rect = this.RectangleToScreen(MouseRectangle);
             Color color = Color.Green;
+<<<<<<< HEAD
             double aspectRatioOfMouseRectangle = Math.Abs(Math.Round(((float)MouseRectangle.Height / (float)MouseRectangle.Width), 2));
             double aspectRatioOfGraphicDrawingArea = Math.Round(((float)GraphicDrawingArea.Height / (float)GraphicDrawingArea.Width), 2);
             if (MouseRectangle.Width != 0 && aspectRatioOfMouseRectangle == aspectRatioOfGraphicDrawingArea)
+=======
+            if (MouseRectangle.Width != 0 && Math.Round(((float)MouseRectangle.Height / (float)MouseRectangle.Width), 1) == Math.Round(((float)graphicDrawingArea.Height / (float)graphicDrawingArea.Width), 1))
+>>>>>>> e67f449a592f3b96a4882e467cb40a8cda765893
             {
                 color = Color.Brown;
             }
