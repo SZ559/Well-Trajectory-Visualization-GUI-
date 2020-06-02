@@ -8,12 +8,13 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Numerics;
+using BLLayer;
 
 namespace Well_Trajectory_Visualization
 {
     public partial class TableLayoutPanelForProjection : TableLayoutPanel
     {
-        public TrajectoryInformation CurrentTrajectoryInformation
+        public CurrentTrajectory CurrentTrajectory
         {
             get; set;
         }
@@ -26,7 +27,7 @@ namespace Well_Trajectory_Visualization
         {
             get
             {
-                return Math.Min(topViewPanel.GraphicDrawingArea.Width, mainViewPanel.GraphicDrawingArea.Width) / CurrentTrajectoryInformation.DifferenceInXOfTrajectory;
+                return Math.Min(topViewPanel.GraphicDrawingArea.Width, mainViewPanel.GraphicDrawingArea.Width) / CurrentTrajectory.DifferenceInXOfTrajectory;
             }
         }
 
@@ -34,7 +35,7 @@ namespace Well_Trajectory_Visualization
         {
             get
             {
-                return Math.Min(leftViewPanel.GraphicDrawingArea.Height, mainViewPanel.GraphicDrawingArea.Height) / CurrentTrajectoryInformation.DifferenceInZOfTrajectory;
+                return Math.Min(leftViewPanel.GraphicDrawingArea.Height, mainViewPanel.GraphicDrawingArea.Height) / CurrentTrajectory.DifferenceInZOfTrajectory;
             }
         }
 
@@ -42,11 +43,11 @@ namespace Well_Trajectory_Visualization
         {
             get
             {
-                return Math.Min(leftViewPanel.GraphicDrawingArea.Width, topViewPanel.GraphicDrawingArea.Height) / CurrentTrajectoryInformation.DifferenceInYOfTrajectory;
+                return Math.Min(leftViewPanel.GraphicDrawingArea.Width, topViewPanel.GraphicDrawingArea.Height) / CurrentTrajectory.DifferenceInYOfTrajectory;
             }
         }
 
-        public TableLayoutPanelForProjection(TrajectoryInformation currentTrajectoryInformation, DisplayChoice displayChoice)
+        public TableLayoutPanelForProjection(CurrentTrajectory currentTrajectory, DisplayChoice displayChoice)
         {
             InitializeComponent();
             BorderStyle = BorderStyle.None;
@@ -55,7 +56,7 @@ namespace Well_Trajectory_Visualization
             ColumnCount = 0;
             AutoScroll = true;
             Dock = DockStyle.Fill;
-            this.CurrentTrajectoryInformation = currentTrajectoryInformation;
+            this.CurrentTrajectory = currentTrajectory;
             zoomInformation = new ZoomInformationOfView();
             this.displayChoice = displayChoice;
         }
@@ -67,9 +68,9 @@ namespace Well_Trajectory_Visualization
             this.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 33));
             this.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 33));
 
-            mainViewPanel = new PanelForProjection(Vector3.UnitY, CurrentTrajectoryInformation, zoomInformation, displayChoice);
-            leftViewPanel = new PanelForProjection(Vector3.UnitX, CurrentTrajectoryInformation, zoomInformation, displayChoice);
-            topViewPanel = new PanelForProjection(Vector3.UnitZ, CurrentTrajectoryInformation, zoomInformation, displayChoice);
+            mainViewPanel = new PanelForProjection(Vector3.UnitY, CurrentTrajectory, zoomInformation, displayChoice);
+            leftViewPanel = new PanelForProjection(Vector3.UnitX, CurrentTrajectory, zoomInformation, displayChoice);
+            topViewPanel = new PanelForProjection(Vector3.UnitZ, CurrentTrajectory, zoomInformation, displayChoice);
 
             this.SuspendLayout();
             this.Controls.Add(mainViewPanel, 0, 0);
@@ -87,7 +88,7 @@ namespace Well_Trajectory_Visualization
                 columnStyle.Width = (float)(1.0 / ColumnCount);
             }
 
-            PanelForProjection panelForProjection = new PanelForProjection(normalVector, this.CurrentTrajectoryInformation, this.zoomInformation, displayChoice);
+            PanelForProjection panelForProjection = new PanelForProjection(normalVector, this.CurrentTrajectory, this.zoomInformation, displayChoice);
             this.Controls.Add(panelForProjection, ColumnCount - 1, 0);
         }
 

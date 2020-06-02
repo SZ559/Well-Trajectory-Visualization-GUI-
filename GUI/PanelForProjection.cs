@@ -1,4 +1,4 @@
-﻿using GeometricObject;
+﻿using ValueObject;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Windows.Forms;
@@ -7,14 +7,13 @@ using System.Data;
 using System.Linq;
 using System.Numerics;
 using System.ComponentModel;
+using BLLayer;
 
 namespace Well_Trajectory_Visualization
 {
     public class PanelForProjection : Panel
     {
-        Projection projection = new Projection();
-        TrajectoryInformation currentTrajectoryInformation;
-        private ZoomInformationOfView zoomInformation;
+
         readonly int numberOfDataInAxisX;
         readonly int numberOfDataInAxisY;
         readonly int spaceHeightForViewName;
@@ -28,8 +27,11 @@ namespace Well_Trajectory_Visualization
         readonly int widthOfAxisName;
         readonly int heightOfAxisName;
 
+        CurrentTrajectory currentTrajectory;
         private Vector3 normalVector;
+        private ZoomInformationOfView zoomInformation;
         private DisplayChoice displayChoice;
+
         public string AxisXCaption
         {
             get
@@ -49,10 +51,10 @@ namespace Well_Trajectory_Visualization
                         break;
                 }
 
-                return caption + "(" + currentTrajectoryInformation.UnitForCaption + ")";
+                return caption + "(" + currentTrajectory.UnitForCaption + ")";
             }
         }
-
+        
         public string AxisYCaption
         {
             get
@@ -72,12 +74,9 @@ namespace Well_Trajectory_Visualization
                         break;
                 }
 
-                return caption + "(" + currentTrajectoryInformation.UnitForCaption + ")";
+                return caption + "(" + currentTrajectory.UnitForCaption + ")";
             }
         }
-
-        private Single minX;
-        private Single minY;
 
 
         public Rectangle GraphicDrawingArea
@@ -95,8 +94,12 @@ namespace Well_Trajectory_Visualization
                 return Rectangle.Inflate(GraphicDrawingArea, 8, 8);
             }
         }
+
         Rectangle MouseRectangle = Rectangle.Empty;
 
+
+        private Single minX;
+        private Single minY;
         float zoomInXAxisParameter;
         float zoomInYAxisParameter;
 
@@ -110,36 +113,30 @@ namespace Well_Trajectory_Visualization
         float offsetY;
         ToolTip toolTipForAnnotation;
 
+        private List<Vector2> TrajectoryProjectionIn2D;
+        private PointF[] TrajectoryProjectionLocationOnPanel;
 
-        public List<PointIn2D> TrajectoryProjectionIn2D
-        {
-            get; set;
-        }
-
-        public PointF[] TrajectoryProjectionLocationOnPanel
-        {
-            get; set;
-        }
-
-        public PanelForProjection(Vector3 normalVector, TrajectoryInformation currentTrajectoryInformation, ZoomInformationOfView zoomInformation, DisplayChoice displayChoice)
+        public PanelForProjection(Vector3 normalVector, CurrentTrajectory currentTrajectory, ZoomInformationOfView zoomInformation, DisplayChoice displayChoice)
         {
             //initialize panel property
             Dock = DockStyle.Fill;
             BorderStyle = BorderStyle.None;
+            Name = Projection.GetProjectionView(normalVector);
 
-            this.currentTrajectoryInformation = currentTrajectoryInformation;
+            this.currentTrajectory = currentTrajectory;
+            this.currentTrajectory.PropertyChanged += UpdateParameters;
             this.normalVector = normalVector;
-            TrajectoryProjectionIn2D = projection.GetProjectionInPlane(this.currentTrajectoryInformation.CurrentTrajectory.PolyLineNodes, this.normalVector);
-            this.currentTrajectoryInformation.PropertyChanged += UpdateParameters;
-
-            Name = projection.GetProjectionView(this.normalVector);
-            TrajectoryProjectionLocationOnPanel = new PointF[TrajectoryProjectionIn2D.Count];
-            minX = TrajectoryProjectionIn2D.Select(x => x.X).Min();
-            minY = TrajectoryProjectionIn2D.Select(x => x.Y).Min();
-
             this.displayChoice = displayChoice;
-            //Initialize drawing property
+            //zoom and drag
+            isDrag = false;
+            isChoosingRegion = false;
+            this.zoomInformation = zoomInformation;
 
+            TrajectoryProjectionIn2D = Projection.GetProjectionInPlane(currentTrajectory.Nodes, normalVector);
+            TrajectoryProjectionLocationOnPanel = new PointF[TrajectoryProjectionIn2D.Count];
+
+
+            //Initialize drawing property
             numberOfDataInAxisX = 5;
             numberOfDataInAxisY = 10;
             spaceHeightForViewName = 25;
@@ -153,11 +150,6 @@ namespace Well_Trajectory_Visualization
             rightPaddingX = segementLength / 2 + marginAxis + widthOfAxisName + 5;
             paddingY = segementLength * 3 / 2 + marginAxis + Math.Max(heightOfAxisName, heightOfCoordinate) + 5;
 
-
-            //zoom and drag
-            isDrag = false;
-            isChoosingRegion = false;
-            this.zoomInformation = zoomInformation;
             //tool tip
             toolTipForAnnotation = new ToolTip()
             {
@@ -166,6 +158,7 @@ namespace Well_Trajectory_Visualization
                 ReshowDelay = 100,
                 ShowAlways = true,
             };
+
             Paint += new PaintEventHandler(PaintPanel);
             MouseMove += new MouseEventHandler(Panel_MouseMove);
             MouseDown += new MouseEventHandler(Panel_MouseDown);
@@ -213,9 +206,9 @@ namespace Well_Trajectory_Visualization
             }
         }
 
-        private void UpdateParameters(object sender, PropertyChangedEventArgs e)
+        private void UpdateParameters()
         {
-            TrajectoryProjectionIn2D = projection.GetProjectionInPlane(currentTrajectoryInformation.CurrentTrajectory.PolyLineNodes, normalVector);
+            TrajectoryProjectionIn2D = Projection.GetProjectionInPlane(currentTrajectory.Nodes, normalVector);
             TrajectoryProjectionLocationOnPanel = new PointF[TrajectoryProjectionIn2D.Count];
             minX = TrajectoryProjectionIn2D.Select(x => x.X).Min();
             minY = TrajectoryProjectionIn2D.Select(x => x.Y).Min();
@@ -265,6 +258,7 @@ namespace Well_Trajectory_Visualization
                 }
             }
         }
+
         private void HighlightPoints(Graphics graphics)
         {
             using (SolidBrush brushForPoint = new SolidBrush(Color.FromArgb(63, 63, 68)))
@@ -338,7 +332,7 @@ namespace Well_Trajectory_Visualization
         /// Draw Annotation////
         private void DrawAnnotation(Graphics graphics)
         {
-            if (displayChoice.AddAnnotation)
+            if (displayChoice.IfShowAnnotation)
             {
                 using (Font textFont = new Font("Microsoft YaHei", 6, FontStyle.Regular, GraphicsUnit.Point))
                 {
@@ -358,11 +352,11 @@ namespace Well_Trajectory_Visualization
 
         private void DrawSharpestPoint(Graphics graphics, int spaceX, int spaceY)
         {
-            if (displayChoice.AddSharpestPoint)
+            if (displayChoice.IfShowSharpestPoint)
             {
                 using (SolidBrush brushForPoint = new SolidBrush(Color.Red))
                 {
-                    foreach (var index in currentTrajectoryInformation.SharpestPointIndex)
+                    foreach (var index in currentTrajectory.SharpestPointIndex)
                     {
                         graphics.FillRectangle(brushForPoint, TrajectoryProjectionLocationOnPanel[index].X - 1, TrajectoryProjectionLocationOnPanel[index].Y - 1, 2, 2);
                     }
@@ -447,7 +441,7 @@ namespace Well_Trajectory_Visualization
         {
             if (e.Button == MouseButtons.Left)
             {
-                if (displayChoice.ChooseRegion)
+                if (displayChoice.IfUseRegionChoosing)
                 {
                     if (MouseRectangleArea.Contains(e.Location))
                     {
@@ -586,27 +580,29 @@ namespace Well_Trajectory_Visualization
                 }
             }
         }
+
+
+        //private void Panel_MouseHover(object sender, EventArgs e)
+        //{
+        //    string tip = "";
+        //    int radius = ;
+        //    int index = 0;
+        //    PointF position = PointToClient(Cursor.Position);
+        //    foreach (var location in TrajectoryProjectionLocationOnPanel)
+        //    {
+        //        if ((Math.Abs(position.X - location.X) < radius) &&
+        //            (Math.Abs(position.Y - location.Y) < radius))
+        //        {
+        //            tip = $"({Math.Round(TrajectoryProjectionIn2D[index].X, 1)}, {Math.Round(TrajectoryProjectionIn2D[index].Y, 1)})";
+        //            break;
+        //        }
+        //        index = index + 1;
+        //    }
+        //    if (toolTipForAnnotation.GetToolTip(this) != tip)
+        //    {
+        //        toolTipForAnnotation.SetToolTip(this, tip);
+        //    }
+        //}
+
     }
 }
-
-//private void Panel_MouseHover(object sender, EventArgs e)
-//{
-//    string tip = "";
-//    int radius = ;
-//    int index = 0;
-//    PointF position = PointToClient(Cursor.Position);
-//    foreach (var location in TrajectoryProjectionLocationOnPanel)
-//    {
-//        if ((Math.Abs(position.X - location.X) < radius) &&
-//            (Math.Abs(position.Y - location.Y) < radius))
-//        {
-//            tip = $"({Math.Round(TrajectoryProjectionIn2D[index].X, 1)}, {Math.Round(TrajectoryProjectionIn2D[index].Y, 1)})";
-//            break;
-//        }
-//        index = index + 1;
-//    }
-//    if (toolTipForAnnotation.GetToolTip(this) != tip)
-//    {
-//        toolTipForAnnotation.SetToolTip(this, tip);
-//    }
-//}

@@ -3,32 +3,32 @@ namespace Well_Trajectory_Visualization
 {
     public class DisplayChoice
     {
-        public bool AddAnnotation
+        public bool IfShowAnnotation
         {
             get; set;
         }
 
-        public bool AddSharpestPoint
+        public bool IfShowSharpestPoint
         {
             get; set;
         }
         
-        public bool ChooseRegion
+        public bool IfUseRegionChoosing
         {
             get; set;
         }
 
-        public bool Synchronize
+        public bool IfSynchronize
         {
             get; set;
         }
 
         public DisplayChoice()
         {
-            AddAnnotation = false;
-            AddSharpestPoint = false;
-            Synchronize = false;
-            ChooseRegion = false;
+            IfShowAnnotation = false;
+            IfShowSharpestPoint = false;
+            IfSynchronize = false;
+            IfUseRegionChoosing = false;
         }
     }
 }
