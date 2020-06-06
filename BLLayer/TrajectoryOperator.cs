@@ -7,18 +7,18 @@ using MongoDB.Bson.Serialization;
 
 namespace BLLayer
 {
-    public class TrajectoryOperation
+    public class TrajectoryOperator
     {
         private TrajectoryDatabase database;
         private TrajectoryDataFileReader fileReader;
 
-        public TrajectoryOperation()
+        public TrajectoryOperator()
         {
             database = new TrajectoryDatabase();
             fileReader = new TrajectoryDataFileReader();
         }
 
-        public TrajectoryOperation(TrajectoryDatabase trajectoryDatabase)
+        public TrajectoryOperator(TrajectoryDatabase trajectoryDatabase)
         {
             database = trajectoryDatabase;
         }
@@ -32,16 +32,6 @@ namespace BLLayer
         public List<Trajectory> GetAllTrajectories()
         {
             return database.GetAllTrajectoriesInBsonDocument().Select(x => BsonSerializer.Deserialize<Trajectory>(x)).ToList();
-        }
-
-        public List<Trajectory> GetAllTrajectoriesOfOneWell(string wellName)
-        {
-            return GetAllTrajectories().FindAll(x => x.WellName == wellName).ToList();
-        }
-
-        public List<string> GetAllWells()
-        {
-            return GetAllTrajectories().Select(x => x.WellName).Distinct().ToList();
         }
 
         public bool HasBeenLoaded(string filePath)
@@ -60,7 +50,7 @@ namespace BLLayer
             {
                 if (!ids.Contains(trajectory.MongoDbId))
                 {
-                    if(wellNames.Contains(trajectory.WellName))
+                    if (wellNames.Contains(trajectory.WellName))
                     {
                         ids.Add(trajectory.MongoDbId);
                     }
@@ -76,12 +66,26 @@ namespace BLLayer
                 }
             }
 
-            foreach(var id in ids)
+            foreach (var id in ids)
             {
                 searchResult.Add(BsonSerializer.Deserialize<Trajectory>(database.GetTrajectoryInBsonDocumentByTrajectoryObjectID(id)));
             }
 
             return searchResult;
+        }
+
+        public Dictionary<string, List<Trajectory>> ConstructTreeViewDictionary(List<Trajectory> trajectories)
+        {
+            Dictionary<string, List<Trajectory>> treeviewDict = new Dictionary<string, List<Trajectory>>();
+            foreach (Trajectory trajectory in trajectories)
+            {
+                if (!treeviewDict.ContainsKey(trajectory.WellName))
+                {
+                    treeviewDict.Add(trajectory.WellName, new List<Trajectory>());
+                }
+                treeviewDict[trajectory.WellName].Add(trajectory);
+            }
+            return treeviewDict;
         }
 
         public void DeleteTrajectoryByTrajectoryNode(ObjectId id)

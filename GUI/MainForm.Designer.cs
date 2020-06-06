@@ -30,7 +30,7 @@
         {
             this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
-            System.Windows.Forms.TreeNode treeNode1 = new System.Windows.Forms.TreeNode("Wells");
+            System.Windows.Forms.TreeNode treeNode2 = new System.Windows.Forms.TreeNode("Wells");
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.openFileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -55,6 +55,7 @@
             this.resetToolStripButton = new System.Windows.Forms.ToolStripButton();
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
+            this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.wellsTreeView = new System.Windows.Forms.TreeView();
             this.defaultPagePanel = new System.Windows.Forms.TableLayoutPanel();
             this.label8 = new System.Windows.Forms.Label();
@@ -71,12 +72,14 @@
             this.tabControl = new System.Windows.Forms.TabControl();
             this.openFileDialog = new System.Windows.Forms.OpenFileDialog();
             this.saveFileDialog = new System.Windows.Forms.SaveFileDialog();
+            this.searchTextbox = new System.Windows.Forms.TextBox();
             this.menuStrip1.SuspendLayout();
             this.toolStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
             this.splitContainer1.SuspendLayout();
+            this.tableLayoutPanel1.SuspendLayout();
             this.defaultPagePanel.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.imageSourceReference.SuspendLayout();
@@ -304,7 +307,7 @@
             // 
             // splitContainer1.Panel1
             // 
-            this.splitContainer1.Panel1.Controls.Add(this.wellsTreeView);
+            this.splitContainer1.Panel1.Controls.Add(this.tableLayoutPanel1);
             // 
             // splitContainer1.Panel2
             // 
@@ -315,6 +318,21 @@
             this.splitContainer1.SplitterWidth = 5;
             this.splitContainer1.TabIndex = 3;
             // 
+            // tableLayoutPanel1
+            // 
+            this.tableLayoutPanel1.ColumnCount = 1;
+            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 40F));
+            this.tableLayoutPanel1.Controls.Add(this.wellsTreeView, 0, 1);
+            this.tableLayoutPanel1.Controls.Add(this.searchTextbox, 0, 0);
+            this.tableLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tableLayoutPanel1.Location = new System.Drawing.Point(0, 0);
+            this.tableLayoutPanel1.Name = "tableLayoutPanel1";
+            this.tableLayoutPanel1.RowCount = 2;
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 5F));
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 95F));
+            this.tableLayoutPanel1.Size = new System.Drawing.Size(164, 599);
+            this.tableLayoutPanel1.TabIndex = 1;
+            // 
             // wellsTreeView
             // 
             this.wellsTreeView.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -322,14 +340,14 @@
             this.wellsTreeView.Indent = 25;
             this.wellsTreeView.ItemHeight = 20;
             this.wellsTreeView.LineColor = System.Drawing.Color.LightCoral;
-            this.wellsTreeView.Location = new System.Drawing.Point(0, 0);
+            this.wellsTreeView.Location = new System.Drawing.Point(3, 33);
             this.wellsTreeView.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.wellsTreeView.Name = "wellsTreeView";
-            treeNode1.Name = "Root";
-            treeNode1.Text = "Wells";
+            treeNode2.Name = "Root";
+            treeNode2.Text = "Wells";
             this.wellsTreeView.Nodes.AddRange(new System.Windows.Forms.TreeNode[] {
-            treeNode1});
-            this.wellsTreeView.Size = new System.Drawing.Size(164, 599);
+            treeNode2});
+            this.wellsTreeView.Size = new System.Drawing.Size(158, 562);
             this.wellsTreeView.TabIndex = 0;
             this.wellsTreeView.NodeMouseClick += new System.Windows.Forms.TreeNodeMouseClickEventHandler(this.WellsTreeView_NodeMouseClick);
             this.wellsTreeView.NodeMouseDoubleClick += new System.Windows.Forms.TreeNodeMouseClickEventHandler(this.WellsTreeView_NodeMouseDoubleClick);
@@ -442,12 +460,12 @@
             this.imageSourceReference.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.referenceToolStripMenuItem});
             this.imageSourceReference.Name = "imageSourceReference";
-            this.imageSourceReference.Size = new System.Drawing.Size(127, 26);
+            this.imageSourceReference.Size = new System.Drawing.Size(135, 26);
             // 
             // referenceToolStripMenuItem
             // 
             this.referenceToolStripMenuItem.Name = "referenceToolStripMenuItem";
-            this.referenceToolStripMenuItem.Size = new System.Drawing.Size(126, 22);
+            this.referenceToolStripMenuItem.Size = new System.Drawing.Size(134, 22);
             this.referenceToolStripMenuItem.Text = "Reference";
             this.referenceToolStripMenuItem.Click += new System.EventHandler(this.ReferenceToolStripMenuItem_Click);
             // 
@@ -515,6 +533,15 @@
             // 
             this.saveFileDialog.Filter = "Bitmap Files|*.bmp|JPEG Files|*.jpeg|PNG Files|*.png";
             // 
+            // searchTextbox
+            // 
+            this.searchTextbox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+            this.searchTextbox.Location = new System.Drawing.Point(3, 3);
+            this.searchTextbox.Name = "searchTextbox";
+            this.searchTextbox.Size = new System.Drawing.Size(158, 23);
+            this.searchTextbox.TabIndex = 2;
+            this.searchTextbox.TextChanged += new System.EventHandler(this.SearchTextBox_TextChanged);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 17F);
@@ -538,6 +565,8 @@
             this.splitContainer1.Panel2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).EndInit();
             this.splitContainer1.ResumeLayout(false);
+            this.tableLayoutPanel1.ResumeLayout(false);
+            this.tableLayoutPanel1.PerformLayout();
             this.defaultPagePanel.ResumeLayout(false);
             this.defaultPagePanel.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
@@ -556,7 +585,6 @@
         private System.Windows.Forms.ToolStripButton toolStripButton1;
         private System.Windows.Forms.StatusStrip statusStrip1;
         private System.Windows.Forms.SplitContainer splitContainer1;
-        private System.Windows.Forms.TreeView wellsTreeView;
         private System.Windows.Forms.ToolStripMenuItem openFileToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem saveAsToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem exitToolStripMenuItem;
@@ -589,6 +617,9 @@
         private System.Windows.Forms.ToolStripMenuItem feetToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem sharpestPointToolStripMenuItem;
         private System.Windows.Forms.ToolStripButton resetToolStripButton;
+        private System.Windows.Forms.TableLayoutPanel tableLayoutPanel1;
+        private System.Windows.Forms.TreeView wellsTreeView;
+        private System.Windows.Forms.TextBox searchTextbox;
     }
 }
 

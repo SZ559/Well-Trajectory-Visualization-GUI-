@@ -97,7 +97,6 @@
       <DependentUpon>TableLayoutPanelForProjection.cs</DependentUpon>
     </Compile>
     <Compile Include="ZoomInformationOfView.cs" />
-    <Compile Include="CurrentTrajectoryInformation.cs" />
     <Compile Include="DisplayChoice.cs" />
     <Compile Include="PanelForProjection.cs">
       <SubType>Component</SubType>
@@ -141,14 +140,6 @@
     <ProjectReference Include="..\BLLayer\BLLayer.csproj">
       <Project>{86cfd273-2e7e-4fde-89a3-630990915f39}</Project>
       <Name>BLLayer</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\FileHandler\FileHandler.csproj">
-      <Project>{f12c0a51-482f-4659-b748-6437468adbe1}</Project>
-      <Name>FileHandler</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\GeometricObject\GeometricObject.csproj">
-      <Project>{ac21d131-7147-4404-86ae-1149e9f8bf6b}</Project>
-      <Name>GeometricObject</Name>
     </ProjectReference>
     <ProjectReference Include="..\ValueObject\ValueObject.csproj">
       <Project>{d0dfeb00-57d7-48af-b7db-54422289f439}</Project>

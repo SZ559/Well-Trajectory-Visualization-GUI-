@@ -47,12 +47,6 @@ namespace DataSource
             return document;
         }
 
-        //public BsonDocument GetOneWellByWellName(string wellName)
-        //{
-        //    var filter = Builders<BsonDocument>.Filter.Eq("wellName", wellName);
-        //    return wellCollection.Find(filter).First();
-        //}
-
         public BsonDocument GetTrajectoryInBsonDocumentByTrajectoryObjectID(ObjectId id)
         {
             var filter = Builders<BsonDocument>.Filter.Eq("_id", id);

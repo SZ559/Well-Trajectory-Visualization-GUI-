@@ -1,16 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
-//using GeometricObject;
 using ValueObject;
-using FileHandler;
 using BLLayer;
-using System.Numerics;
-using System.IO;
 using MongoDB.Bson;
+using System.Collections.Generic;
 
 namespace Well_Trajectory_Visualization
 {
@@ -18,7 +13,7 @@ namespace Well_Trajectory_Visualization
     {
         WellViewSaver wellViewSaver;
         DisplayChoice displayChoice;
-        TrajectoryOperation trajectoryOperator;
+        TrajectoryOperator trajectoryOperator;
 
         readonly int leftPadding;
         readonly int rightPadding;
@@ -58,8 +53,8 @@ namespace Well_Trajectory_Visualization
             wellViewSaver = new WellViewSaver();
             displayChoice = new DisplayChoice();
 
-            trajectoryOperator = new TrajectoryOperation();
-            UpdateTreeView();
+            trajectoryOperator = new TrajectoryOperator();
+            BuildWholeTreeView();
 
             tabControl.Padding = new Point(18, 5);
             isDoubleClick = false;
@@ -143,13 +138,6 @@ namespace Well_Trajectory_Visualization
             {
                 foreach (var filePath in openFileDialog.FileNames)
                 {
-                    //if (wells.Select(x => x.Trajectories.Count).Sum() >= 30)
-                    ////if (wells.Select(x => x.TrajectoryCount).Sum() >= 30)
-                    //{
-                    //    MessageBox.Show($"Loading {filePath} failed. Reach the well trajectory loading limit.", "Loading Well Trajectory", MessageBoxButtons.OK);
-                    //    continue;
-                    //}
-
                     if (trajectoryOperator.HasBeenLoaded(filePath))
                     {
                         MessageBox.Show($"Trajectory has been already loaded for {filePath}!", "Loading Well Trajectory", MessageBoxButtons.OK);
@@ -157,24 +145,11 @@ namespace Well_Trajectory_Visualization
                     }
 
                     string errorMessage;
-                    //Trajectory newTrajectory = trajectoryDataReader.ReadFile(filePath, out errorMessage);
                     Trajectory newTrajectory = trajectoryOperator.ImportTrajectoryFromFile(filePath, out errorMessage);
                     if (string.IsNullOrEmpty(errorMessage))
                     {
                         trajectoryOperator.LoadTrajectoryToDatabase(newTrajectory);
-
-                        //if (!wells.Select(x => x.WellName).Contains(newTrajectory.WellName))
-                        //{
-                        //    Well newWell = new Well(newTrajectory.WellName);
-                        //    newWell.AddTrajectory(newTrajectory);
-                        //    wells.Add(newWell);
-                        //}
-                        //else
-                        //{
-                        //    wells.Find(x => x.WellName == newTrajectory.WellName).AddTrajectory(newTrajectory);
-                        //}
-
-                        UpdateTreeView();
+                        BuildWholeTreeView();
                         MessageBox.Show($"New Well loading from {filePath} succeed.", "Loading Well Trajectory", MessageBoxButtons.OK);
                     }
                     else
@@ -187,19 +162,25 @@ namespace Well_Trajectory_Visualization
 
         //////////////// Tree View //////////////////////////
 
-        private void UpdateTreeView()
+        private void BuildWholeTreeView()
+        {
+            Dictionary<string, List<Trajectory>> treeviewDict = trajectoryOperator.ConstructTreeViewDictionary(trajectoryOperator.GetAllTrajectories());
+            BuildTreeViewFromDict(treeviewDict);
+        }
+
+        private void BuildTreeViewFromDict(Dictionary<string, List<Trajectory>> treeviewDict)
         {
             wellsTreeView.BeginUpdate();
             wellsTreeView.Nodes[0].Nodes.Clear();
 
             int i = 0;
-            foreach (var well in trajectoryOperator.GetAllWells())
+            foreach (var well in treeviewDict.Keys)
             {
                 wellsTreeView.Nodes[0].Nodes.Add(well);
                 wellsTreeView.Nodes[0].Nodes[i].Name = well;
                 //wellsTreeView.Nodes[0].Nodes[i].Tag = well;
                 int j = 0;
-                foreach (var trajectory in trajectoryOperator.GetAllTrajectoriesOfOneWell(well))
+                foreach (var trajectory in treeviewDict[well])
                 {
                     wellsTreeView.Nodes[0].Nodes[i].Nodes.Add(trajectory.TrajectoryName);
                     wellsTreeView.Nodes[0].Nodes[i].Nodes[j].Name = trajectory.WellName + "-" + trajectory.TrajectoryName;
@@ -468,6 +449,30 @@ namespace Well_Trajectory_Visualization
             {
                 ((TableLayoutPanelForProjection)tabControl.SelectedTab.Controls[0]).ResetZoom();
                 tabControl.SelectedTab.Refresh();
+            }
+        }
+
+        private void SearchTextBox_TextChanged(object sender, EventArgs e)
+        {
+            if(!string.IsNullOrWhiteSpace(searchTextbox.Text))
+            {
+                var searchResult = trajectoryOperator.GetTrajectoriesBySearchFunction(searchTextbox.Text);
+                if(searchResult.Count != 0)
+                {
+                    searchTextbox.BackColor = Color.White;
+                    var treeviewDict = trajectoryOperator.ConstructTreeViewDictionary(searchResult);
+                    BuildTreeViewFromDict(treeviewDict);
+                }
+                else
+                {
+                    searchTextbox.BackColor = Color.Red;
+                    BuildWholeTreeView();
+                }
+            }
+            else
+            {
+                searchTextbox.BackColor = Color.White;
+                BuildWholeTreeView();
             }
         }
     }
