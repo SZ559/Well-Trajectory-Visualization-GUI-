@@ -4,6 +4,7 @@ using ValueObject;
 using MongoDB.Bson;
 using System.Linq;
 using MongoDB.Bson.Serialization;
+using System;
 
 namespace BLLayer
 {
@@ -48,21 +49,28 @@ namespace BLLayer
 
             foreach (var trajectory in GetAllTrajectories())
             {
-                if (!ids.Contains(trajectory.MongoDbId))
+                try
                 {
-                    if (wellNames.Contains(trajectory.WellName))
+                    if (!ids.Contains(trajectory.MongoDbId))
                     {
-                        ids.Add(trajectory.MongoDbId);
+                        if (wellNames.Contains(trajectory.WellName))
+                        {
+                            ids.Add(trajectory.MongoDbId);
+                        }
+                        else if (trajectory.WellName.Contains(searchText))
+                        {
+                            wellNames.Add(trajectory.WellName);
+                            ids.Add(trajectory.MongoDbId);
+                        }
+                        else if (trajectory.TrajectoryName.Contains(searchText))
+                        {
+                            ids.Add(trajectory.MongoDbId);
+                        }
                     }
-                    else if (trajectory.WellName.Contains(searchText))
-                    {
-                        wellNames.Add(trajectory.WellName);
-                        ids.Add(trajectory.MongoDbId);
-                    }
-                    else if (trajectory.TrajectoryName.Contains(searchText))
-                    {
-                        ids.Add(trajectory.MongoDbId);
-                    }
+                }
+                catch (Exception ex)
+                {
+                    //TODO:: how to handle exception - if name is null
                 }
             }
 
@@ -79,11 +87,18 @@ namespace BLLayer
             Dictionary<string, List<Trajectory>> treeviewDict = new Dictionary<string, List<Trajectory>>();
             foreach (Trajectory trajectory in trajectories)
             {
-                if (!treeviewDict.ContainsKey(trajectory.WellName))
+                try
                 {
-                    treeviewDict.Add(trajectory.WellName, new List<Trajectory>());
+                    if (!treeviewDict.ContainsKey(trajectory.WellName))
+                    {
+                        treeviewDict.Add(trajectory.WellName, new List<Trajectory>());
+                    }
+                    treeviewDict[trajectory.WellName].Add(trajectory);
                 }
-                treeviewDict[trajectory.WellName].Add(trajectory);
+                catch (Exception ex)
+                {
+                    //TODO:: how to handle exception - if name is null
+                }
             }
             return treeviewDict;
         }

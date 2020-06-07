@@ -30,7 +30,7 @@
         {
             this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
-            System.Windows.Forms.TreeNode treeNode2 = new System.Windows.Forms.TreeNode("Wells");
+            System.Windows.Forms.TreeNode treeNode1 = new System.Windows.Forms.TreeNode("Wells");
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.openFileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -57,6 +57,7 @@
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.wellsTreeView = new System.Windows.Forms.TreeView();
+            this.searchTextbox = new System.Windows.Forms.TextBox();
             this.defaultPagePanel = new System.Windows.Forms.TableLayoutPanel();
             this.label8 = new System.Windows.Forms.Label();
             this.label4 = new System.Windows.Forms.Label();
@@ -72,7 +73,7 @@
             this.tabControl = new System.Windows.Forms.TabControl();
             this.openFileDialog = new System.Windows.Forms.OpenFileDialog();
             this.saveFileDialog = new System.Windows.Forms.SaveFileDialog();
-            this.searchTextbox = new System.Windows.Forms.TextBox();
+            this.deleteNodeToolStripButton = new System.Windows.Forms.ToolStripButton();
             this.menuStrip1.SuspendLayout();
             this.toolStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
@@ -248,7 +249,8 @@
             this.toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripButton1,
             this.saveToolStripButton,
-            this.resetToolStripButton});
+            this.resetToolStripButton,
+            this.deleteNodeToolStripButton});
             this.toolStrip1.Location = new System.Drawing.Point(0, 24);
             this.toolStrip1.Name = "toolStrip1";
             this.toolStrip1.Size = new System.Drawing.Size(1172, 25);
@@ -286,6 +288,7 @@
             this.resetToolStripButton.Name = "resetToolStripButton";
             this.resetToolStripButton.Size = new System.Drawing.Size(23, 22);
             this.resetToolStripButton.Text = "toolStripButton2";
+            this.resetToolStripButton.ToolTipText = "Reset zoom";
             this.resetToolStripButton.Click += new System.EventHandler(this.ResetToolStripButton_Click);
             // 
             // statusStrip1
@@ -343,14 +346,23 @@
             this.wellsTreeView.Location = new System.Drawing.Point(3, 33);
             this.wellsTreeView.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.wellsTreeView.Name = "wellsTreeView";
-            treeNode2.Name = "Root";
-            treeNode2.Text = "Wells";
+            treeNode1.Name = "Root";
+            treeNode1.Text = "Wells";
             this.wellsTreeView.Nodes.AddRange(new System.Windows.Forms.TreeNode[] {
-            treeNode2});
+            treeNode1});
             this.wellsTreeView.Size = new System.Drawing.Size(158, 562);
             this.wellsTreeView.TabIndex = 0;
             this.wellsTreeView.NodeMouseClick += new System.Windows.Forms.TreeNodeMouseClickEventHandler(this.WellsTreeView_NodeMouseClick);
             this.wellsTreeView.NodeMouseDoubleClick += new System.Windows.Forms.TreeNodeMouseClickEventHandler(this.WellsTreeView_NodeMouseDoubleClick);
+            // 
+            // searchTextbox
+            // 
+            this.searchTextbox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+            this.searchTextbox.Location = new System.Drawing.Point(3, 3);
+            this.searchTextbox.Name = "searchTextbox";
+            this.searchTextbox.Size = new System.Drawing.Size(158, 23);
+            this.searchTextbox.TabIndex = 2;
+            this.searchTextbox.TextChanged += new System.EventHandler(this.SearchTextBox_TextChanged);
             // 
             // defaultPagePanel
             // 
@@ -533,14 +545,17 @@
             // 
             this.saveFileDialog.Filter = "Bitmap Files|*.bmp|JPEG Files|*.jpeg|PNG Files|*.png";
             // 
-            // searchTextbox
+            // deleteNodeToolStripButton
             // 
-            this.searchTextbox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
-            this.searchTextbox.Location = new System.Drawing.Point(3, 3);
-            this.searchTextbox.Name = "searchTextbox";
-            this.searchTextbox.Size = new System.Drawing.Size(158, 23);
-            this.searchTextbox.TabIndex = 2;
-            this.searchTextbox.TextChanged += new System.EventHandler(this.SearchTextBox_TextChanged);
+            this.deleteNodeToolStripButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.deleteNodeToolStripButton.Image = ((System.Drawing.Image)(resources.GetObject("deleteNodeToolStripButton.Image")));
+            this.deleteNodeToolStripButton.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
+            this.deleteNodeToolStripButton.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.deleteNodeToolStripButton.Name = "deleteNodeToolStripButton";
+            this.deleteNodeToolStripButton.Size = new System.Drawing.Size(23, 22);
+            this.deleteNodeToolStripButton.Text = "toolStripButton2";
+            this.deleteNodeToolStripButton.ToolTipText = "Delete tree node";
+            this.deleteNodeToolStripButton.Click += new System.EventHandler(this.DeleteNodeToolStripButton_Click);
             // 
             // MainForm
             // 
@@ -620,6 +635,7 @@
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel1;
         private System.Windows.Forms.TreeView wellsTreeView;
         private System.Windows.Forms.TextBox searchTextbox;
+        private System.Windows.Forms.ToolStripButton deleteNodeToolStripButton;
     }
 }
 

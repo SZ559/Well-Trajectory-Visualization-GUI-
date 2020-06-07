@@ -42,7 +42,7 @@ namespace Well_Trajectory_Visualization
         public MainForm()
         {
             InitializeComponent();
-            
+
 
             leftPadding = 5;
             rightPadding = 5;
@@ -454,10 +454,15 @@ namespace Well_Trajectory_Visualization
 
         private void SearchTextBox_TextChanged(object sender, EventArgs e)
         {
-            if(!string.IsNullOrWhiteSpace(searchTextbox.Text))
+            UpdateTreeView();
+        }
+
+        private void UpdateTreeView()
+        {
+            if (!string.IsNullOrWhiteSpace(searchTextbox.Text))
             {
                 var searchResult = trajectoryOperator.GetTrajectoriesBySearchFunction(searchTextbox.Text);
-                if(searchResult.Count != 0)
+                if (searchResult.Count != 0)
                 {
                     searchTextbox.BackColor = Color.White;
                     var treeviewDict = trajectoryOperator.ConstructTreeViewDictionary(searchResult);
@@ -473,6 +478,25 @@ namespace Well_Trajectory_Visualization
             {
                 searchTextbox.BackColor = Color.White;
                 BuildWholeTreeView();
+            }
+        }
+
+        private void DeleteNodeToolStripButton_Click(object sender, EventArgs e)
+        {
+            if (wellsTreeView.SelectedNode != null && wellsTreeView.SelectedNode.Parent != null)
+            {
+                if (wellsTreeView.SelectedNode.GetNodeCount(true) != 0)
+                {
+                    foreach (TreeNode node in wellsTreeView.SelectedNode.Nodes)
+                    {
+                        trajectoryOperator.DeleteTrajectoryByTrajectoryNode((ObjectId)node.Tag);
+                    }
+                }
+                else
+                {
+                    trajectoryOperator.DeleteTrajectoryByTrajectoryNode((ObjectId)wellsTreeView.SelectedNode.Tag);
+                }
+                UpdateTreeView();
             }
         }
     }
