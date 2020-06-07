@@ -483,20 +483,23 @@ namespace Well_Trajectory_Visualization
 
         private void DeleteNodeToolStripButton_Click(object sender, EventArgs e)
         {
-            if (wellsTreeView.SelectedNode != null && wellsTreeView.SelectedNode.Parent != null)
+            if (MessageBox.Show("Are you sure to delete the(se) trajectory(/ies)?", "Deleting trajectory...", MessageBoxButtons.YesNo) == DialogResult.Yes)
             {
-                if (wellsTreeView.SelectedNode.GetNodeCount(true) != 0)
+                if (wellsTreeView.SelectedNode != null && wellsTreeView.SelectedNode.Parent != null)
                 {
-                    foreach (TreeNode node in wellsTreeView.SelectedNode.Nodes)
+                    if (wellsTreeView.SelectedNode.GetNodeCount(true) != 0)
                     {
-                        trajectoryOperator.DeleteTrajectoryByTrajectoryNode((ObjectId)node.Tag);
+                        foreach (TreeNode node in wellsTreeView.SelectedNode.Nodes)
+                        {
+                            trajectoryOperator.DeleteTrajectoryByTrajectoryNode((ObjectId)node.Tag);
+                        }
                     }
+                    else
+                    {
+                        trajectoryOperator.DeleteTrajectoryByTrajectoryNode((ObjectId)wellsTreeView.SelectedNode.Tag);
+                    }
+                    UpdateTreeView();
                 }
-                else
-                {
-                    trajectoryOperator.DeleteTrajectoryByTrajectoryNode((ObjectId)wellsTreeView.SelectedNode.Tag);
-                }
-                UpdateTreeView();
             }
         }
     }
