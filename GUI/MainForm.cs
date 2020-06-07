@@ -1,22 +1,19 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
-using GeometricObject;
-using FileHandler;
-using System.Numerics;
+using ValueObject;
+using BLLayer;
+using MongoDB.Bson;
+using System.Collections.Generic;
 
 namespace Well_Trajectory_Visualization
 {
     public partial class MainForm : Form
     {
-
-        TrajectoryDataReader trajectoryDataReader;
         WellViewSaver wellViewSaver;
         DisplayChoice displayChoice;
-        List<Well> wells;
+        TrajectoryOperator trajectoryOperator;
 
         readonly int leftPadding;
         readonly int rightPadding;
@@ -39,11 +36,13 @@ namespace Well_Trajectory_Visualization
                 return -1;
             }
         }
+
         private bool isDoubleClick;
 
         public MainForm()
         {
             InitializeComponent();
+
 
             leftPadding = 5;
             rightPadding = 5;
@@ -51,12 +50,13 @@ namespace Well_Trajectory_Visualization
             verticalPaddingForHeaderName = 5;
             verticalPaddingForCloseIcon = 9;
 
-            trajectoryDataReader = new TrajectoryDataReader();
             wellViewSaver = new WellViewSaver();
             displayChoice = new DisplayChoice();
 
+            trajectoryOperator = new TrajectoryOperator();
+            BuildWholeTreeView();
+
             tabControl.Padding = new Point(18, 5);
-            wells = new List<Well>();
             isDoubleClick = false;
 
             KeyPreview = true;
@@ -138,34 +138,18 @@ namespace Well_Trajectory_Visualization
             {
                 foreach (var filePath in openFileDialog.FileNames)
                 {
-                    if (wells.Select(x => x.TrajectoryCount).Sum() >= 30)
-                    {
-                        MessageBox.Show($"Loading {filePath} failed. Reach the well trajectory loading limit.", "Loading Well Trajectory", MessageBoxButtons.OK);
-                        continue;
-                    }
-
-                    if (wells.SelectMany(x => x.Sources).Contains(filePath))
+                    if (trajectoryOperator.HasBeenLoaded(filePath))
                     {
                         MessageBox.Show($"Trajectory has been already loaded for {filePath}!", "Loading Well Trajectory", MessageBoxButtons.OK);
                         continue;
                     }
 
                     string errorMessage;
-                    Trajectory newTrajectory = trajectoryDataReader.ReadFile(filePath, out errorMessage);
+                    Trajectory newTrajectory = trajectoryOperator.ImportTrajectoryFromFile(filePath, out errorMessage);
                     if (string.IsNullOrEmpty(errorMessage))
                     {
-                        if (!wells.Select(x => x.WellName).Contains(newTrajectory.WellName))
-                        {
-                            Well newWell = new Well(newTrajectory.WellName);
-                            newWell.AddTrajectory(newTrajectory);
-                            wells.Add(newWell);
-                        }
-                        else
-                        {
-                            wells.Find(x => x.WellName == newTrajectory.WellName).AddTrajectory(newTrajectory);
-                        }
-
-                        UpdateTreeView();
+                        trajectoryOperator.LoadTrajectoryToDatabase(newTrajectory);
+                        BuildWholeTreeView();
                         MessageBox.Show($"New Well loading from {filePath} succeed.", "Loading Well Trajectory", MessageBoxButtons.OK);
                     }
                     else
@@ -178,23 +162,29 @@ namespace Well_Trajectory_Visualization
 
         //////////////// Tree View //////////////////////////
 
-        private void UpdateTreeView()
+        private void BuildWholeTreeView()
+        {
+            Dictionary<string, List<Trajectory>> treeviewDict = trajectoryOperator.ConstructTreeViewDictionary(trajectoryOperator.GetAllTrajectories());
+            BuildTreeViewFromDict(treeviewDict);
+        }
+
+        private void BuildTreeViewFromDict(Dictionary<string, List<Trajectory>> treeviewDict)
         {
             wellsTreeView.BeginUpdate();
             wellsTreeView.Nodes[0].Nodes.Clear();
 
             int i = 0;
-            foreach (var well in wells)
+            foreach (var well in treeviewDict.Keys)
             {
-                wellsTreeView.Nodes[0].Nodes.Add(well.WellName);
-                wellsTreeView.Nodes[0].Nodes[i].Name = well.WellName;
-                wellsTreeView.Nodes[0].Nodes[i].Tag = well;
+                wellsTreeView.Nodes[0].Nodes.Add(well);
+                wellsTreeView.Nodes[0].Nodes[i].Name = well;
+                //wellsTreeView.Nodes[0].Nodes[i].Tag = well;
                 int j = 0;
-                foreach (var trajectory in well.Trajectories)
+                foreach (var trajectory in treeviewDict[well])
                 {
                     wellsTreeView.Nodes[0].Nodes[i].Nodes.Add(trajectory.TrajectoryName);
                     wellsTreeView.Nodes[0].Nodes[i].Nodes[j].Name = trajectory.WellName + "-" + trajectory.TrajectoryName;
-                    wellsTreeView.Nodes[0].Nodes[i].Nodes[j].Tag = trajectory;
+                    wellsTreeView.Nodes[0].Nodes[i].Nodes[j].Tag = trajectory.MongoDbId;
                     j = j + 1;
                 }
                 i = i + 1;
@@ -247,7 +237,7 @@ namespace Well_Trajectory_Visualization
                         MessageBox.Show("Only 10 pages can be opened. Please close a page before opening a new one.");
                         return;
                     }
-                    OpenNewTabPage(wellName, trajectoryName, (Trajectory) node.Tag);
+                    OpenNewTabPage((ObjectId)node.Tag);
                 }
             }
         }
@@ -277,62 +267,27 @@ namespace Well_Trajectory_Visualization
             }
         }
 
-        private void OpenNewTabPage(string wellName, string trajectoryName, Trajectory trajectory)
+        private void OpenNewTabPage(ObjectId id)
         {
+            Trajectory trajectory = trajectoryOperator.GetTrajectoryByTrajectoryNode(id);
+
             TabPage tabPage = new TabPage
             {
-                Text = GetHeaderTextForTabPage(wellName, trajectoryName),
-                Name = $"{wellName}-{trajectoryName}",
+                Text = GetHeaderTextForTabPage(trajectory.WellName, trajectory.TrajectoryName),
+                Name = $"{trajectory.WellName}-{trajectory.TrajectoryName}",
                 Font = tabControl.Font,
                 BorderStyle = BorderStyle.None,
                 Tag = isDoubleClick // opened or preview : true means opened
             };
 
             //TableLayoutPanel tableLayoutPanel = InitializeTableLayoutPanelForTabPage(trajectory);
-            TableLayoutPanelForProjection tableLayoutPanel = new TableLayoutPanelForProjection(new TrajectoryInformation(trajectory), displayChoice);
+            TableLayoutPanelForProjection tableLayoutPanel = new TableLayoutPanelForProjection(new CurrentTrajectory(trajectory), displayChoice);
             tableLayoutPanel.AddThreeViewPanelForProjectionOnly();
             tabPage.Controls.Add(tableLayoutPanel);
             tabControl.TabPages.Add(tabPage);
             tabControl.SelectedTab = tabPage;
         }
 
-        ///////////// Panels inside Tab Page //////////////////
-        /*
-        private TableLayoutPanel InitializeTableLayoutPanelForTabPage(Trajectory trajectory)
-        {
-            TableLayoutPanel tableLayoutPanel = new TableLayoutPanel
-            {
-                BorderStyle = BorderStyle.None,
-                CellBorderStyle = TableLayoutPanelCellBorderStyle.Single,
-                RowCount = 1,
-                ColumnCount = 3,
-                AutoScroll = true,
-                Dock = DockStyle.Fill,
-                Tag = new TrajectoryInformation(trajectory, displayChoice),
-            };
-            tableLayoutPanel.SuspendLayout();
-            tableLayoutPanel.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 33));
-            tableLayoutPanel.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 33));
-            tableLayoutPanel.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 33));
-            tableLayoutPanel.ResumeLayout();
-            AddViewPanelForTableLayoutPanel(tableLayoutPanel);
-            return tableLayoutPanel;
-        }
-
-        private void AddViewPanelForTableLayoutPanel(TableLayoutPanel tableLayoutPanel)
-        {
-
-            PanelForProjection mainViewPanel = new PanelForProjection(Vector3.UnitY, (TrajectoryInformation)tableLayoutPanel.Tag);
-            PanelForProjection leftViewPanel = new PanelForProjection(Vector3.UnitX, (TrajectoryInformation)tableLayoutPanel.Tag);
-            PanelForProjection topViewPanel = new PanelForProjection(Vector3.UnitZ, (TrajectoryInformation)tableLayoutPanel.Tag);
-
-            tableLayoutPanel.SuspendLayout();
-            tableLayoutPanel.Controls.Add(mainViewPanel, 0, 0);
-            tableLayoutPanel.Controls.Add(leftViewPanel, 1, 0);
-            tableLayoutPanel.Controls.Add(topViewPanel, 2, 0);
-            tableLayoutPanel.ResumeLayout();
-        }
-        */
         /////////// Draw Tab Page Header //////////////////
 
         private string GetHeaderTextForTabPage(string wellName, string trajectoryName)
@@ -441,7 +396,7 @@ namespace Well_Trajectory_Visualization
 
         private void AnnnotationToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            displayChoice.AddAnnotation = annnotationToolStripMenuItem.Checked;
+            displayChoice.IfShowAnnotation = annnotationToolStripMenuItem.Checked;
             if (tabControl.SelectedTab != null)
             {
                 tabControl.SelectedTab.Refresh();
@@ -453,7 +408,7 @@ namespace Well_Trajectory_Visualization
             if (tabControl.SelectedTab != null)
             {
                 TableLayoutPanelForProjection tableLayoutPanel = (TableLayoutPanelForProjection)tabControl.SelectedTab.Controls[0];
-                tableLayoutPanel.CurrentTrajectoryInformation.Unit = DistanceUnit.Meter;
+                tableLayoutPanel.CurrentTrajectory.UnitInUse = DistanceUnit.Meter;
                 tabControl.SelectedTab.Refresh();
             }
         }
@@ -463,14 +418,14 @@ namespace Well_Trajectory_Visualization
             if (tabControl.SelectedTab != null)
             {
                 TableLayoutPanelForProjection tableLayoutPanel = (TableLayoutPanelForProjection)tabControl.SelectedTab.Controls[0];
-                tableLayoutPanel.CurrentTrajectoryInformation.Unit = DistanceUnit.Feet;
+                tableLayoutPanel.CurrentTrajectory.UnitInUse = DistanceUnit.Feet;
                 tabControl.SelectedTab.Refresh();
             }
         }
 
         private void SharpestPointToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            displayChoice.AddSharpestPoint = sharpestPointToolStripMenuItem.Checked;
+            displayChoice.IfShowSharpestPoint = sharpestPointToolStripMenuItem.Checked;
             if (tabControl.SelectedTab != null)
             {
                 tabControl.SelectedTab.Refresh();
@@ -479,13 +434,13 @@ namespace Well_Trajectory_Visualization
 
         private void Panel_KeyDown(object sender, KeyEventArgs e)
         {
-            displayChoice.ChooseRegion = e.KeyCode == Keys.ControlKey;
+            displayChoice.IfUseRegionChoosing = e.KeyCode == Keys.ControlKey;
 
         }
 
         private void Panel_KeyUp(object sender, KeyEventArgs e)
         {
-            displayChoice.ChooseRegion = false;
+            displayChoice.IfUseRegionChoosing = false;
         }
 
         private void ResetToolStripButton_Click(object sender, EventArgs e)
@@ -494,6 +449,54 @@ namespace Well_Trajectory_Visualization
             {
                 ((TableLayoutPanelForProjection)tabControl.SelectedTab.Controls[0]).ResetZoom();
                 tabControl.SelectedTab.Refresh();
+            }
+        }
+
+        private void SearchTextBox_TextChanged(object sender, EventArgs e)
+        {
+            UpdateTreeView();
+        }
+
+        private void UpdateTreeView()
+        {
+            if (!string.IsNullOrWhiteSpace(searchTextbox.Text))
+            {
+                var searchResult = trajectoryOperator.GetTrajectoriesBySearchFunction(searchTextbox.Text);
+                if (searchResult.Count != 0)
+                {
+                    searchTextbox.BackColor = Color.White;
+                    var treeviewDict = trajectoryOperator.ConstructTreeViewDictionary(searchResult);
+                    BuildTreeViewFromDict(treeviewDict);
+                }
+                else
+                {
+                    searchTextbox.BackColor = Color.Red;
+                    BuildWholeTreeView();
+                }
+            }
+            else
+            {
+                searchTextbox.BackColor = Color.White;
+                BuildWholeTreeView();
+            }
+        }
+
+        private void DeleteNodeToolStripButton_Click(object sender, EventArgs e)
+        {
+            if (wellsTreeView.SelectedNode != null && wellsTreeView.SelectedNode.Parent != null)
+            {
+                if (wellsTreeView.SelectedNode.GetNodeCount(true) != 0)
+                {
+                    foreach (TreeNode node in wellsTreeView.SelectedNode.Nodes)
+                    {
+                        trajectoryOperator.DeleteTrajectoryByTrajectoryNode((ObjectId)node.Tag);
+                    }
+                }
+                else
+                {
+                    trajectoryOperator.DeleteTrajectoryByTrajectoryNode((ObjectId)wellsTreeView.SelectedNode.Tag);
+                }
+                UpdateTreeView();
             }
         }
     }

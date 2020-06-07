@@ -2,10 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 
-namespace GeometricObject
+namespace ValueObject
 {
     [Flags]
     public enum DistanceUnit
@@ -14,7 +13,7 @@ namespace GeometricObject
         Feet,
     }
 
-    public class UnitConversion
+    public class UnitConvertor
     {
         public static float Result(DistanceUnit unit, DistanceUnit unitInUse)
         {

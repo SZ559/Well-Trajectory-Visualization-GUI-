@@ -4,11 +4,11 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{F12C0A51-482F-4659-B748-6437468ADBE1}</ProjectGuid>
+    <ProjectGuid>{466F8205-C1FA-4617-BE0C-3DDEA685B078}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>FileHandler</RootNamespace>
-    <AssemblyName>FileHandler</AssemblyName>
+    <RootNamespace>Database</RootNamespace>
+    <AssemblyName>Database</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
@@ -77,18 +77,18 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="TrajectoryDataReader.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="WellViewSaver.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\GeometricObject\GeometricObject.csproj">
-      <Project>{ac21d131-7147-4404-86ae-1149e9f8bf6b}</Project>
-      <Name>GeometricObject</Name>
-    </ProjectReference>
+    <Compile Include="TrajectoryDatabase.cs" />
+    <Compile Include="TrajectoryDataFileReader.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\ValueObject\ValueObject.csproj">
+      <Project>{d0dfeb00-57d7-48af-b7db-54422289f439}</Project>
+      <Name>ValueObject</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="..\packages\MongoDB.Libmongocrypt.1.0.0\build\MongoDB.Libmongocrypt.targets" Condition="Exists('..\packages\MongoDB.Libmongocrypt.1.0.0\build\MongoDB.Libmongocrypt.targets')" />
