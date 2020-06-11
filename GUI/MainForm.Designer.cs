@@ -30,7 +30,7 @@
         {
             this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
-            System.Windows.Forms.TreeNode treeNode1 = new System.Windows.Forms.TreeNode("Wells");
+            System.Windows.Forms.TreeNode treeNode2 = new System.Windows.Forms.TreeNode("Wells");
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.openFileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -53,6 +53,7 @@
             this.toolStripButton1 = new System.Windows.Forms.ToolStripButton();
             this.saveToolStripButton = new System.Windows.Forms.ToolStripButton();
             this.resetToolStripButton = new System.Windows.Forms.ToolStripButton();
+            this.deleteNodeToolStripButton = new System.Windows.Forms.ToolStripButton();
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
@@ -73,7 +74,10 @@
             this.tabControl = new System.Windows.Forms.TabControl();
             this.openFileDialog = new System.Windows.Forms.OpenFileDialog();
             this.saveFileDialog = new System.Windows.Forms.SaveFileDialog();
-            this.deleteNodeToolStripButton = new System.Windows.Forms.ToolStripButton();
+            this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
+            this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
+            this.ShowThreeViewToolStripButton = new System.Windows.Forms.ToolStripButton();
+            this.Show3DViewToolStripButton = new System.Windows.Forms.ToolStripButton();
             this.menuStrip1.SuspendLayout();
             this.toolStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
@@ -249,8 +253,12 @@
             this.toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripButton1,
             this.saveToolStripButton,
+            this.deleteNodeToolStripButton,
+            this.toolStripSeparator1,
             this.resetToolStripButton,
-            this.deleteNodeToolStripButton});
+            this.toolStripSeparator2,
+            this.ShowThreeViewToolStripButton,
+            this.Show3DViewToolStripButton});
             this.toolStrip1.Location = new System.Drawing.Point(0, 24);
             this.toolStrip1.Name = "toolStrip1";
             this.toolStrip1.Size = new System.Drawing.Size(1172, 25);
@@ -290,6 +298,18 @@
             this.resetToolStripButton.Text = "toolStripButton2";
             this.resetToolStripButton.ToolTipText = "Reset zoom";
             this.resetToolStripButton.Click += new System.EventHandler(this.ResetToolStripButton_Click);
+            // 
+            // deleteNodeToolStripButton
+            // 
+            this.deleteNodeToolStripButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.deleteNodeToolStripButton.Image = ((System.Drawing.Image)(resources.GetObject("deleteNodeToolStripButton.Image")));
+            this.deleteNodeToolStripButton.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
+            this.deleteNodeToolStripButton.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.deleteNodeToolStripButton.Name = "deleteNodeToolStripButton";
+            this.deleteNodeToolStripButton.Size = new System.Drawing.Size(23, 22);
+            this.deleteNodeToolStripButton.Text = "toolStripButton2";
+            this.deleteNodeToolStripButton.ToolTipText = "Delete tree node";
+            this.deleteNodeToolStripButton.Click += new System.EventHandler(this.DeleteNodeToolStripButton_Click);
             // 
             // statusStrip1
             // 
@@ -346,10 +366,10 @@
             this.wellsTreeView.Location = new System.Drawing.Point(3, 33);
             this.wellsTreeView.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.wellsTreeView.Name = "wellsTreeView";
-            treeNode1.Name = "Root";
-            treeNode1.Text = "Wells";
+            treeNode2.Name = "Root";
+            treeNode2.Text = "Wells";
             this.wellsTreeView.Nodes.AddRange(new System.Windows.Forms.TreeNode[] {
-            treeNode1});
+            treeNode2});
             this.wellsTreeView.Size = new System.Drawing.Size(158, 562);
             this.wellsTreeView.TabIndex = 0;
             this.wellsTreeView.NodeMouseClick += new System.Windows.Forms.TreeNodeMouseClickEventHandler(this.WellsTreeView_NodeMouseClick);
@@ -545,17 +565,37 @@
             // 
             this.saveFileDialog.Filter = "Bitmap Files|*.bmp|JPEG Files|*.jpeg|PNG Files|*.png";
             // 
-            // deleteNodeToolStripButton
+            // toolStripSeparator1
             // 
-            this.deleteNodeToolStripButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.deleteNodeToolStripButton.Image = ((System.Drawing.Image)(resources.GetObject("deleteNodeToolStripButton.Image")));
-            this.deleteNodeToolStripButton.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
-            this.deleteNodeToolStripButton.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.deleteNodeToolStripButton.Name = "deleteNodeToolStripButton";
-            this.deleteNodeToolStripButton.Size = new System.Drawing.Size(23, 22);
-            this.deleteNodeToolStripButton.Text = "toolStripButton2";
-            this.deleteNodeToolStripButton.ToolTipText = "Delete tree node";
-            this.deleteNodeToolStripButton.Click += new System.EventHandler(this.DeleteNodeToolStripButton_Click);
+            this.toolStripSeparator1.Name = "toolStripSeparator1";
+            this.toolStripSeparator1.Size = new System.Drawing.Size(6, 25);
+            // 
+            // toolStripSeparator2
+            // 
+            this.toolStripSeparator2.Name = "toolStripSeparator2";
+            this.toolStripSeparator2.Size = new System.Drawing.Size(6, 25);
+            // 
+            // ShowThreeViewToolStripButton
+            // 
+            this.ShowThreeViewToolStripButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.ShowThreeViewToolStripButton.Image = ((System.Drawing.Image)(resources.GetObject("ShowThreeViewToolStripButton.Image")));
+            this.ShowThreeViewToolStripButton.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
+            this.ShowThreeViewToolStripButton.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.ShowThreeViewToolStripButton.Name = "ShowThreeViewToolStripButton";
+            this.ShowThreeViewToolStripButton.Size = new System.Drawing.Size(23, 22);
+            this.ShowThreeViewToolStripButton.Text = "toolStripButton2";
+            this.ShowThreeViewToolStripButton.Click += new System.EventHandler(this.ShowThreeViewToolStripButton_Click);
+            // 
+            // Show3DViewToolStripButton
+            // 
+            this.Show3DViewToolStripButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.Show3DViewToolStripButton.Image = ((System.Drawing.Image)(resources.GetObject("Show3DViewToolStripButton.Image")));
+            this.Show3DViewToolStripButton.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
+            this.Show3DViewToolStripButton.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.Show3DViewToolStripButton.Name = "Show3DViewToolStripButton";
+            this.Show3DViewToolStripButton.Size = new System.Drawing.Size(23, 22);
+            this.Show3DViewToolStripButton.Text = "toolStripButton3";
+            this.Show3DViewToolStripButton.Click += new System.EventHandler(this.Show3DViewToolStripButton_Click);
             // 
             // MainForm
             // 
@@ -636,6 +676,10 @@
         private System.Windows.Forms.TreeView wellsTreeView;
         private System.Windows.Forms.TextBox searchTextbox;
         private System.Windows.Forms.ToolStripButton deleteNodeToolStripButton;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
+        private System.Windows.Forms.ToolStripButton ShowThreeViewToolStripButton;
+        private System.Windows.Forms.ToolStripButton Show3DViewToolStripButton;
     }
 }
 

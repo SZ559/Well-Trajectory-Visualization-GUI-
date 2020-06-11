@@ -77,6 +77,9 @@ namespace BLLayer
         public float MaxZ { get; private set; }
         public float MinZ { get; private set; }
 
+        public float Radius { get; private set; }
+        public Vector3 CenterOfTrajectory { get; private set; }
+
         public List<Vector2> ProjectionInMainView { get; private set; }
         public List<Vector2> ProjectionInLeftView { get; private set; }
         public List<Vector2> ProjectionInTopView { get; private set; }
@@ -97,6 +100,8 @@ namespace BLLayer
             ProjectionInMainView = GetProjectionInMainView();
             ProjectionInLeftView = GetProjectionInLeftView();
             ProjectionInTopView = GetProjectionInTopView();
+            Radius = GetRadiusOfMinSphere();
+            CenterOfTrajectory = GetCenterOfTrajectory();
             PropertyChanged?.Invoke();
         }
 
@@ -193,6 +198,16 @@ namespace BLLayer
             MinZ = Self.Nodes.Select(x => x.Z * UnitConversion).Min();
             zoomZ = MaxZ - MinZ;
             return zoomZ > 0 ? zoomZ : 1;
+        }
+
+        private float GetRadiusOfMinSphere()
+        {
+            return (float)Nodes.Select(point => Math.Sqrt(point.X * point.X + point.Y * point.Y + point.Z * point.Z)).Max();
+        }
+
+        private Vector3 GetCenterOfTrajectory()
+        {
+            return new Vector3((MaxX + MinX) / 2, (MaxY + MinY) / 2, (MaxZ + MinZ) / 2);
         }
     }
 }

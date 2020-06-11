@@ -23,6 +23,9 @@ namespace Well_Trajectory_Visualization
         private PanelForProjection leftViewPanel;
         private PanelForProjection mainViewPanel;
         private ZoomInformationOfView zoomInformation;
+
+        private bool hasPanelFor3DView;
+
         public float ZoomInXAxis
         {
             get
@@ -59,6 +62,8 @@ namespace Well_Trajectory_Visualization
             this.CurrentTrajectory = currentTrajectory;
             zoomInformation = new ZoomInformationOfView();
             this.displayChoice = displayChoice;
+
+            hasPanelFor3DView = false;
         }
 
         public void AddThreeViewPanelForProjectionOnly()
@@ -90,6 +95,42 @@ namespace Well_Trajectory_Visualization
 
             PanelForProjection panelForProjection = new PanelForProjection(normalVector, this.CurrentTrajectory, this.zoomInformation, displayChoice);
             this.Controls.Add(panelForProjection, ColumnCount - 1, 0);
+        }
+
+        public void AddPanelFor3DView()
+        {
+            ColumnCount = ColumnCount + 1;
+            hasPanelFor3DView = true;
+            ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 0));
+            PanelFor3DView panelFor3DView = new PanelFor3DView( this.CurrentTrajectory);
+            this.Controls.Add(panelFor3DView, ColumnCount - 1, 0);
+        }
+
+        public void DisplayPanelFor3DView()
+        {
+            if (!hasPanelFor3DView)
+            {
+                AddPanelFor3DView();
+            }
+            ColumnStyles[0].Width = 0;
+            ColumnStyles[1].Width = 0;
+            ColumnStyles[2].Width = 0;
+            ColumnStyles[3].Width = 100;
+        }
+
+        public void HidePanelFor3DView()
+        {
+            if (!hasPanelFor3DView)
+            {
+                return;
+            }
+            else
+            {
+                ColumnStyles[0].Width = (float)(1.0 / 3.0);
+                ColumnStyles[1].Width = (float)(1.0 / 3.0);
+                ColumnStyles[2].Width = (float)(1.0 / 3.0);
+                ColumnStyles[3].Width = 0;
+            }
         }
 
         public void ResetZoom()

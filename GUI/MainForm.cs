@@ -502,5 +502,21 @@ namespace Well_Trajectory_Visualization
                 }
             }
         }
+
+        private void Show3DViewToolStripButton_Click(object sender, EventArgs e)
+        {
+            if (tabControl.SelectedTab != null)
+            {
+                ((TableLayoutPanelForProjection)tabControl.SelectedTab.Controls[0]).DisplayPanelFor3DView();
+            }
+        }
+
+        private void ShowThreeViewToolStripButton_Click(object sender, EventArgs e)
+        {
+            if (tabControl.SelectedTab != null)
+            {
+                ((TableLayoutPanelForProjection)tabControl.SelectedTab.Controls[0]).HidePanelFor3DView();
+            }
+        }
     }
 }

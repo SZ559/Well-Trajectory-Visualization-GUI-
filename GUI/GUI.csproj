@@ -90,6 +90,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="PanelFor3DView.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="TableLayoutPanelForProjection.cs">
       <SubType>Component</SubType>
     </Compile>
