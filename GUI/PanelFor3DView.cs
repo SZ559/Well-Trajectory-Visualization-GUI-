@@ -23,6 +23,7 @@ namespace Well_Trajectory_Visualization
 
         int paddingX;
         int paddingY;
+        int paddingForAxis;
 
         int WidthOfCanvas
         {
@@ -48,16 +49,16 @@ namespace Well_Trajectory_Visualization
 
         public PanelFor3DView(CurrentTrajectory currentTrajectory)
         {
+            paddingX = 20;
+            paddingY = 10;
+            paddingForAxis = (int)(currentTrajectory.Radius / 10);
+            Dock = DockStyle.Fill;
+            BorderStyle = BorderStyle.None;
+
             this.currentTrajectory = currentTrajectory;
             intermediareNodes = currentTrajectory.Nodes.Select(p => (Vector3)p).ToList();
             InitAxis();
-
             SetCamera();
-
-            paddingX = 20;
-            paddingY = 10;
-            Dock = DockStyle.Fill;
-            BorderStyle = BorderStyle.None;
 
             Paint += new PaintEventHandler(PaintPanel);
             MouseMove += new MouseEventHandler(Panel_MouseMove);
@@ -74,7 +75,7 @@ namespace Well_Trajectory_Visualization
                 positionOfCamera.Z = (currentTrajectory.MaxZ + currentTrajectory.MinZ) / 2;
 
                 distanceBetweenCameraAndImage = currentTrajectory.Radius;
-                sizeOfScreen = 2 * currentTrajectory.Radius;
+                sizeOfScreen = (float)(2 * (currentTrajectory.Radius + Math.Sqrt(3) * paddingForAxis));
             }
         }
 
@@ -90,14 +91,14 @@ namespace Well_Trajectory_Visualization
 
         private void InitAxis()
         {
-            axis = (new Vector3[] { new Vector3(currentTrajectory.MinX, currentTrajectory.MinY, currentTrajectory.MinZ),
-                new Vector3(currentTrajectory.MaxX, currentTrajectory.MinY, currentTrajectory.MinZ),
-                new Vector3(currentTrajectory.MinX, currentTrajectory.MaxY, currentTrajectory.MinZ),
-                new Vector3(currentTrajectory.MinX, currentTrajectory.MinY, currentTrajectory.MaxZ),
-                new Vector3(currentTrajectory.MinX, currentTrajectory.MaxY, currentTrajectory.MaxZ),
-                new Vector3(currentTrajectory.MaxX, currentTrajectory.MinY, currentTrajectory.MaxZ),
-                new Vector3(currentTrajectory.MaxX, currentTrajectory.MaxY, currentTrajectory.MinZ),
-                new Vector3(currentTrajectory.MaxX, currentTrajectory.MaxY, currentTrajectory.MaxZ) }).ToList();
+            axis = (new Vector3[] { new Vector3(currentTrajectory.MinX - paddingForAxis, currentTrajectory.MinY - paddingForAxis, currentTrajectory.MinZ - paddingForAxis),
+                new Vector3(currentTrajectory.MaxX + paddingForAxis, currentTrajectory.MinY - paddingForAxis, currentTrajectory.MinZ - paddingForAxis),
+                new Vector3(currentTrajectory.MinX - paddingForAxis, currentTrajectory.MaxY + paddingForAxis, currentTrajectory.MinZ - paddingForAxis),
+                new Vector3(currentTrajectory.MinX - paddingForAxis, currentTrajectory.MinY - paddingForAxis, currentTrajectory.MaxZ + paddingForAxis),
+                new Vector3(currentTrajectory.MinX - paddingForAxis, currentTrajectory.MaxY + paddingForAxis, currentTrajectory.MaxZ + paddingForAxis),
+                new Vector3(currentTrajectory.MaxX + paddingForAxis, currentTrajectory.MinY - paddingForAxis, currentTrajectory.MaxZ + paddingForAxis),
+                new Vector3(currentTrajectory.MaxX + paddingForAxis, currentTrajectory.MaxY + paddingForAxis, currentTrajectory.MinZ - paddingForAxis),
+                new Vector3(currentTrajectory.MaxX + paddingForAxis, currentTrajectory.MaxY + paddingForAxis, currentTrajectory.MaxZ + paddingForAxis) }).ToList();
         }
 
         private void PaintPanel(object sender, PaintEventArgs e)
@@ -157,12 +158,14 @@ namespace Well_Trajectory_Visualization
         {
             if (isDrag)
             {
-                angleZ = (e.X - beginDragLocation.X) * Math.PI / 200;
+                angleZ =
+                //(e.X - beginDragLocation.X) * Math.PI / 200;
                 //Math.Tanh(e.X - beginDragLocation.X) * Math.PI / 2;
-                //Math.Atan2((e.X - beginDragLocation.X), currentTrajectory.Radius);
-                angleX = (beginDragLocation.Y - e.Y) * Math.PI / 200;
+                Math.Atan2((e.X - beginDragLocation.X), Math.Max(Width, Height));
+                angleX =
+                //(beginDragLocation.Y - e.Y) * Math.PI / 200;
                 //Math.Tanh(beginDragLocation.Y - e.Y) * Math.PI / 2;
-                //Math.Atan2((beginDragLocation.Y - e.Y), currentTrajectory.Radius);
+                Math.Atan2((beginDragLocation.Y - e.Y), Math.Max(Width, Height));
                 var panel = (PanelFor3DView)sender;
                 panel.Refresh();
             }
