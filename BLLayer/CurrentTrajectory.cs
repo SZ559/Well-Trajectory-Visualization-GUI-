@@ -202,7 +202,7 @@ namespace BLLayer
 
         private float GetRadiusOfMinSphere()
         {
-            return (float)Nodes.Select(point => Math.Sqrt(point.X * point.X + point.Y * point.Y + point.Z * point.Z)).Max();
+            return (float)(Math.Sqrt((MaxX - MinX) * (MaxX - MinX) + (MaxY - MinY) * (MaxY - MinY) + (MaxZ - MinZ) * (MaxZ - MinZ)) / 2);
         }
 
         private Vector3 GetCenterOfTrajectory()

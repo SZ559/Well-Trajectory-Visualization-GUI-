@@ -18,6 +18,8 @@ namespace Well_Trajectory_Visualization
         float distanceBetweenCameraAndImage;
         float sizeOfScreen;
 
+        List<PointIn3D> intermediareNodes;
+
         int paddingX;
         int paddingY;
 
@@ -46,6 +48,7 @@ namespace Well_Trajectory_Visualization
         public PanelFor3DView(CurrentTrajectory currentTrajectory)
         {
             this.currentTrajectory = currentTrajectory;
+            intermediareNodes = currentTrajectory.Nodes;
 
             SetCamera();
 
@@ -75,34 +78,47 @@ namespace Well_Trajectory_Visualization
 
         private int[] ProjectPointToCanvas(PointIn3D point)
         {
-            var coordinatesInWorld = Projection.GetCoordinatesInWorldCoordinatesSystem(point, currentTrajectory.CenterOfTrajectory, angleX, angleZ); // TODO:: improve transformation.
+            //var coordinatesInWorld = Projection.GetCoordinatesInWorldCoordinatesSystem(point, currentTrajectory.CenterOfTrajectory, angleX, angleZ);
+            point = Projection.GetCoordinatesInWorldCoordinatesSystem(point, currentTrajectory.CenterOfTrajectory, angleX, angleZ);
+            var coordinatesInCamera = Projection.GetCoordinatesInCameraCoordinatesSystem(point, positionOfCamera);
+            var coordinatesInImage = Projection.GetParallelCoordinatesInImageCoordinatesSystem(coordinatesInCamera);
+            var sizeOfCanvas = Math.Min(WidthOfCanvas, HeightOfCanvas);
+            var coordinatesInCanvas = Projection.GetRasterCoordinateInCanvasCoordiantesSystem(coordinatesInImage, sizeOfScreen, sizeOfCanvas, sizeOfCanvas);
+            return coordinatesInCanvas;
+        }
+
+        private List<int[]> ProjectPointToCanvas(List<PointIn3D> points)
+        {
+            var coordinatesInWorld = Projection.GetCoordinatesInWorldCoordinatesSystem(points.Select(p => (Vector3)p).ToList(), currentTrajectory.CenterOfTrajectory, angleX, angleZ);
             var coordinatesInCamera = Projection.GetCoordinatesInCameraCoordinatesSystem(coordinatesInWorld, positionOfCamera);
             var coordinatesInImage = Projection.GetParallelCoordinatesInImageCoordinatesSystem(coordinatesInCamera);
             var sizeOfCanvas = Math.Min(WidthOfCanvas, HeightOfCanvas);
             var coordinatesInCanvas = Projection.GetRasterCoordinateInCanvasCoordiantesSystem(coordinatesInImage, sizeOfScreen, sizeOfCanvas, sizeOfCanvas);
-            //MessageBox.Show(point.ToString() + "\n" + coordinatesInWorld.ToString() + "\n" + coordinatesInCamera.ToString() + "\n" + coordinatesInImage.ToString() + "\n" + coordinatesInCanvas[0].ToString() + "," + coordinatesInCanvas[1].ToString());
             return coordinatesInCanvas;
         }
 
+        //private PointF[] GetProjectionFrom3DTo2D(List<PointIn3D> nodes)
+        //{
+        //    var projection = new PointF[nodes.Count];
+        //    int i = 0;
+        //    foreach (var node in nodes)
+        //    {
+        //        var coordinates = ProjectPointToCanvas(node);
+        //        projection[i] = new PointF(coordinates[0], coordinates[1]);
+        //        i++;
+        //    }
+        //    return projection;
+        //}
+
         private PointF[] GetProjectionFrom3DTo2D(List<PointIn3D> nodes)
         {
-            var projection = new PointF[nodes.Count];
-            int i = 0;
-            foreach (var node in nodes)
-            {
-                var coordinates = ProjectPointToCanvas(node);
-                projection[i] = new PointF(coordinates[0], coordinates[1]);
-                i++;
-            }
-            //MessageBox.Show(projection[0].ToString() + projection[1].ToString() + projection[nodes.Count-1].ToString()); 
-            //MessageBox.Show(WidthOfCanvas + "," + HeightOfCanvas);
-            return projection;
+            return ProjectPointToCanvas(nodes).Select(p => new PointF(p[0], p[1])).ToArray();
         }
 
         private void PaintPanel(object sender, PaintEventArgs e)
         {
             Graphics graphics = e.Graphics;
-            var points = GetProjectionFrom3DTo2D(currentTrajectory.Nodes);
+            var points = GetProjectionFrom3DTo2D(intermediareNodes);
             using (Pen penForLine = new Pen(Color.FromArgb(204, 234, 187), 3.0F))
             {
                 for (int i = 0; i < points.Length - 1; i = i + 1)
@@ -119,11 +135,11 @@ namespace Well_Trajectory_Visualization
                 }
             }
 
-            List<PointIn3D> axis = (new PointIn3D[] { new PointIn3D(currentTrajectory.MinX, currentTrajectory.MinY, currentTrajectory.MinZ), 
-                new PointIn3D(currentTrajectory.MaxX, currentTrajectory.MinY, currentTrajectory.MinZ), 
-                new PointIn3D(currentTrajectory.MinX, currentTrajectory.MaxY, currentTrajectory.MinZ), 
-                new PointIn3D(currentTrajectory.MinX, currentTrajectory.MinY, currentTrajectory.MaxZ), 
-                new PointIn3D(currentTrajectory.MinX, currentTrajectory.MaxY, currentTrajectory.MaxZ), 
+            List<PointIn3D> axis = (new PointIn3D[] { new PointIn3D(currentTrajectory.MinX, currentTrajectory.MinY, currentTrajectory.MinZ),
+                new PointIn3D(currentTrajectory.MaxX, currentTrajectory.MinY, currentTrajectory.MinZ),
+                new PointIn3D(currentTrajectory.MinX, currentTrajectory.MaxY, currentTrajectory.MinZ),
+                new PointIn3D(currentTrajectory.MinX, currentTrajectory.MinY, currentTrajectory.MaxZ),
+                new PointIn3D(currentTrajectory.MinX, currentTrajectory.MaxY, currentTrajectory.MaxZ),
                 new PointIn3D(currentTrajectory.MaxX, currentTrajectory.MinY, currentTrajectory.MaxZ),
                 new PointIn3D(currentTrajectory.MaxX, currentTrajectory.MaxY, currentTrajectory.MinZ),
                 new PointIn3D(currentTrajectory.MaxX, currentTrajectory.MaxY, currentTrajectory.MaxZ) }).ToList();
@@ -164,8 +180,8 @@ namespace Well_Trajectory_Visualization
         {
             if (isDrag)
             {
-                angleZ = Math.PI * (e.X - beginDragLocation.X) / 100;
-                angleX = Math.PI * (e.Y - beginDragLocation.Y) / 100;
+                angleZ = Math.Atan2((e.X - beginDragLocation.X), currentTrajectory.Radius);
+                angleX = Math.Atan2((beginDragLocation.Y - e.Y), currentTrajectory.Radius);
                 var panel = (PanelFor3DView)sender;
                 panel.Refresh();
             }
