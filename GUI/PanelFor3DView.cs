@@ -85,7 +85,7 @@ namespace Well_Trajectory_Visualization
             var coordinatesInImage = Projection.GetParallelCoordinatesInImageCoordinatesSystem(coordinatesInCamera);
             var sizeOfCanvas = Math.Min(WidthOfCanvas, HeightOfCanvas);
             var coordinatesInCanvas = Projection.GetRasterCoordinateInCanvasCoordiantesSystem(coordinatesInImage, sizeOfScreen, sizeOfCanvas, sizeOfCanvas);
-            return coordinatesInCanvas.Select(p => new PointF(p[0], p[1])).ToArray();
+            return coordinatesInCanvas.Select(p => new PointF(p[0] + paddingX + Math.Max((WidthOfCanvas - HeightOfCanvas) / 2, 0), p[1] + paddingY + Math.Max((HeightOfCanvas - WidthOfCanvas) / 2, 0))).ToArray();
         }
 
         private void InitAxis()
