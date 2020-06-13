@@ -78,10 +78,10 @@ namespace Well_Trajectory_Visualization
             }
         }
 
-        private PointF[] GetProjectionFrom3DTo2D(ref List<Vector3> coordinatesInObject)
+        private PointF[] GetProjectionFrom3DTo2D(List<Vector3> coordinatesInObject)
         {
-            coordinatesInObject = Projection.GetCoordinatesInWorldCoordinatesSystem(coordinatesInObject, currentTrajectory.CenterOfTrajectory, angleX, angleZ);
-            var coordinatesInCamera = Projection.GetCoordinatesInCameraCoordinatesSystem(coordinatesInObject, positionOfCamera);
+            var coordinatesInWorld = Projection.GetCoordinatesInWorldCoordinatesSystem(coordinatesInObject, currentTrajectory.CenterOfTrajectory, angleX, angleZ);
+            var coordinatesInCamera = Projection.GetCoordinatesInCameraCoordinatesSystem(coordinatesInWorld, positionOfCamera);
             var coordinatesInImage = Projection.GetParallelCoordinatesInImageCoordinatesSystem(coordinatesInCamera);
             var sizeOfCanvas = Math.Min(WidthOfCanvas, HeightOfCanvas);
             var coordinatesInCanvas = Projection.GetRasterCoordinateInCanvasCoordiantesSystem(coordinatesInImage, sizeOfScreen, sizeOfCanvas, sizeOfCanvas);
@@ -103,7 +103,7 @@ namespace Well_Trajectory_Visualization
         private void PaintPanel(object sender, PaintEventArgs e)
         {
             Graphics graphics = e.Graphics;
-            var points = GetProjectionFrom3DTo2D(ref intermediareNodes);
+            var points = GetProjectionFrom3DTo2D(intermediareNodes);
             using (Pen penForLine = new Pen(Color.FromArgb(204, 234, 187), 3.0F))
             {
                 for (int i = 0; i < points.Length - 1; i = i + 1)
@@ -121,7 +121,7 @@ namespace Well_Trajectory_Visualization
             }
 
 
-            var axisInCanvas = GetProjectionFrom3DTo2D(ref axis);
+            var axisInCanvas = GetProjectionFrom3DTo2D(axis);
             using (Pen penForLine = new Pen(Color.FromArgb(63, 63, 68), 2.0F))
             {
                 graphics.DrawLine(penForLine, axisInCanvas[0], axisInCanvas[1]);
@@ -157,8 +157,12 @@ namespace Well_Trajectory_Visualization
         {
             if (isDrag)
             {
-                angleZ = Math.Atan2((e.X - beginDragLocation.X), currentTrajectory.Radius);
-                angleX = Math.Atan2((beginDragLocation.Y - e.Y), currentTrajectory.Radius);
+                angleZ = (e.X - beginDragLocation.X) * Math.PI / 200;
+                //Math.Tanh(e.X - beginDragLocation.X) * Math.PI / 2;
+                //Math.Atan2((e.X - beginDragLocation.X), currentTrajectory.Radius);
+                angleX = (beginDragLocation.Y - e.Y) * Math.PI / 200;
+                //Math.Tanh(beginDragLocation.Y - e.Y) * Math.PI / 2;
+                //Math.Atan2((beginDragLocation.Y - e.Y), currentTrajectory.Radius);
                 var panel = (PanelFor3DView)sender;
                 panel.Refresh();
             }
@@ -169,6 +173,9 @@ namespace Well_Trajectory_Visualization
             if (isDrag)
             {
                 isDrag = false;
+
+                intermediareNodes = Projection.GetCoordinatesInWorldCoordinatesSystem(intermediareNodes, currentTrajectory.CenterOfTrajectory, angleX, angleZ);
+                axis = Projection.GetCoordinatesInWorldCoordinatesSystem(axis, currentTrajectory.CenterOfTrajectory, angleX, angleZ);
             }
         }
     }
