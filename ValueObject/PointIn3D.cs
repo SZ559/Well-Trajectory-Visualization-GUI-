@@ -44,6 +44,11 @@ namespace ValueObject
             return new Vector3(p.X, p.Y, p.Z);
         }
 
+        public static implicit operator PointIn3D(Vector3 v)
+        {
+            return new PointIn3D(v.X, v.Y, v.Z);
+        }
+
         public bool IsEqual(PointIn3D point)
         {
             return this.X == point.X && this.Y == point.Y && this.Z == point.Z;

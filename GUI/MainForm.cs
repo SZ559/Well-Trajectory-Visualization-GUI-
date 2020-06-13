@@ -280,10 +280,16 @@ namespace Well_Trajectory_Visualization
                 Tag = isDoubleClick // opened or preview : true means opened
             };
 
-            //TableLayoutPanel tableLayoutPanel = InitializeTableLayoutPanelForTabPage(trajectory);
-            TableLayoutPanelForProjection tableLayoutPanel = new TableLayoutPanelForProjection(new CurrentTrajectory(trajectory), displayChoice);
-            tableLayoutPanel.AddThreeViewPanelForProjectionOnly();
-            tabPage.Controls.Add(tableLayoutPanel);
+            var splitContainer = new SplitContainer
+            {
+                Dock = DockStyle.Fill,
+                BorderStyle = BorderStyle.None,
+                Panel2Collapsed = true
+            };
+            splitContainer.Panel1.Controls.Add(new TableLayoutPanelForProjection(new CurrentTrajectory(trajectory), displayChoice));
+            splitContainer.Panel2.Controls.Add(new PanelFor3DView(new CurrentTrajectory(trajectory)));
+            tabPage.Controls.Add(splitContainer);
+
             tabControl.TabPages.Add(tabPage);
             tabControl.SelectedTab = tabPage;
         }
@@ -407,7 +413,7 @@ namespace Well_Trajectory_Visualization
         {
             if (tabControl.SelectedTab != null)
             {
-                TableLayoutPanelForProjection tableLayoutPanel = (TableLayoutPanelForProjection)tabControl.SelectedTab.Controls[0];
+                TableLayoutPanelForProjection tableLayoutPanel = (TableLayoutPanelForProjection)((SplitContainer)tabControl.SelectedTab.Controls[0]).Panel1.Controls[0];
                 tableLayoutPanel.CurrentTrajectory.UnitInUse = DistanceUnit.Meter;
                 tabControl.SelectedTab.Refresh();
             }
@@ -417,7 +423,7 @@ namespace Well_Trajectory_Visualization
         {
             if (tabControl.SelectedTab != null)
             {
-                TableLayoutPanelForProjection tableLayoutPanel = (TableLayoutPanelForProjection)tabControl.SelectedTab.Controls[0];
+                TableLayoutPanelForProjection tableLayoutPanel = (TableLayoutPanelForProjection)((SplitContainer)tabControl.SelectedTab.Controls[0]).Panel1.Controls[0];
                 tableLayoutPanel.CurrentTrajectory.UnitInUse = DistanceUnit.Feet;
                 tabControl.SelectedTab.Refresh();
             }
@@ -447,7 +453,7 @@ namespace Well_Trajectory_Visualization
         {
             if (tabControl.SelectedTab != null)
             {
-                ((TableLayoutPanelForProjection)tabControl.SelectedTab.Controls[0]).ResetZoom();
+                ((TableLayoutPanelForProjection)((SplitContainer)tabControl.SelectedTab.Controls[0]).Panel1.Controls[0]).ResetZoom();
                 tabControl.SelectedTab.Refresh();
             }
         }
@@ -500,6 +506,24 @@ namespace Well_Trajectory_Visualization
                     }
                     UpdateTreeView();
                 }
+            }
+        }
+
+        private void Show3DViewToolStripButton_Click(object sender, EventArgs e)
+        {
+            if (tabControl.SelectedTab != null)
+            {
+                ((SplitContainer)tabControl.SelectedTab.Controls[0]).Panel1Collapsed = true;
+                ((SplitContainer)tabControl.SelectedTab.Controls[0]).Panel2Collapsed = false;
+            }
+        }
+
+        private void ShowThreeViewToolStripButton_Click(object sender, EventArgs e)
+        {
+            if (tabControl.SelectedTab != null)
+            {
+                ((SplitContainer)tabControl.SelectedTab.Controls[0]).Panel1Collapsed = false;
+                ((SplitContainer)tabControl.SelectedTab.Controls[0]).Panel2Collapsed = true;
             }
         }
     }

@@ -23,6 +23,7 @@ namespace Well_Trajectory_Visualization
         private PanelForProjection leftViewPanel;
         private PanelForProjection mainViewPanel;
         private ZoomInformationOfView zoomInformation;
+
         public float ZoomInXAxis
         {
             get
@@ -53,16 +54,13 @@ namespace Well_Trajectory_Visualization
             BorderStyle = BorderStyle.None;
             CellBorderStyle = TableLayoutPanelCellBorderStyle.Single;
             RowCount = 1;
-            ColumnCount = 0;
             AutoScroll = true;
             Dock = DockStyle.Fill;
+
             this.CurrentTrajectory = currentTrajectory;
             zoomInformation = new ZoomInformationOfView();
             this.displayChoice = displayChoice;
-        }
 
-        public void AddThreeViewPanelForProjectionOnly()
-        {
             ColumnCount = 3;
             this.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 33));
             this.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 33));
@@ -77,19 +75,6 @@ namespace Well_Trajectory_Visualization
             this.Controls.Add(leftViewPanel, 1, 0);
             this.Controls.Add(topViewPanel, 2, 0);
             this.ResumeLayout();
-        }
-
-        public void AddPanelForProjection(Vector3 normalVector)
-        {
-            ColumnCount = ColumnCount + 1;
-            ColumnStyles.Add(new ColumnStyle(SizeType.Percent, (float)(1.0 / ColumnCount)));
-            foreach (ColumnStyle columnStyle in ColumnStyles)
-            {
-                columnStyle.Width = (float)(1.0 / ColumnCount);
-            }
-
-            PanelForProjection panelForProjection = new PanelForProjection(normalVector, this.CurrentTrajectory, this.zoomInformation, displayChoice);
-            this.Controls.Add(panelForProjection, ColumnCount - 1, 0);
         }
 
         public void ResetZoom()

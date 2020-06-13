@@ -407,7 +407,7 @@ namespace Well_Trajectory_Visualization
                     zoomInformation.OffsetZ = offsetY;
                     break;
             }
-            foreach (PanelForProjection panel in this.Parent.Controls)
+            foreach (Panel panel in this.Parent.Controls)
             {
                 panel.Refresh();
             }
