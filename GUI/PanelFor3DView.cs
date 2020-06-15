@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using ValueObject;
 
+
 namespace Well_Trajectory_Visualization
 {
     public class PanelFor3DView : Panel
@@ -98,9 +99,15 @@ namespace Well_Trajectory_Visualization
         {
             if (currentTrajectory != null)
             {
-                positionOfCamera.X = (currentTrajectory.MaxX + currentTrajectory.MinX) / 2;
+                //positionOfCamera.X = (currentTrajectory.MaxX + currentTrajectory.MinX) / 2;
+                //positionOfCamera.Y = 2 * currentTrajectory.Radius;
+                //positionOfCamera.Z = (currentTrajectory.MaxZ + currentTrajectory.MinZ) / 2;
+
+
+                positionOfCamera.X = 0;
                 positionOfCamera.Y = 2 * currentTrajectory.Radius;
-                positionOfCamera.Z = (currentTrajectory.MaxZ + currentTrajectory.MinZ) / 2;
+                positionOfCamera.Z = 0;
+
 
                 distanceBetweenCameraAndImage = currentTrajectory.Radius;
                 sizeOfScreen = (float)(2 * (currentTrajectory.Radius + Math.Sqrt(3) * paddingForAxis));
@@ -138,6 +145,8 @@ namespace Well_Trajectory_Visualization
 
         private void InitializeAxis()
         {
+
+
             axis = (new Vector3[] { new Vector3(currentTrajectory.MinX - paddingForAxis, currentTrajectory.MinY - paddingForAxis, currentTrajectory.MinZ - paddingForAxis),
                 new Vector3(currentTrajectory.MaxX + paddingForAxis, currentTrajectory.MinY - paddingForAxis, currentTrajectory.MinZ - paddingForAxis),
                 new Vector3(currentTrajectory.MinX - paddingForAxis, currentTrajectory.MaxY + paddingForAxis, currentTrajectory.MinZ - paddingForAxis),
@@ -146,18 +155,30 @@ namespace Well_Trajectory_Visualization
                 new Vector3(currentTrajectory.MaxX + paddingForAxis, currentTrajectory.MinY - paddingForAxis, currentTrajectory.MaxZ + paddingForAxis),
                 new Vector3(currentTrajectory.MaxX + paddingForAxis, currentTrajectory.MaxY + paddingForAxis, currentTrajectory.MinZ - paddingForAxis),
                 new Vector3(currentTrajectory.MaxX + paddingForAxis, currentTrajectory.MaxY + paddingForAxis, currentTrajectory.MaxZ + paddingForAxis) }).ToList();
+            axis = Projection.Initialize(axis, currentTrajectory.CenterOfTrajectory);
         }
 
         private void PaintPanel(object sender, PaintEventArgs e)
         {
             Graphics graphics = e.Graphics;
+            //angleZ = 5 * Math.PI / 180;
+            //angleX = 5 * Math.PI / 180;
+
             pointsOnCanvas = GetProjectionFrom3DTo2D(intermediareNodes);
             
-            DrawTrajectory(graphics);
-            HighlightDataPoint(graphics);
-            DrawAxis(graphics);
+            //DrawTrajectory(graphics);
+            //HighlightDataPoint(graphics);
+            DrawAxis(graphics, Pens.Black);
             DrawAnnotation(graphics);
             DrawSharpestPoint(graphics);
+
+            angleZ = 15 * Math.PI / 180;
+            angleX = 15 * Math.PI / 180;
+
+            pointsOnCanvas = GetProjectionFrom3DTo2D(intermediareNodes);
+            //DrawTrajectory(graphics);
+            //HighlightDataPoint(graphics);
+            DrawAxis(graphics, Pens.Red);
             //DrawXYZAxis(graphics);
             graphics.Dispose();
         }
@@ -184,11 +205,11 @@ namespace Well_Trajectory_Visualization
             }
         }
 
-        private void DrawAxis(Graphics graphics)
+        private void DrawAxis(Graphics graphics, Pen penForLine)
         {
             var axisOnCanvas = GetProjectionFrom3DTo2D(axis);
-            using (Pen penForLine = new Pen(Color.FromArgb(63, 63, 68), 2.0F))
-            {
+            //using (Pen penForLine = new Pen(Color.FromArgb(63, 63, 68), 2.0F))
+            //{
                 graphics.DrawLine(penForLine, axisOnCanvas[0], axisOnCanvas[1]);
                 graphics.DrawLine(penForLine, axisOnCanvas[0], axisOnCanvas[2]);
                 graphics.DrawLine(penForLine, axisOnCanvas[0], axisOnCanvas[3]);
@@ -203,7 +224,7 @@ namespace Well_Trajectory_Visualization
                 graphics.DrawLine(penForLine, axisOnCanvas[3], axisOnCanvas[5]);
                 graphics.DrawLine(penForLine, axisOnCanvas[3], axisOnCanvas[4]);
                 graphics.DrawLine(penForLine, axisOnCanvas[2], axisOnCanvas[4]);
-            }
+            //}
         }
 
 
@@ -294,7 +315,6 @@ namespace Well_Trajectory_Visualization
                 axis = Projection.GetCoordinatesInWorldCoordinatesSystem(axis, currentTrajectory.CenterOfTrajectory, angleX, angleZ);
             }
         }
-
 
         private void InitializeXYZAxis()
         {

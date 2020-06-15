@@ -132,9 +132,22 @@ namespace BLLayer
                                                               { 0, Math.Cos(angleX), Math.Sin(angleX), 0 },
                                                               { 0, -1 * Math.Sin(angleX), Math.Cos(angleX), 0 },
                                                               { 0, 0, 0, 1 }});
-            var matrixOfPointsInWorld = (M.DenseDiagonal(4, 2) - matrixTranslation) * matrixRotationZ * matrixRotationX * matrixTranslation * matrixOfPointsInObject;
+            //var matrixOfPointsInWorld = (M.DenseDiagonal(4, 2) - matrixTranslation) * matrixRotationZ * matrixRotationX matrixTranslation* matrixOfPointsInObject;
+            var matrixOfPointsInWorld =  matrixRotationZ * matrixRotationX * matrixOfPointsInObject;
             return matrixOfPointsInWorld.ToColumnArrays().Select(p => new Vector3((float)p[0], (float)p[1], (float)p[2])).ToList();
         }
+        public static List<Vector3> Initialize(List<Vector3> points, Vector3 centerOfTranformation)
+        {
+            var M = Matrix<double>.Build;
+            var matrixOfPointsInObject = M.DenseOfColumnArrays(points.Select(p => new double[] { p.X, p.Y, p.Z, 1 }).ToArray());
+            var matrixTranslation = M.DenseOfArray(new double[,] { { 1,0,0,-1*centerOfTranformation.X},
+            { 0,1,0,-1*centerOfTranformation.Y},
+            { 0,0,1,-1*centerOfTranformation.Z},
+            { 0,0,0,1} });
+            var matrixOfPointsInWorld = matrixTranslation * matrixOfPointsInObject;
+            return matrixOfPointsInWorld.ToColumnArrays().Select(p => new Vector3((float)p[0], (float)p[1], (float)p[2])).ToList();
+        }
+
 
         public static Vector3 GetCoordinatesInCameraCoordinatesSystem(Vector3 point, Vector3 originOfCamera)
         {
