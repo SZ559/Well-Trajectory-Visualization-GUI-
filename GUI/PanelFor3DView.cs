@@ -315,8 +315,8 @@ namespace Well_Trajectory_Visualization
 
                 var zAxisTriangle1 = new PointF[] { zAxisOnCanvas[2], zAxisOnCanvas[3], zAxisOnCanvas[4] };
                 var zAxisTriangle2 = new PointF[] { zAxisOnCanvas[2], zAxisOnCanvas[5], zAxisOnCanvas[6] };
-                graphics.FillPolygon(Brushes.Blue, zAxisTriangle1);
-                graphics.FillPolygon(Brushes.Blue, zAxisTriangle2);
+                graphics.FillPolygon(Brushes.Green, zAxisTriangle1);
+                graphics.FillPolygon(Brushes.Green, zAxisTriangle2);
             }
         }
 
