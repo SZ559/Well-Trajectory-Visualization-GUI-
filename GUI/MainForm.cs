@@ -287,7 +287,7 @@ namespace Well_Trajectory_Visualization
                 Panel2Collapsed = true
             };
             splitContainer.Panel1.Controls.Add(new TableLayoutPanelForProjection(new CurrentTrajectory(trajectory), displayChoice));
-            splitContainer.Panel2.Controls.Add(new PanelFor3DView(new CurrentTrajectory(trajectory)));
+            splitContainer.Panel2.Controls.Add(new PanelFor3DView(new CurrentTrajectory(trajectory), displayChoice));
             tabPage.Controls.Add(splitContainer);
 
             tabControl.TabPages.Add(tabPage);
