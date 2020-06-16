@@ -17,8 +17,6 @@ namespace Well_Trajectory_Visualization
         CurrentTrajectory currentTrajectory;
         private DisplayChoice displayChoice;
 
-        Vector3 positionOfCamera;
-        float distanceBetweenCameraAndImage;
         float sizeOfScreen;
 
         List<Vector3> intermediareNodes;
@@ -28,6 +26,7 @@ namespace Well_Trajectory_Visualization
         int paddingX;
         int paddingY;
         int paddingForAxis;
+        int paddingForAxisNotation;
 
         int WidthOfCanvas
         {
@@ -45,41 +44,53 @@ namespace Well_Trajectory_Visualization
             }
         }
 
-        int sideWidthOfXYZAxisDrawingArea;
+        float LargestAllowedSizeOfScreen
+        {
+            get
+            {
+                return (float)(2 * (currentTrajectory.Radius + Math.Sqrt(3) * paddingForAxis));
+            }
+        }
+
         List<Vector3> xAxis;
         List<Vector3> yAxis;
         List<Vector3> zAxis;
 
-        public Rectangle XYZAxisDrawingArea
-        {
-            get
-            {
-                return new Rectangle(Width - sideWidthOfXYZAxisDrawingArea - paddingX, paddingY, sideWidthOfXYZAxisDrawingArea, sideWidthOfXYZAxisDrawingArea);
-            }
-        }
-
         bool isDrag = false;
         Point beginDragLocation;
-        double angleX = 0;
-        double angleZ = 0;
+        double angleX;
+        double angleZ;
         ToolTip toolTipForAnnotation;
-
+        float zoom;
+        float offsetX;
+        float offsetY;
         public PanelFor3DView(CurrentTrajectory currentTrajectory, DisplayChoice displayChoice)
         {
+            paddingForAxis = Math.Max((int)(currentTrajectory.Radius / 10), 5);
+            paddingForAxisNotation = Math.Max((int)(currentTrajectory.Radius / 20), 2);
             paddingX = 20;
             paddingY = 10;
-            paddingForAxis = (int)(currentTrajectory.Radius / 10);
+
             Dock = DockStyle.Fill;
             BorderStyle = BorderStyle.None;
 
-            sideWidthOfXYZAxisDrawingArea = 100;
+            zoom = 0;
+            offsetX = 0;
+            offsetY = 0;
+            angleX = 0;
+            //- 10 * Math.PI / 180;
+            angleZ = 0;
+                //- 10 * Math.PI / 180;
 
             this.currentTrajectory = currentTrajectory;
             this.displayChoice = displayChoice;
             intermediareNodes = currentTrajectory.Nodes.Select(p => (Vector3)p).ToList();
             InitializeAxis();
             InitializeXYZAxis();
-            SetCamera();
+            sizeOfScreen = LargestAllowedSizeOfScreen;
+
+
+            InitializeIntermediareNodes();
 
             toolTipForAnnotation = new ToolTip()
             {
@@ -93,93 +104,128 @@ namespace Well_Trajectory_Visualization
             MouseMove += new MouseEventHandler(Panel_MouseMove);
             MouseDown += new MouseEventHandler(Panel_MouseDown);
             MouseUp += new MouseEventHandler(Panel_MouseUp);
-        }
+            MouseWheel += new MouseEventHandler(Panel_MouseWheel);
 
-        private void SetCamera()
-        {
-            if (currentTrajectory != null)
-            {
-                //positionOfCamera.X = (currentTrajectory.MaxX + currentTrajectory.MinX) / 2;
-                //positionOfCamera.Y = 2 * currentTrajectory.Radius;
-                //positionOfCamera.Z = (currentTrajectory.MaxZ + currentTrajectory.MinZ) / 2;
-
-
-                positionOfCamera.X = 0;
-                positionOfCamera.Y = 2 * currentTrajectory.Radius;
-                positionOfCamera.Z = 0;
-
-
-                distanceBetweenCameraAndImage = currentTrajectory.Radius;
-                sizeOfScreen = (float)(2 * (currentTrajectory.Radius + Math.Sqrt(3) * paddingForAxis));
-            }
         }
 
         private PointF[] GetProjectionFrom3DTo2D(List<Vector3> coordinatesInObject)
         {
-            var coordinatesInWorld = Projection.GetCoordinatesInWorldCoordinatesSystem(coordinatesInObject, currentTrajectory.CenterOfTrajectory, angleX, angleZ);
-            var coordinatesInCamera = Projection.GetCoordinatesInCameraCoordinatesSystem(coordinatesInWorld, positionOfCamera);
-            var coordinatesInImage = Projection.GetParallelCoordinatesInImageCoordinatesSystem(coordinatesInCamera);
+            var coordinatesInWorld = Projection.GetCoordinatesInWorldCoordinatesSystemAfterRotation(coordinatesInObject, angleX, angleZ);
+            var coordinatesInImage = Projection.GetParallelCoordinatesInImageCoordinatesSystem(coordinatesInWorld);
+            
             var sizeOfCanvas = Math.Min(WidthOfCanvas, HeightOfCanvas);
-            var coordinatesInCanvas = Projection.GetRasterCoordinateInCanvasCoordiantesSystem(coordinatesInImage, sizeOfScreen, sizeOfCanvas, sizeOfCanvas);
+            var coordinatesInCanvas = Projection.GetRasterCoordinateInCanvasCoordiantesSystem(coordinatesInImage, sizeOfScreen, sizeOfCanvas, sizeOfCanvas, zoom, offsetX, offsetY);
             return coordinatesInCanvas.Select(p => new PointF(p[0] + paddingX + Math.Max((WidthOfCanvas - HeightOfCanvas) / 2, 0), p[1] + paddingY + Math.Max((HeightOfCanvas - WidthOfCanvas) / 2, 0))).ToArray();
-        }
-
-        private PointF[] GetProjectionFrom3DTo2DForXYZAxis(List<Vector3> coordinatesInObject)
-        {
-
-            var coordinatesInWorld = Projection.GetCoordinatesInWorldCoordinatesSystem(coordinatesInObject, currentTrajectory.CenterOfTrajectory, angleX, angleZ);
-            var coordinatesInCamera = Projection.GetCoordinatesInCameraCoordinatesSystem(coordinatesInWorld, positionOfCamera);
-            var coordinatesInImage = Projection.GetParallelCoordinatesInImageCoordinatesSystem(coordinatesInCamera);
-
-            //var coordinatesInWorld = Projection.GetCoordinatesInWorldCoordinatesSystem(coordinatesInObject, Vector3.Zero, angleX, angleZ);
-            //var coordinatesInCamera = Projection.GetCoordinatesInCameraCoordinatesSystem(coordinatesInWorld, Vector3.Multiply(Vector3.Normalize(positionOfCamera), sideWidthOfXYZAxisDrawingArea));
-            //var coordinatesInImage = Projection.GetParallelCoordinatesInImageCoordinatesSystem(coordinatesInCamera);
-            var coordinatesInCanvas = Projection.GetRasterCoordinateInCanvasCoordiantesSystem(coordinatesInImage, sideWidthOfXYZAxisDrawingArea, sideWidthOfXYZAxisDrawingArea, sideWidthOfXYZAxisDrawingArea);
-
-            //foreach (var coordinate in coordinatesInCanvas)
-            //{
-            //    MessageBox.Show(coordinate[0].ToString() + ", " + coordinate[1].ToString());
-            //}
-            return coordinatesInCanvas.Select(p => new PointF(p[0] + XYZAxisDrawingArea.X, p[1] + XYZAxisDrawingArea.Y + sideWidthOfXYZAxisDrawingArea / 2)).ToArray();
         }
 
         private void InitializeAxis()
         {
+            axis = (new Vector3[] { new Vector3(currentTrajectory.MinX, currentTrajectory.MinY, currentTrajectory.MinZ),
+                new Vector3(currentTrajectory.MaxX, currentTrajectory.MinY, currentTrajectory.MinZ),
+                new Vector3(currentTrajectory.MinX, currentTrajectory.MaxY, currentTrajectory.MinZ),
+                new Vector3(currentTrajectory.MinX, currentTrajectory.MinY, currentTrajectory.MaxZ),
+                new Vector3(currentTrajectory.MinX, currentTrajectory.MaxY, currentTrajectory.MaxZ),
+                new Vector3(currentTrajectory.MaxX, currentTrajectory.MinY, currentTrajectory.MaxZ),
+                new Vector3(currentTrajectory.MaxX, currentTrajectory.MaxY, currentTrajectory.MinZ),
+                new Vector3(currentTrajectory.MaxX, currentTrajectory.MaxY, currentTrajectory.MaxZ),
 
 
-            axis = (new Vector3[] { new Vector3(currentTrajectory.MinX - paddingForAxis, currentTrajectory.MinY - paddingForAxis, currentTrajectory.MinZ - paddingForAxis),
-                new Vector3(currentTrajectory.MaxX + paddingForAxis, currentTrajectory.MinY - paddingForAxis, currentTrajectory.MinZ - paddingForAxis),
-                new Vector3(currentTrajectory.MinX - paddingForAxis, currentTrajectory.MaxY + paddingForAxis, currentTrajectory.MinZ - paddingForAxis),
-                new Vector3(currentTrajectory.MinX - paddingForAxis, currentTrajectory.MinY - paddingForAxis, currentTrajectory.MaxZ + paddingForAxis),
-                new Vector3(currentTrajectory.MinX - paddingForAxis, currentTrajectory.MaxY + paddingForAxis, currentTrajectory.MaxZ + paddingForAxis),
-                new Vector3(currentTrajectory.MaxX + paddingForAxis, currentTrajectory.MinY - paddingForAxis, currentTrajectory.MaxZ + paddingForAxis),
-                new Vector3(currentTrajectory.MaxX + paddingForAxis, currentTrajectory.MaxY + paddingForAxis, currentTrajectory.MinZ - paddingForAxis),
-                new Vector3(currentTrajectory.MaxX + paddingForAxis, currentTrajectory.MaxY + paddingForAxis, currentTrajectory.MaxZ + paddingForAxis) }).ToList();
-            axis = Projection.Initialize(axis, currentTrajectory.CenterOfTrajectory);
+            }).ToList();
+            axis = Projection.FromObjectCoordinateToWorldCoordinate(axis, currentTrajectory.CenterOfTrajectory);
+            axis = Projection.GetCoordinatesInWorldCoordinatesSystemAfterRotation(axis, angleX, angleZ);
+
         }
+
+        private void InitializeXYZAxis()
+        {
+            float heightOfTheTriangle = paddingForAxisNotation / 2;
+            float widthOfTheTriangle = paddingForAxisNotation;
+
+            xAxis = (new Vector3[] { 
+                //Axis end point
+                new Vector3(currentTrajectory.MaxX + paddingForAxis, currentTrajectory.MinY, currentTrajectory.MinZ),
+                
+                //Axis notation
+                new Vector3(currentTrajectory.MaxX + paddingForAxis + paddingForAxisNotation, currentTrajectory.MinY, currentTrajectory.MinZ),
+
+                //Axis triangle
+                new Vector3(currentTrajectory.MaxX + paddingForAxis + heightOfTheTriangle, currentTrajectory.MinY, currentTrajectory.MinZ),
+
+                new Vector3(currentTrajectory.MaxX + paddingForAxis, currentTrajectory.MinY + widthOfTheTriangle / 2, currentTrajectory.MinZ),
+                new Vector3(currentTrajectory.MaxX + paddingForAxis, currentTrajectory.MinY - widthOfTheTriangle / 2, currentTrajectory.MinZ),
+
+                new Vector3(currentTrajectory.MaxX + paddingForAxis, currentTrajectory.MinY, currentTrajectory.MinZ + widthOfTheTriangle / 2),
+                new Vector3(currentTrajectory.MaxX + paddingForAxis, currentTrajectory.MinY, currentTrajectory.MinZ - widthOfTheTriangle / 2),
+
+
+            }).ToList();
+
+
+            yAxis = (new Vector3[] {
+                //Axis end point
+                new Vector3(currentTrajectory.MinX, currentTrajectory.MaxY + paddingForAxis, currentTrajectory.MinZ),
+                
+                //Axis notation
+                new Vector3(currentTrajectory.MinX, currentTrajectory.MaxY + paddingForAxis + paddingForAxisNotation, currentTrajectory.MinZ),
+                
+                //Axis triangle
+                new Vector3(currentTrajectory.MinX, currentTrajectory.MaxY + paddingForAxis + heightOfTheTriangle, currentTrajectory.MinZ),
+
+                new Vector3(currentTrajectory.MinX + widthOfTheTriangle / 2, currentTrajectory.MaxY + paddingForAxis, currentTrajectory.MinZ),
+                new Vector3(currentTrajectory.MinX - widthOfTheTriangle / 2, currentTrajectory.MaxY + paddingForAxis, currentTrajectory.MinZ),
+
+                new Vector3(currentTrajectory.MinX, currentTrajectory.MaxY + paddingForAxis, currentTrajectory.MinZ + widthOfTheTriangle / 2),
+                new Vector3(currentTrajectory.MinX, currentTrajectory.MaxY + paddingForAxis, currentTrajectory.MinZ - widthOfTheTriangle / 2),
+
+            }).ToList();
+
+
+            zAxis = (new Vector3[] {
+                new Vector3(currentTrajectory.MinX, currentTrajectory.MinY, currentTrajectory.MaxZ + paddingForAxis),
+                
+                //Axis notation
+                new Vector3(currentTrajectory.MinX, currentTrajectory.MinY, currentTrajectory.MaxZ + paddingForAxis + paddingForAxisNotation),
+                             
+                //Axis triangle
+                new Vector3(currentTrajectory.MinX, currentTrajectory.MinY, currentTrajectory.MaxZ + paddingForAxis +  heightOfTheTriangle),
+
+
+                new Vector3(currentTrajectory.MinX + widthOfTheTriangle / 2, currentTrajectory.MinY, currentTrajectory.MaxZ + paddingForAxis),
+                new Vector3(currentTrajectory.MinX - widthOfTheTriangle / 2, currentTrajectory.MinY, currentTrajectory.MaxZ + paddingForAxis),
+
+
+                new Vector3(currentTrajectory.MinX, currentTrajectory.MinY + widthOfTheTriangle / 2, currentTrajectory.MaxZ + paddingForAxis),
+                new Vector3(currentTrajectory.MinX, currentTrajectory.MinY - widthOfTheTriangle / 2, currentTrajectory.MaxZ + paddingForAxis),
+
+            }).ToList();
+
+            xAxis = Projection.FromObjectCoordinateToWorldCoordinate(xAxis, currentTrajectory.CenterOfTrajectory);
+            yAxis = Projection.FromObjectCoordinateToWorldCoordinate(yAxis, currentTrajectory.CenterOfTrajectory);
+            zAxis = Projection.FromObjectCoordinateToWorldCoordinate(zAxis, currentTrajectory.CenterOfTrajectory);
+
+            xAxis = Projection.GetCoordinatesInWorldCoordinatesSystemAfterRotation(xAxis, angleX, angleZ);
+            yAxis = Projection.GetCoordinatesInWorldCoordinatesSystemAfterRotation(yAxis, angleX, angleZ);
+            zAxis = Projection.GetCoordinatesInWorldCoordinatesSystemAfterRotation(zAxis, angleX, angleZ);
+
+        }
+
+        private void InitializeIntermediareNodes()
+        {
+            intermediareNodes = Projection.FromObjectCoordinateToWorldCoordinate(intermediareNodes, currentTrajectory.CenterOfTrajectory);
+            intermediareNodes = Projection.GetCoordinatesInWorldCoordinatesSystemAfterRotation(intermediareNodes, angleX, angleZ);
+
+        }
+
 
         private void PaintPanel(object sender, PaintEventArgs e)
         {
             Graphics graphics = e.Graphics;
-            //angleZ = 5 * Math.PI / 180;
-            //angleX = 5 * Math.PI / 180;
-
             pointsOnCanvas = GetProjectionFrom3DTo2D(intermediareNodes);
-            
-            //DrawTrajectory(graphics);
-            //HighlightDataPoint(graphics);
-            DrawAxis(graphics, Pens.Black);
+            DrawTrajectory(graphics);
+            HighlightDataPoint(graphics); 
+            DrawAxis(graphics);
             DrawAnnotation(graphics);
             DrawSharpestPoint(graphics);
-
-            angleZ = 15 * Math.PI / 180;
-            angleX = 15 * Math.PI / 180;
-
-            pointsOnCanvas = GetProjectionFrom3DTo2D(intermediareNodes);
-            //DrawTrajectory(graphics);
-            //HighlightDataPoint(graphics);
-            DrawAxis(graphics, Pens.Red);
-            //DrawXYZAxis(graphics);
             graphics.Dispose();
         }
 
@@ -200,19 +246,19 @@ namespace Well_Trajectory_Visualization
             {
                 foreach (var point in pointsOnCanvas)
                 {
-                    graphics.FillRectangle(brushForPoint, point.X - 1, point.Y - 1, 2, 2);
+                    graphics.FillRectangle(brushForPoint, point.X - 2, point.Y - 2, 4, 4);
                 }
             }
         }
 
-        private void DrawAxis(Graphics graphics, Pen penForLine)
+        private void DrawAxis(Graphics graphics)
         {
             var axisOnCanvas = GetProjectionFrom3DTo2D(axis);
-            //using (Pen penForLine = new Pen(Color.FromArgb(63, 63, 68), 2.0F))
-            //{
-                graphics.DrawLine(penForLine, axisOnCanvas[0], axisOnCanvas[1]);
-                graphics.DrawLine(penForLine, axisOnCanvas[0], axisOnCanvas[2]);
-                graphics.DrawLine(penForLine, axisOnCanvas[0], axisOnCanvas[3]);
+            using (Pen penForLine = new Pen(Color.FromArgb(63, 63, 68), 1.0F))
+            {
+                //graphics.DrawLine(penForLine, axisOnCanvas[0], axisOnCanvas[1]);
+                //graphics.DrawLine(penForLine, axisOnCanvas[0], axisOnCanvas[2]);
+                //graphics.DrawLine(penForLine, axisOnCanvas[0], axisOnCanvas[3]);
 
                 graphics.DrawLine(penForLine, axisOnCanvas[7], axisOnCanvas[4]);
                 graphics.DrawLine(penForLine, axisOnCanvas[7], axisOnCanvas[5]);
@@ -224,9 +270,55 @@ namespace Well_Trajectory_Visualization
                 graphics.DrawLine(penForLine, axisOnCanvas[3], axisOnCanvas[5]);
                 graphics.DrawLine(penForLine, axisOnCanvas[3], axisOnCanvas[4]);
                 graphics.DrawLine(penForLine, axisOnCanvas[2], axisOnCanvas[4]);
-            //}
-        }
+            }
 
+            var origin = axisOnCanvas[0];
+
+            using (Pen penForXAxis = new Pen(Color.Red, 1.0F))
+            {
+                var xAxisOnCanvas = GetProjectionFrom3DTo2D(xAxis);
+                var xAxisEndPoint = xAxisOnCanvas[0];
+                graphics.DrawLine(penForXAxis, origin, xAxisEndPoint);
+
+                var xAxisNotationOnCanvas = xAxisOnCanvas[1];
+                graphics.DrawString("X", Control.DefaultFont, Brushes.Red, xAxisNotationOnCanvas.X, xAxisNotationOnCanvas.Y);
+
+                var xAxisTriangle1 = new PointF[] { xAxisOnCanvas[2], xAxisOnCanvas[3], xAxisOnCanvas[4] };
+                var xAxisTriangle2 = new PointF[] { xAxisOnCanvas[2], xAxisOnCanvas[5], xAxisOnCanvas[6] };
+                graphics.FillPolygon(Brushes.Red, xAxisTriangle1);
+                graphics.FillPolygon(Brushes.Red, xAxisTriangle2);
+            }
+
+            using (Pen penForYAxis = new Pen(Color.Blue, 1.0F))
+            {
+                var yAxisOnCanvas = GetProjectionFrom3DTo2D(yAxis);
+                var yAxisEndPoint = yAxisOnCanvas[0];
+                graphics.DrawLine(penForYAxis, origin, yAxisEndPoint);
+
+                var yAxisNotationOnCanvas = yAxisOnCanvas[1];
+                graphics.DrawString("Y", Control.DefaultFont, Brushes.Blue, yAxisNotationOnCanvas.X, yAxisNotationOnCanvas.Y);
+
+                var yAxisTriangle1 = new PointF[] { yAxisOnCanvas[2], yAxisOnCanvas[3], yAxisOnCanvas[4] };
+                var yAxisTriangle2 = new PointF[] { yAxisOnCanvas[2], yAxisOnCanvas[5], yAxisOnCanvas[6] };
+                graphics.FillPolygon(Brushes.Blue, yAxisTriangle1);
+                graphics.FillPolygon(Brushes.Blue, yAxisTriangle2);
+            }
+
+            using (Pen penForZAxis = new Pen(Color.Green, 1.0F))
+            {
+                var zAxisOnCanvas = GetProjectionFrom3DTo2D(zAxis);
+                var zAxisEndPoint = zAxisOnCanvas[0];
+                graphics.DrawLine(penForZAxis, origin, zAxisEndPoint);
+
+                var zAxisNotationOnCanvas = zAxisOnCanvas[1];
+                graphics.DrawString("Z", Control.DefaultFont, Brushes.Green, zAxisNotationOnCanvas.X, zAxisNotationOnCanvas.Y);
+
+                var zAxisTriangle1 = new PointF[] { zAxisOnCanvas[2], zAxisOnCanvas[3], zAxisOnCanvas[4] };
+                var zAxisTriangle2 = new PointF[] { zAxisOnCanvas[2], zAxisOnCanvas[5], zAxisOnCanvas[6] };
+                graphics.FillPolygon(Brushes.Blue, zAxisTriangle1);
+                graphics.FillPolygon(Brushes.Blue, zAxisTriangle2);
+            }
+        }
 
         private void DrawAnnotation(Graphics graphics)
         {
@@ -277,13 +369,12 @@ namespace Well_Trajectory_Visualization
                 angleZ =
                 //(e.X - beginDragLocation.X) * Math.PI / 200;
                 //Math.Tanh(e.X - beginDragLocation.X) * Math.PI / 2;
-                Math.Atan2((e.X - beginDragLocation.X), Math.Max(Width, Height));
+                Math.Atan2(e.X - beginDragLocation.X, Math.Max(Width, Height));
                 angleX =
                 //(beginDragLocation.Y - e.Y) * Math.PI / 200;
                 //Math.Tanh(beginDragLocation.Y - e.Y) * Math.PI / 2;
-                Math.Atan2((beginDragLocation.Y - e.Y), Math.Max(Width, Height));
-                var panel = (PanelFor3DView)sender;
-                panel.Refresh();
+                Math.Atan2(beginDragLocation.Y - e.Y, Math.Max(Width, Height));
+                Refresh();
             }
             else
             {
@@ -311,78 +402,39 @@ namespace Well_Trajectory_Visualization
             {
                 isDrag = false;
 
-                intermediareNodes = Projection.GetCoordinatesInWorldCoordinatesSystem(intermediareNodes, currentTrajectory.CenterOfTrajectory, angleX, angleZ);
-                axis = Projection.GetCoordinatesInWorldCoordinatesSystem(axis, currentTrajectory.CenterOfTrajectory, angleX, angleZ);
+                intermediareNodes = Projection.GetCoordinatesInWorldCoordinatesSystemAfterRotation(intermediareNodes, angleX, angleZ);
+                axis = Projection.GetCoordinatesInWorldCoordinatesSystemAfterRotation(axis, angleX, angleZ);
+                xAxis = Projection.GetCoordinatesInWorldCoordinatesSystemAfterRotation(xAxis, angleX, angleZ);
+                yAxis = Projection.GetCoordinatesInWorldCoordinatesSystemAfterRotation(yAxis, angleX, angleZ);
+                zAxis = Projection.GetCoordinatesInWorldCoordinatesSystemAfterRotation(zAxis, angleX, angleZ);
             }
         }
 
-        private void InitializeXYZAxis()
+        private void Panel_MouseWheel(object sender, MouseEventArgs e)
         {
-            int sideWidthOfAxisPyramid = (int)sideWidthOfXYZAxisDrawingArea / 10;
-            int heightOfAxisPyramid = (int)sideWidthOfXYZAxisDrawingArea / 10;
-            int lengthOfAxis = sideWidthOfXYZAxisDrawingArea / 4;
-            xAxis = (new Vector3[] { new Vector3(0, 0, 0),
-                new Vector3(lengthOfAxis, 0, 0),
-                new Vector3(lengthOfAxis, 0, - sideWidthOfAxisPyramid / 2),
-                new Vector3(lengthOfAxis, 0, sideWidthOfAxisPyramid / 2),
-                new Vector3(lengthOfAxis + heightOfAxisPyramid, 0, 0),
-                //new Vector3(sideWidthOfXYZAxisDrawingArea / 3, sideWidthOfAxisPyramid / 2, sideWidthOfAxisPyramid / 2),
-                //new Vector3(sideWidthOfXYZAxisDrawingArea / 3, - sideWidthOfAxisPyramid / 2, sideWidthOfAxisPyramid / 2),
-                //new Vector3(sideWidthOfXYZAxisDrawingArea / 3, sideWidthOfAxisPyramid / 2, - sideWidthOfAxisPyramid / 2),
-                //new Vector3(sideWidthOfXYZAxisDrawingArea / 3, - sideWidthOfAxisPyramid / 2, - sideWidthOfAxisPyramid / 2),
-                //new Vector3(sideWidthOfXYZAxisDrawingArea / 3 + heightOfAxisPyramid, 0, 0)
-            }).ToList();
-            yAxis = (new Vector3[] { new Vector3(0, 0, 0),
-                new Vector3(0, lengthOfAxis, 0),
-                new Vector3(0, lengthOfAxis, - sideWidthOfAxisPyramid / 2),
-                new Vector3(0, lengthOfAxis, sideWidthOfAxisPyramid / 2),
-                new Vector3(0, lengthOfAxis + heightOfAxisPyramid, 0),
-            }).ToList();
-            zAxis = (new Vector3[] { new Vector3(0, 0, 0),
-                new Vector3(0, 0, lengthOfAxis),
-                new Vector3(- sideWidthOfAxisPyramid / 2, 0, lengthOfAxis),
-                new Vector3(sideWidthOfAxisPyramid / 2, 0, lengthOfAxis),
-                new Vector3(0, 0, lengthOfAxis + heightOfAxisPyramid),
-            }).ToList();
+            float zoomDeltaOfWheel = (float)(e.Delta / 120 * 0.2);
+            float zoomAfterChange = zoom + zoomDeltaOfWheel;
+            PointF pointOnCanvas = new PointF(e.X - paddingX, e.Y - paddingY);
+
+            if (zoomAfterChange >= 0)
+            {
+                zoom = zoomAfterChange;
+                offsetX = (float) (pointOnCanvas.X / WidthOfCanvas - 0.5) * zoom;
+                offsetY = (float) ((HeightOfCanvas - pointOnCanvas.Y) / HeightOfCanvas - 0.5) * zoom;
+                Refresh();
+            }
         }
-
-        private void DrawXYZAxis(Graphics graphics)
+ 
+        private void Reset()
         {
-            var xAxisOnCanvas = GetProjectionFrom3DTo2DForXYZAxis(xAxis);
-
-            graphics.DrawLine(Pens.Red, xAxisOnCanvas[0], xAxisOnCanvas[1]);
-            var pointsForXAxisTriangle = new PointF[] { xAxisOnCanvas[2], xAxisOnCanvas[3], xAxisOnCanvas[4] };
-            graphics.FillPolygon(Brushes.Red, pointsForXAxisTriangle);
-            graphics.DrawString("X", Control.DefaultFont, Brushes.Black, xAxisOnCanvas[4].X + 2, xAxisOnCanvas[4].Y + 2);
-
-            var yAxisOnCanvas = GetProjectionFrom3DTo2DForXYZAxis(yAxis);
-
-            graphics.DrawLine(Pens.Blue, yAxisOnCanvas[0], yAxisOnCanvas[1]);
-            var pointsForYAxisTriangle = new PointF[] { yAxisOnCanvas[2], yAxisOnCanvas[3], yAxisOnCanvas[4] };
-            graphics.FillPolygon(Brushes.Blue, pointsForYAxisTriangle);
-            graphics.DrawString("Y", Control.DefaultFont, Brushes.Black, yAxisOnCanvas[4].X + 2, yAxisOnCanvas[4].Y + 2);
-
-            var zAxisOnCanvas = GetProjectionFrom3DTo2DForXYZAxis(zAxis);
-
-            graphics.DrawLine(Pens.Black, zAxisOnCanvas[0], zAxisOnCanvas[1]);
-            var pointsForZAxisTriangle = new PointF[] { zAxisOnCanvas[2], zAxisOnCanvas[3], zAxisOnCanvas[4] };
-            graphics.FillPolygon(Brushes.Black, pointsForZAxisTriangle);
-            graphics.DrawString("Z", Control.DefaultFont, Brushes.Black, zAxisOnCanvas[4].X + 2, zAxisOnCanvas[4].Y + 2);
-            //var pointsForPyramidBottomOnCanvas = new PointF[] { xyzAxisOnCanvas[2], xyzAxisOnCanvas[3], xyzAxisOnCanvas[4], xyzAxisOnCanvas[5] };
-            //graphics.FillPolygon(Brushes.Red, pointsForPyramidBottomOnCanvas);
-
-            //var pointsForPyramidSide1OnCanvas = new PointF[] { xyzAxisOnCanvas[2], xyzAxisOnCanvas[3], xyzAxisOnCanvas[6] };
-            //graphics.FillPolygon(Brushes.Red, pointsForPyramidSide1OnCanvas);
-
-            //var pointsForPyramidSide2OnCanvas = new PointF[] { xyzAxisOnCanvas[2], xyzAxisOnCanvas[4], xyzAxisOnCanvas[6] };
-            //graphics.FillPolygon(Brushes.Red, pointsForPyramidSide2OnCanvas);
-
-            //var pointsForPyramidSide3OnCanvas = new PointF[] { xyzAxisOnCanvas[5], xyzAxisOnCanvas[3], xyzAxisOnCanvas[6] };
-            //graphics.FillPolygon(Brushes.Red, pointsForPyramidSide3OnCanvas);
-
-            //var pointsForPyramidSide4OnCanvas = new PointF[] { xyzAxisOnCanvas[5], xyzAxisOnCanvas[4], xyzAxisOnCanvas[6] };
-            //graphics.FillPolygon(Brushes.Red, pointsForPyramidSide4OnCanvas);
-
+            offsetX = 0;
+            offsetY = 0;
+            zoom = 0;
+            angleX = 0;
+            //- 10 * Math.PI / 180;
+            angleZ = 0;
+                //10 * Math.PI / 180;
+            Refresh();
         }
     }
 }
