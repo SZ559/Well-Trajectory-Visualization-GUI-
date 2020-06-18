@@ -89,6 +89,7 @@
   <ItemGroup>
     <Compile Include="CurrentTrajectory.cs" />
     <Compile Include="Projection.cs" />
+    <Compile Include="TrajectoryDataFileReader.cs" />
     <Compile Include="TrajectoryOperator.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TrajectoryViewSaver.cs" />

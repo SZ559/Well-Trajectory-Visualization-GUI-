@@ -454,6 +454,7 @@ namespace Well_Trajectory_Visualization
             if (tabControl.SelectedTab != null)
             {
                 ((TableLayoutPanelForProjection)((SplitContainer)tabControl.SelectedTab.Controls[0]).Panel1.Controls[0]).ResetZoom();
+                ((PanelFor3DView)((SplitContainer)tabControl.SelectedTab.Controls[0]).Panel2.Controls[0]).Reset();
                 tabControl.SelectedTab.Refresh();
             }
         }

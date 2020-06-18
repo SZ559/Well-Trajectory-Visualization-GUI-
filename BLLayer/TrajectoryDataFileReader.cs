@@ -4,7 +4,7 @@ using System.Numerics;
 using ValueObject;
 using System.Linq;
 
-namespace DataSource
+namespace BLLayer
 {
     public class TrajectoryDataFileReader
     {
