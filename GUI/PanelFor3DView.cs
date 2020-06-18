@@ -70,7 +70,7 @@ namespace Well_Trajectory_Visualization
         public PanelFor3DView(CurrentTrajectory currentTrajectory, DisplayChoice displayChoice)
         {
             paddingForAxis = Math.Max((int)(currentTrajectory.Radius / 10), 5);
-            paddingForAxisNotation = Math.Max((int)(currentTrajectory.Radius / 20), 2);
+            paddingForAxisNotation = Math.Max((int)(currentTrajectory.Radius / 30), 2);
             paddingX = 20;
             paddingY = 10;
 
@@ -129,8 +129,8 @@ namespace Well_Trajectory_Visualization
 
         private void InitializeXYZAxis()
         {
-            float heightOfTheTriangle = paddingForAxisNotation / 2;
-            float widthOfTheTriangle = paddingForAxisNotation;
+            float heightOfTheTriangle = paddingForAxisNotation / 3;
+            float widthOfTheTriangle = paddingForAxisNotation / 3;
 
             xAxis = (new Vector3[] {
                 
@@ -144,11 +144,11 @@ namespace Well_Trajectory_Visualization
                 // Axis triangle
                 new Vector3(currentTrajectory.MaxX + paddingForAxis + heightOfTheTriangle, currentTrajectory.MinY, currentTrajectory.MinZ),
 
-                new Vector3(currentTrajectory.MaxX + paddingForAxis, currentTrajectory.MinY + widthOfTheTriangle / 2, currentTrajectory.MinZ),
-                new Vector3(currentTrajectory.MaxX + paddingForAxis, currentTrajectory.MinY - widthOfTheTriangle / 2, currentTrajectory.MinZ),
+                new Vector3(currentTrajectory.MaxX + paddingForAxis, currentTrajectory.MinY + widthOfTheTriangle, currentTrajectory.MinZ),
+                new Vector3(currentTrajectory.MaxX + paddingForAxis, currentTrajectory.MinY - widthOfTheTriangle, currentTrajectory.MinZ),
 
-                new Vector3(currentTrajectory.MaxX + paddingForAxis, currentTrajectory.MinY, currentTrajectory.MinZ + widthOfTheTriangle / 2),
-                new Vector3(currentTrajectory.MaxX + paddingForAxis, currentTrajectory.MinY, currentTrajectory.MinZ - widthOfTheTriangle / 2),
+                new Vector3(currentTrajectory.MaxX + paddingForAxis, currentTrajectory.MinY, currentTrajectory.MinZ + widthOfTheTriangle),
+                new Vector3(currentTrajectory.MaxX + paddingForAxis, currentTrajectory.MinY, currentTrajectory.MinZ - widthOfTheTriangle),
             }).ToList();
 
             yAxis = (new Vector3[] {
@@ -162,11 +162,11 @@ namespace Well_Trajectory_Visualization
                 // Axis triangle
                 new Vector3(currentTrajectory.MinX, currentTrajectory.MaxY + paddingForAxis + heightOfTheTriangle, currentTrajectory.MinZ),
 
-                new Vector3(currentTrajectory.MinX + widthOfTheTriangle / 2, currentTrajectory.MaxY + paddingForAxis, currentTrajectory.MinZ),
-                new Vector3(currentTrajectory.MinX - widthOfTheTriangle / 2, currentTrajectory.MaxY + paddingForAxis, currentTrajectory.MinZ),
+                new Vector3(currentTrajectory.MinX + widthOfTheTriangle, currentTrajectory.MaxY + paddingForAxis, currentTrajectory.MinZ),
+                new Vector3(currentTrajectory.MinX - widthOfTheTriangle, currentTrajectory.MaxY + paddingForAxis, currentTrajectory.MinZ),
 
-                new Vector3(currentTrajectory.MinX, currentTrajectory.MaxY + paddingForAxis, currentTrajectory.MinZ + widthOfTheTriangle / 2),
-                new Vector3(currentTrajectory.MinX, currentTrajectory.MaxY + paddingForAxis, currentTrajectory.MinZ - widthOfTheTriangle / 2),
+                new Vector3(currentTrajectory.MinX, currentTrajectory.MaxY + paddingForAxis, currentTrajectory.MinZ + widthOfTheTriangle),
+                new Vector3(currentTrajectory.MinX, currentTrajectory.MaxY + paddingForAxis, currentTrajectory.MinZ - widthOfTheTriangle),
             }).ToList();
 
             zAxis = (new Vector3[] {
@@ -180,11 +180,11 @@ namespace Well_Trajectory_Visualization
                 // Axis triangle
                 new Vector3(currentTrajectory.MinX, currentTrajectory.MinY, currentTrajectory.MaxZ + paddingForAxis +  heightOfTheTriangle),
 
-                new Vector3(currentTrajectory.MinX + widthOfTheTriangle / 2, currentTrajectory.MinY, currentTrajectory.MaxZ + paddingForAxis),
-                new Vector3(currentTrajectory.MinX - widthOfTheTriangle / 2, currentTrajectory.MinY, currentTrajectory.MaxZ + paddingForAxis),
+                new Vector3(currentTrajectory.MinX + widthOfTheTriangle, currentTrajectory.MinY, currentTrajectory.MaxZ + paddingForAxis),
+                new Vector3(currentTrajectory.MinX - widthOfTheTriangle, currentTrajectory.MinY, currentTrajectory.MaxZ + paddingForAxis),
 
-                new Vector3(currentTrajectory.MinX, currentTrajectory.MinY + widthOfTheTriangle / 2, currentTrajectory.MaxZ + paddingForAxis),
-                new Vector3(currentTrajectory.MinX, currentTrajectory.MinY - widthOfTheTriangle / 2, currentTrajectory.MaxZ + paddingForAxis),
+                new Vector3(currentTrajectory.MinX, currentTrajectory.MinY + widthOfTheTriangle, currentTrajectory.MaxZ + paddingForAxis),
+                new Vector3(currentTrajectory.MinX, currentTrajectory.MinY - widthOfTheTriangle, currentTrajectory.MaxZ + paddingForAxis),
 
             }).ToList();
 
@@ -240,11 +240,11 @@ namespace Well_Trajectory_Visualization
 
         private void HighlightDataPoint(Graphics graphics)
         {
-            using (SolidBrush brushForPoint = new SolidBrush(Color.Red))
+            using (SolidBrush brushForPoint = new SolidBrush(Color.FromArgb(63, 63, 68)))
             {
                 foreach (var point in pointsOnCanvas)
                 {
-                    graphics.FillRectangle(brushForPoint, point.X - 2, point.Y - 2, 4, 4);
+                    graphics.FillRectangle(brushForPoint, point.X - 1, point.Y - 1, 2, 2);
                 }
             }
         }
@@ -254,6 +254,8 @@ namespace Well_Trajectory_Visualization
             var boundboxOnCanvas = GetProjectionFrom3DTo2D(boundingBox);
             using (Pen penForLine = new Pen(Color.FromArgb(63, 63, 68), 1.0F))
             {
+                penForLine.DashPattern = new float[] { 5, 10 };
+
                 //graphics.DrawLine(penForLine, axisOnCanvas[0], axisOnCanvas[1]);
                 //graphics.DrawLine(penForLine, axisOnCanvas[0], axisOnCanvas[2]);
                 //graphics.DrawLine(penForLine, axisOnCanvas[0], axisOnCanvas[3]);
@@ -273,14 +275,14 @@ namespace Well_Trajectory_Visualization
 
         private void DrawAxis(Graphics graphics)
         {
-            DrawSingleAxis(graphics, xAxis, Color.FromArgb(88, 139, 139), Brushes.Red, "X");
-            DrawSingleAxis(graphics, yAxis, Color.FromArgb(242, 143, 59), Brushes.Blue, "Y");
-            DrawSingleAxis(graphics, zAxis, Color.FromArgb(200, 85, 61), Brushes.Green, "Z");
+            DrawSingleAxis(graphics, xAxis, Color.FromArgb(102, 194, 165), "X");
+            DrawSingleAxis(graphics, yAxis, Color.FromArgb(252, 141, 98), "Y");
+            DrawSingleAxis(graphics, zAxis, Color.FromArgb(141, 160, 203), "Z");
         }
 
-        private void DrawSingleAxis(Graphics graphics, List<Vector3> axis, Color colorForLine, Brush brushForPolygon, string notation)
+        private void DrawSingleAxis(Graphics graphics, List<Vector3> axis, Color colorForLine, string notation)
         {
-            using (Pen penForAxis = new Pen(colorForLine, 1.0F))
+            using (Pen penForAxis = new Pen(colorForLine, 2.0F))
             {
                 var axisOnCanvas = GetProjectionFrom3DTo2D(axis);
                 var axisBeginPoint = axisOnCanvas[0];
@@ -288,12 +290,12 @@ namespace Well_Trajectory_Visualization
                 graphics.DrawLine(penForAxis, axisBeginPoint, axisEndPoint);
 
                 var axisNotationOnCanvas = axisOnCanvas[2];
-                graphics.DrawString(notation, Control.DefaultFont, brushForPolygon, axisNotationOnCanvas.X, axisNotationOnCanvas.Y);
+                graphics.DrawString(notation, Control.DefaultFont, Brushes.LightSlateGray, axisNotationOnCanvas.X, axisNotationOnCanvas.Y);
 
                 var axisTriangle1 = new PointF[] { axisOnCanvas[3], axisOnCanvas[4], axisOnCanvas[5] };
                 var axisTriangle2 = new PointF[] { axisOnCanvas[3], axisOnCanvas[6], axisOnCanvas[7] };
-                graphics.FillPolygon(brushForPolygon, axisTriangle1);
-                graphics.FillPolygon(brushForPolygon, axisTriangle2);
+                graphics.FillPolygon(Brushes.LightSlateGray, axisTriangle1);
+                graphics.FillPolygon(Brushes.LightSlateGray, axisTriangle2);
             }
         }
 
@@ -320,7 +322,7 @@ namespace Well_Trajectory_Visualization
         {
             if (displayChoice.IfShowSharpestPoint)
             {
-                using (SolidBrush brushForPoint = new SolidBrush(Color.Blue))
+                using (SolidBrush brushForPoint = new SolidBrush(Color.Red))
                 {
                     foreach (var index in currentTrajectory.SharpestPointIndex)
                     {
