@@ -235,7 +235,7 @@ namespace Well_Trajectory_Visualization
 
             DrawAnnotation(graphics);
 
-            DrawSharpestPoint(graphics, spaceX, spaceY);
+            DrawSharpestPoint(graphics);
 
             graphics.ResetClip();
 
@@ -355,7 +355,7 @@ namespace Well_Trajectory_Visualization
             }
         }
 
-        private void DrawSharpestPoint(Graphics graphics, int spaceX, int spaceY)
+        private void DrawSharpestPoint(Graphics graphics)
         {
             if (displayChoice.IfShowSharpestPoint)
             {
