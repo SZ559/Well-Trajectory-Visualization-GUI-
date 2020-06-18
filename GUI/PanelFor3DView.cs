@@ -64,14 +64,13 @@ namespace Well_Trajectory_Visualization
         double angleZ;
 
         float zoom;
-        float offsetX;
-        float offsetY;
+        float[] centerOfZoom; // {newCenterOfZoomX, newCenterOfZoomY, previousZoomX, previousZoomY}
 
         public PanelFor3DView(CurrentTrajectory currentTrajectory, DisplayChoice displayChoice)
         {
             paddingForAxis = Math.Max((int)(currentTrajectory.Radius / 10), 5);
             paddingForAxisNotation = Math.Max((int)(currentTrajectory.Radius / 30), 2);
-            paddingX = 20;
+            paddingX = 15;
             paddingY = 10;
 
             Dock = DockStyle.Fill;
@@ -79,8 +78,7 @@ namespace Well_Trajectory_Visualization
             //BackColor = Color.FromArgb(149, 163, 166);
 
             zoom = 0;
-            offsetX = 0;
-            offsetY = 0;
+            centerOfZoom = new float[] { 0, 0};
             angleX = 0;
             //- 10 * Math.PI / 180;
             angleZ = 0;
@@ -199,6 +197,10 @@ namespace Well_Trajectory_Visualization
             intermediareNodes = Projection.GetCoordinatesInWorldCoordinatesSystem(intermediareNodes, currentTrajectory.CenterOfTrajectory, angleX, angleZ);
         }
 
+        public PointF[] GetCoordinatesAfterZoom(PointF[] points, float[] centerOfZoom, float zoom)
+        {
+            return points.Select(p => new PointF((p.X - centerOfZoom[0]) * (1 + zoom) + centerOfZoom[0], (p.Y - centerOfZoom[1]) * (1 + zoom) + centerOfZoom[1])).ToArray();
+        }
 
         private PointF[] GetProjectionFrom3DTo2D(List<Vector3> coordinatesInObject)
         {
@@ -206,13 +208,16 @@ namespace Well_Trajectory_Visualization
             var coordinatesInImage = Projection.GetParallelCoordinatesInImageCoordinatesSystem(coordinatesInWorld, currentTrajectory.CenterOfTrajectory);
 
             var sizeOfCanvas = Math.Min(WidthOfCanvas, HeightOfCanvas);
-            var coordinatesInCanvas = Projection.GetRasterCoordinateInCanvasCoordiantesSystem(coordinatesInImage, sizeOfScreen, sizeOfCanvas, sizeOfCanvas, zoom, offsetX, offsetY);
-            return coordinatesInCanvas.Select(p => new PointF(p[0] + paddingX + Math.Max((WidthOfCanvas - HeightOfCanvas) / 2, 0), p[1] + paddingY + Math.Max((HeightOfCanvas - WidthOfCanvas) / 2, 0))).ToArray();
+            var coordinatesInCanvas = Projection.GetRasterCoordinateInCanvasCoordiantesSystem(coordinatesInImage, sizeOfScreen, sizeOfCanvas, sizeOfCanvas);
+            var coordinatesInPanel = coordinatesInCanvas.Select(p => new PointF(p[0] + paddingX + Math.Max((WidthOfCanvas - HeightOfCanvas) / 2, 0), p[1] + paddingY + Math.Max((HeightOfCanvas - WidthOfCanvas) / 2, 0))).ToArray();
+            return GetCoordinatesAfterZoom(coordinatesInPanel, centerOfZoom, zoom);
         }
 
         private void PaintPanel(object sender, PaintEventArgs e)
         {
             Graphics graphics = e.Graphics;
+
+            graphics.SetClip(new Rectangle(paddingX, paddingY, WidthOfCanvas, HeightOfCanvas));
 
             DrawTrajectory(graphics);
             HighlightDataPoint(graphics);
@@ -222,6 +227,8 @@ namespace Well_Trajectory_Visualization
 
             DrawAnnotation(graphics);
             DrawSharpestPoint(graphics);
+
+            graphics.ResetClip();
 
             graphics.Dispose();
         }
@@ -396,21 +403,19 @@ namespace Well_Trajectory_Visualization
         {
             float zoomDeltaOfWheel = (float)(e.Delta / 120 * 0.2);
             float zoomAfterChange = zoom + zoomDeltaOfWheel;
-            PointF pointOnCanvas = new PointF(e.X - paddingX, e.Y - paddingY);
 
             if (zoomAfterChange >= 0)
             {
                 zoom = zoomAfterChange;
-                offsetX = (float)(pointOnCanvas.X / WidthOfCanvas - 0.5) * zoom;
-                offsetY = (float)((HeightOfCanvas - pointOnCanvas.Y) / HeightOfCanvas - 0.5) * zoom;
+                centerOfZoom[0] = e.X;
+                centerOfZoom[1] = e.Y;
                 Refresh();
             }
         }
 
         public void Reset()
         {
-            offsetX = 0;
-            offsetY = 0;
+            centerOfZoom = new float[] { 0, 0};
             zoom = 0;
             angleX = 0;
             //- 10 * Math.PI / 180;

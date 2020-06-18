@@ -133,7 +133,7 @@ namespace BLLayer
 
         public static List<Vector2> GetParallelCoordinatesInImageCoordinatesSystem(List<Vector3> points, Vector3 originOfCamera)
         {
-            return points.Select(p => new Vector2(p.X - originOfCamera.X, - (p.Z - originOfCamera.Z))).ToList();
+            return points.Select(p => new Vector2(p.X - originOfCamera.X, -(p.Z - originOfCamera.Z))).ToList();
         }
 
         public static List<Vector2> GetPerspectiveCoordinatesInImageCoordinatesSystem(List<Vector3> points, float distanceBetweenCameraAndImage)
@@ -141,13 +141,12 @@ namespace BLLayer
             return points.Select(p => new Vector2(p.X * distanceBetweenCameraAndImage / p.Z, p.Y * distanceBetweenCameraAndImage / p.Z)).ToList();
         }
 
-        public static List<int[]> GetRasterCoordinateInCanvasCoordiantesSystem(List<Vector2> points, float sizeOfScreen, int widthOfCanvas, int heightOfCanvas, float zoom, float offsetX, float offsetY)
+        public static List<int[]> GetRasterCoordinateInCanvasCoordiantesSystem(List<Vector2> points, float sizeOfScreen, int widthOfCanvas, int heightOfCanvas)
         {
-            var normalizedPoints = points.Select(p => new float[] { (p.X * (1 + zoom) + sizeOfScreen / 2) / sizeOfScreen - offsetX, (p.Y * (1 + zoom) + sizeOfScreen / 2) / sizeOfScreen - offsetY }).ToList();
+            var normalizedPoints = points.Select(p => new float[] { (p.X + sizeOfScreen / 2) / sizeOfScreen, (p.Y + sizeOfScreen / 2) / sizeOfScreen }).ToList();
             var rasterPoints = normalizedPoints.Select(np => new int[] { (int)Math.Floor(np[0] * widthOfCanvas), (int)Math.Floor((1 - np[1]) * heightOfCanvas) }).ToList();
             return rasterPoints;
         }
-
 
     }
 }
