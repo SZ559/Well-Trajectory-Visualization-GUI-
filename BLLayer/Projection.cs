@@ -82,7 +82,7 @@ namespace BLLayer
 
         public static Vector2 GetCoordinatesOfProjection_InPlaneThroughOrigin(Vector3 projectionPoint, Vector3 unitXOfProjectionPlane)
         {
-            Single abscissa = Vector3.Dot(projectionPoint, unitXOfProjectionPlane) / unitXOfProjectionPlane.Length();
+            Single abscissa = Vector3.Dot(projectionPoint, unitXOfProjectionPlane);
             Vector3 projectionVector = Vector3.Multiply(unitXOfProjectionPlane, abscissa / unitXOfProjectionPlane.Length());
             Vector3 rejection = Vector3.Subtract(projectionPoint, projectionVector);
             Single ordinate = rejection.Length();
